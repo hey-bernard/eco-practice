@@ -1,10 +1,10 @@
 // 오프라인에서도 열리도록 앱 파일을 캐시한다. 네트워크를 먼저 쓰고, 안 되면 캐시로.
 // 파일을 바꿔 배포할 때 VERSION을 올린다.
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = `eco-practice-${VERSION}`;
 const SHELL = ['./', './index.html', './css/style.css', './js/app.js', './js/audience.js', './js/data.js', './js/store.js', './js/village.js', './manifest.webmanifest', './icons/icon.svg',
   './images/village/earth.webp', './images/village/risa.webp',
-  ...[1, 2, 3, 4, 5, 6].map((n) => `./images/forest/stage${n}.webp`)];
+  ...[1, 2, 3, 4, 5, 6].flatMap((n) => [`./images/forest/stage${n}.webp`, `./images/forest/plant${n}.svg`])];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

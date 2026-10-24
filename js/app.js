@@ -57,8 +57,9 @@ function forestInfo(points) {
   };
 }
 
-// 지구지킴이 성장 6단계 그림 (캐릭터 시트 Lv.1~6에서 잘라 냄)
-const stageImage = (si) => `images/forest/stage${si + 1}.webp`;
+// 성장 6단계 그림: 학생용은 지구지킴이 캐릭터(시트 Lv.1~6에서 잘라 냄), 성인용은 식물 일러스트(SVG)
+const stageImage = (si) => (IS_STUDENT ? `images/forest/stage${si + 1}.webp` : `images/forest/plant${si + 1}.svg`);
+const stageClass = IS_STUDENT ? '' : 'plant';
 
 // 이번 주 카드: 주차마다 14편을 돌아가며 보여 준다
 function weeklyPost() {
@@ -183,7 +184,7 @@ function viewToday() {
       </section>
 
       <a href="#/forest" class="card link-card forest-link">
-        <img class="stage-thumb" src="${stageImage(f.si)}" alt="" aria-hidden="true">
+        <img class="stage-thumb ${stageClass}" src="${stageImage(f.si)}" alt="" aria-hidden="true">
         <div class="col" style="flex:1">
           <div class="eyebrow">나의 숲</div>
           <div style="font-size:14px;font-weight:500">${f.name} 단계 · ${points}점</div>
@@ -403,7 +404,7 @@ function viewForest() {
       </div>
       <section class="forest-art" aria-label="숲 그림">
         <div class="stage-art">
-          <img class="main" src="${stageImage(f.si)}" alt="지구지킴이 ${f.name} 단계 모습">
+          <img class="main ${stageClass}" src="${stageImage(f.si)}" alt="${IS_STUDENT ? '지구지킴이' : '식물'} ${f.name} 단계 모습">
           <svg class="critters" viewBox="0 0 358 220" aria-hidden="true">
             ${bee.ok ? '<g transform="translate(70,120)"><ellipse rx="9" ry="6" fill="#F2C230" stroke="#1C2620" stroke-width="1.5"/></g>' : ''}
             ${bird.ok ? '<path d="M280 46 q8 -8 16 0 q8 -8 16 0" stroke="#1C2620" stroke-width="2" fill="none" stroke-linecap="round"/>' : ''}

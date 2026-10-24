@@ -34,7 +34,8 @@ GitHub 저장소(hey-bernard/eco-practice)의 `main`에 push하면 Vercel이 자
 | `js/village.js` | 지구 마을 미니 게임: 퀘스트·아이템·섬 단계 정의와 계산 |
 | `sw.js`, `manifest.webmanifest` | PWA (오프라인 캐시, 홈 화면 추가). 파일을 바꾸면 `sw.js`의 `VERSION`을 올린다 |
 | `images/village/earth.webp`, `risa.webp` | 지구지킴이·리사 정면. 시트에서 잘라 배경 제거 |
-| `images/forest/stage1~6.webp` | 지구지킴이 성장 6단계. `22a5fae709d12dd5.webp` 시트의 Lv.1~6을 잘라 2배 확대 |
+| `images/forest/stage1~6.webp` | 학생용 지구지킴이 성장 6단계. `22a5fae709d12dd5.webp` 시트의 Lv.1~6을 잘라 2배 확대 |
+| `images/forest/plant1~6.svg` | 성인용 식물 성장 6단계 (씨앗→숲). 숲 화면 동물 그림과 같은 358×220 좌표 |
 
 ## 학생용 · 성인용
 
