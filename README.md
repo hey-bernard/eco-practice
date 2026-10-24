@@ -17,6 +17,10 @@ python -m http.server 8765
 - 발표 시연용: `http://localhost:8765/?demo=1#/forest` 로 열면 숲 화면에 점수 버튼이 나옵니다.
 - 휴대폰으로 확인하려면 같은 와이파이에서 `python -m http.server 8765 --bind 0.0.0.0` 후 PC의 IP로 접속합니다. 단, 홈 화면 설치와 서비스 워커는 HTTPS(또는 localhost)에서만 동작합니다.
 
+## 배포
+
+GitHub 저장소(hey-bernard/eco-practice)의 `main`에 push하면 Vercel이 자동으로 운영 배포한다. 다른 브랜치에 push하면 미리보기 주소가 따로 만들어진다.
+
 ## 구조
 
 | 파일 | 역할 |
