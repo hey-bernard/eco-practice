@@ -1,0 +1,4 @@
+# 비밀값·로컬 도구 산출물
+.env*
+.vercel
+.playwright-mcp

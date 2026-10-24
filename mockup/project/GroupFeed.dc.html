@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>모임 피드 응원 화면</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2E6A4C}a:hover{color:#1F4A35}
+button:focus-visible{outline:2px solid #2E6A4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F2; font-family: 'Noto Sans KR', sans-serif; color: #1C2620; display: flex; flex-direction: column; overflow: hidden">
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 16px 20px 16px; overflow: hidden">
+    <a href="GroupHome.dc.html" style="align-self: flex-start; font-size: 14px; text-decoration: none; padding: 8px 0; display: flex; align-items: center; gap: 4px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      주말 플로깅 크루
+    </a>
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px">이번 주 멤버 실천</h1>
+      <div style="font-size: 13px; color: #55625A">8명 중 6명이 기록했어요 · 순위 없이 응원만 남겨요</div>
+    </div>
+
+    <sc-if value="{{hasSent}}" hint-placeholder-val="{{false}}">
+      <div role="status" style="font-size: 13px; font-weight: 500; color: #1F4A35; background: #E3EEE6; border-radius: 10px; padding: 10px 12px">{{sentText}}</div>
+    </sc-if>
+
+    <sc-for list="{{posts}}" as="p" hint-placeholder-count="3">
+      <article style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 16px; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <div aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 16px; background: {{p.bg}}; color: #1F4A35; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{p.initial}}</div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 1px">
+            <div style="font-size: 14px; font-weight: 700">{{p.name}}</div>
+            <div style="font-size: 12px; color: #55625A">{{p.when}}</div>
+          </div>
+          <div style="flex: none; font-size: 12px; font-weight: 500; padding: 4px 8px; border-radius: 6px; background: #E3EEE6; color: #1F4A35">{{p.tag}}</div>
+          <button type="button" aria-label="신고하거나 숨기기" style="flex: none; width: 44px; height: 44px; margin: -6px -10px -6px 0; border: none; background: transparent; color: #55625A; cursor: pointer; display: flex; align-items: center; justify-content: center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+          </button>
+        </div>
+        <p style="margin: 0; font-size: 14px; line-height: 1.6">{{p.memo}}</p>
+        <div style="display: flex; gap: 6px; align-items: center">
+          <sc-for list="{{p.reactions}}" as="r" hint-placeholder-count="3">
+            <button type="button" onClick="{{r.pick}}" aria-pressed="{{r.pressed}}" style="flex: 1; height: 44px; border-radius: 12px; border: 1.5px solid {{r.border}}; background: {{r.bg}}; color: {{r.color}}; font: 500 13px 'Noto Sans KR', sans-serif; cursor: pointer">{{r.label}} {{r.count}}</button>
+          </sc-for>
+          <button type="button" onClick="{{p.openSheet}}" aria-label="{{p.name}}님에게 한마디 보내기" style="flex: none; width: 44px; height: 44px; border-radius: 12px; border: none; background: #2E6A4C; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h16v11H10l-4.5 3.5v-3.5H4z"/></svg>
+          </button>
+        </div>
+      </article>
+    </sc-for>
+
+    <div style="font-size: 12px; color: #55625A; line-height: 1.5; padding: 0 2px">응원은 이 모임 멤버만 볼 수 있어요. 한 기록에 반응은 하나만 남길 수 있고, 한마디는 정해진 문구로 보내요.</div>
+  </div>
+
+  <sc-if value="{{sheetOpen}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; justify-content: flex-end">
+      <button type="button" onClick="{{closeSheet}}" aria-label="닫기" style="position: absolute; inset: 0; border: none; background: rgba(28, 38, 32, 0.45); cursor: pointer"></button>
+      <div role="dialog" aria-label="한마디 보내기" style="position: relative; background: #FFFFFF; border-radius: 20px 20px 0 0; padding: 20px 20px 24px; display: flex; flex-direction: column; gap: 10px">
+        <div style="font-size: 16px; font-weight: 700">{{sheetName}}님에게 한마디</div>
+        <div style="font-size: 12px; color: #55625A">직접 쓰는 글 대신 따뜻한 문구를 골라 보내요</div>
+        <sc-for list="{{phrases}}" as="ph" hint-placeholder-count="4">
+          <button type="button" onClick="{{ph.send}}" style="height: 48px; border-radius: 12px; border: 1px solid #DDE3DB; background: #F4F6F2; color: #1C2620; font: 500 14px 'Noto Sans KR', sans-serif; text-align: left; padding: 0 16px; cursor: pointer">{{ph.text}}</button>
+        </sc-for>
+        <button type="button" onClick="{{closeSheet}}" style="height: 44px; border-radius: 12px; border: none; background: transparent; color: #55625A; font: 500 14px 'Noto Sans KR', sans-serif; cursor: pointer">취소</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <nav aria-label="주 메뉴" style="height: 72px; background: #FFFFFF; border-top: 1px solid #DDE3DB; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="Main.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+      오늘
+    </a>
+    <a href="Record.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      기록
+    </a>
+    <a href="Groups.dc.html" aria-current="page" style="text-decoration: none; color: #2E6A4C; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="3.2"/><circle cx="16.5" cy="10" r="2.6"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8M14.5 15c2.6-.4 4.9 1 5.8 4"/></svg>
+      모임
+    </a>
+    <a href="Read.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5c-2-1.6-4.6-2-8-1.5v13c3.4-.5 6 0 8 1.5 2-1.5 4.6-2 8-1.5V5c-3.4-.5-6-.1-8 1.5z"/><path d="M12 6.5V19.5"/></svg>
+      읽기
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { picks: {}, sheet: null, sent: '' };
+  }
+  renderVals() {
+    const labels = ['응원해요', '대단해요', '함께해요'];
+    const raw = [
+      { id: 'a', name: '하늘', bg: '#E3EEE6', when: '오늘 오전', tag: '텀블러', memo: '카페 세 곳에서 텀블러를 썼어요. 한 곳은 할인도 해 줬어요.', base: [3, 2, 1] },
+      { id: 'b', name: '다온', bg: '#F3E6D2', when: '어제', tag: '플로깅', memo: '퇴근길에 집 앞 골목에서 쓰레기 한 봉지를 주웠어요.', base: [2, 4, 2] },
+      { id: 'c', name: '소담', bg: '#DCE8EE', when: '어제', tag: '대중교통', memo: '이번 주는 출퇴근을 전부 지하철로 했어요.', base: [4, 1, 0] }
+    ];
+    const posts = raw.map((p) => {
+      const mine = this.state.picks[p.id];
+      return {
+        name: p.name,
+        initial: p.name.charAt(0),
+        bg: p.bg,
+        when: p.when,
+        tag: p.tag,
+        memo: p.memo,
+        openSheet: () => this.setState({ sheet: p.id }),
+        reactions: labels.map((label, i) => {
+          const on = mine === i;
+          return {
+            label,
+            count: p.base[i] + (on ? 1 : 0),
+            pressed: on,
+            border: on ? '#2E6A4C' : '#DDE3DB',
+            bg: on ? '#E3EEE6' : '#FFFFFF',
+            color: on ? '#1F4A35' : '#1C2620',
+            pick: () => {
+              const picks = Object.assign({}, this.state.picks);
+              if (on) { delete picks[p.id]; } else { picks[p.id] = i; }
+              this.setState({ picks });
+            }
+          };
+        })
+      };
+    });
+    const target = raw.find((p) => p.id === this.state.sheet);
+    const texts = ['오늘도 수고했어요', '덕분에 저도 힘이 나요', '다음 모임에서 만나요', '꾸준한 모습이 멋져요'];
+    const phrases = texts.map((text) => ({
+      text,
+      send: () => this.setState({ sheet: null, sent: (target ? target.name : '') + '님에게 응원을 보냈어요' })
+    }));
+    return {
+      posts,
+      phrases,
+      sheetOpen: !!target,
+      sheetName: target ? target.name : '',
+      closeSheet: () => this.setState({ sheet: null }),
+      hasSent: !!this.state.sent,
+      sentText: this.state.sent
+    };
+  }
+}
+</script>
+</body>
+</html>

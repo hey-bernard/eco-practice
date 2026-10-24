@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>나의 숲 화면</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2E6A4C}a:hover{color:#1F4A35}
+button:focus-visible{outline:2px solid #2E6A4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F2; font-family: 'Noto Sans KR', sans-serif; color: #1C2620; display: flex; flex-direction: column; overflow: hidden">
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 16px 20px 12px; overflow: hidden">
+    <a href="Main.dc.html" style="align-self: flex-start; font-size: 14px; text-decoration: none; padding: 8px 0; display: flex; align-items: center; gap: 4px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+      오늘
+    </a>
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px">나의 숲</h1>
+      <div style="font-size: 13px; color: #55625A">실천 한 번이 나무 한 그루를 키워요</div>
+    </div>
+
+    <section aria-label="숲 그림" style="border-radius: 18px; border: 1px solid #DDE3DB; background: linear-gradient(#EAF3EC, #F7F9F5); overflow: hidden">
+      <svg width="100%" height="200" viewBox="0 0 358 200" role="img" aria-label="{{forestStage}} 모습" style="display: block">
+        <ellipse cx="179" cy="188" rx="160" ry="14" fill="#CFE3D5"></ellipse>
+        <sc-if value="{{hasSeed}}" hint-placeholder-val="{{true}}">
+          <ellipse cx="179" cy="184" rx="9" ry="6" fill="#7A5A3A"></ellipse>
+        </sc-if>
+        <sc-for list="{{extraTrees}}" as="t" hint-placeholder-count="4">
+          <g transform="{{t.transform}}">
+            <line x1="0" y1="0" x2="0" y2="-80" stroke="#7A5A3A" stroke-width="6" stroke-linecap="round"></line>
+            <circle cx="0" cy="-92" r="40" fill="#2E6A4C"></circle>
+          </g>
+        </sc-for>
+        <g transform="{{mainTransform}}">
+          <line x1="0" y1="0" x2="0" y2="-80" stroke="#7A5A3A" stroke-width="6" stroke-linecap="round"></line>
+          <circle cx="0" cy="-92" r="40" fill="#2E6A4C"></circle>
+          <sc-if value="{{hasFlower}}" hint-placeholder-val="{{true}}">
+            <g>
+              <circle cx="-22" cy="-108" r="8" fill="#F2B8C6"></circle>
+              <circle cx="22" cy="-102" r="8" fill="#F2B8C6"></circle>
+              <circle cx="0" cy="-130" r="8" fill="#F2B8C6"></circle>
+            </g>
+          </sc-if>
+        </g>
+        <sc-if value="{{hasBee}}" hint-placeholder-val="{{false}}">
+          <g transform="translate(118,112)"><ellipse rx="9" ry="6" fill="#F2C230" stroke="#1C2620" stroke-width="1.5"></ellipse></g>
+        </sc-if>
+        <sc-if value="{{hasBird}}" hint-placeholder-val="{{false}}">
+          <path d="M270 60 q8 -8 16 0 q8 -8 16 0" stroke="#1C2620" stroke-width="2" fill="none" stroke-linecap="round"></path>
+        </sc-if>
+        <sc-if value="{{hasSquirrel}}" hint-placeholder-val="{{false}}">
+          <g><circle cx="252" cy="176" r="9" fill="#B4651E"></circle><circle cx="260" cy="167" r="4" fill="#B4651E"></circle></g>
+        </sc-if>
+      </svg>
+      <div style="padding: 10px 14px; display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid #DDE3DB; background: #FFFFFF">
+        <div style="font-size: 15px; font-weight: 700">{{forestStage}}</div>
+        <div style="font-size: 13px; color: #55625A">{{points}}점 · {{nextText}}</div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; font-size: 15px; font-weight: 700">성장 단계</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+        <sc-for list="{{chips}}" as="c" hint-placeholder-count="6">
+          <div style="border-radius: 12px; padding: 8px 6px; text-align: center; background: {{c.bg}}; color: {{c.color}}; border: 1px solid {{c.border}}; display: flex; flex-direction: column; gap: 2px">
+            <div style="font-size: 13px; font-weight: 700">{{c.name}}</div>
+            <div style="font-size: 11px">{{c.need}} · {{c.status}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 6px">
+      <h2 style="margin: 0; font-size: 15px; font-weight: 700">함께 사는 동식물</h2>
+      <sc-for list="{{animals}}" as="a" hint-placeholder-count="3">
+        <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <div style="font-size: 14px; font-weight: 500">{{a.name}}</div>
+            <div style="font-size: 12px; color: #55625A">{{a.cond}}</div>
+          </div>
+          <div style="flex: none; font-size: 12px; font-weight: 700; color: {{a.color}}">{{a.status}} {{a.progress}}</div>
+        </div>
+      </sc-for>
+    </section>
+
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <button type="button" onClick="{{addPoint}}" style="height: 44px; border-radius: 12px; border: 1.5px solid #2E6A4C; background: #FFFFFF; color: #2E6A4C; font: 500 13px 'Noto Sans KR', sans-serif; cursor: pointer">실천 기록 +1점</button>
+      <button type="button" onClick="{{addNature}}" style="height: 44px; border-radius: 12px; border: 1.5px solid #2E6A4C; background: #FFFFFF; color: #2E6A4C; font: 500 13px 'Noto Sans KR', sans-serif; cursor: pointer">자연 관찰 +1회</button>
+      <button type="button" onClick="{{addTrash}}" style="height: 44px; border-radius: 12px; border: 1.5px solid #2E6A4C; background: #FFFFFF; color: #2E6A4C; font: 500 13px 'Noto Sans KR', sans-serif; cursor: pointer">쓰레기 줍기 +1회</button>
+      <button type="button" onClick="{{readBee}}" style="height: 44px; border-radius: 12px; border: 1.5px solid #2E6A4C; background: #FFFFFF; color: #2E6A4C; font: 500 13px 'Noto Sans KR', sans-serif; cursor: pointer">벌 카드 읽기</button>
+    </div>
+    <div style="font-size: 11px; color: #55625A">위 네 버튼은 목업 확인용입니다. 실제 앱에서는 실천 기록과 글 읽기로 채워집니다.</div>
+  </div>
+
+  <nav aria-label="주 메뉴" style="height: 72px; background: #FFFFFF; border-top: 1px solid #DDE3DB; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="Main.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"></path></svg>
+      오늘
+    </a>
+    <a href="Record.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>
+      기록
+    </a>
+    <a href="Groups.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="3.2"></circle><circle cx="16.5" cy="10" r="2.6"></circle><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8M14.5 15c2.6-.4 4.9 1 5.8 4"></path></svg>
+      모임
+    </a>
+    <a href="Read.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5c-2-1.6-4.6-2-8-1.5v13c3.4-.5 6 0 8 1.5 2-1.5 4.6-2 8-1.5V5c-3.4-.5-6-.1-8 1.5z"></path><path d="M12 6.5V19.5"></path></svg>
+      읽기
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { points: 10, nature: 2, trash: 3, bee: 0 };
+  }
+  renderVals() {
+    const S = this.state;
+    const stages = [['씨앗', 0], ['새싹', 5], ['어린 묘목', 15], ['꽃', 30], ['나무', 60], ['숲', 120]];
+    const scales = [0.001, 0.35, 0.6, 0.8, 1, 1];
+    let si = 0;
+    for (let i = 0; i < stages.length; i++) if (S.points >= stages[i][1]) si = i;
+    const nextS = stages[si + 1];
+    const nextText = nextS ? nextS[0] + '까지 ' + (nextS[1] - S.points) + '점' : '숲 완성';
+    const chips = stages.map((s, i) => {
+      const status = i < si ? '완료' : (i === si ? '지금' : '다음');
+      return {
+        name: s[0],
+        need: s[1] + '점',
+        status,
+        bg: status === '지금' ? '#2E6A4C' : (status === '완료' ? '#E3EEE6' : '#FFFFFF'),
+        color: status === '지금' ? '#FFFFFF' : '#1C2620',
+        border: status === '다음' ? '#DDE3DB' : '#E3EEE6'
+      };
+    });
+    const s = scales[si];
+    const mainTransform = 'translate(179,185) scale(' + s + ')';
+    const extraTrees = si >= 5 ? [
+      { transform: 'translate(40,185) scale(0.5)' },
+      { transform: 'translate(96,185) scale(0.6)' },
+      { transform: 'translate(262,185) scale(0.6)' },
+      { transform: 'translate(318,185) scale(0.5)' }
+    ] : [];
+    const animals = [
+      { name: '벌', cond: '꽃 단계에서 "벌이 사라지면" 카드 읽기', now: S.bee, need: 1, extra: si >= 3 },
+      { name: '새', cond: '자연 관찰 기록 3회', now: S.nature, need: 3, extra: true },
+      { name: '다람쥐', cond: '쓰레기 줍기 5회', now: S.trash, need: 5, extra: true }
+    ].map((a) => {
+      const ok = a.extra && a.now >= a.need;
+      return {
+        name: a.name,
+        cond: a.cond,
+        status: ok ? '열림' : '잠김',
+        progress: a.extra ? (Math.min(a.now, a.need) + '/' + a.need) : '꽃 단계 필요',
+        color: ok ? '#2E6A4C' : '#55625A',
+        ok
+      };
+    });
+    return {
+      forestStage: stages[si][0] + ' 단계',
+      points: S.points,
+      nextText,
+      chips,
+      mainTransform,
+      extraTrees,
+      hasSeed: si === 0,
+      hasFlower: si >= 3,
+      hasBee: animals[0].ok,
+      hasBird: animals[1].ok,
+      hasSquirrel: animals[2].ok,
+      animals,
+      addPoint: () => this.setState({ points: this.state.points + 1 }),
+      addNature: () => this.setState({ nature: this.state.nature + 1 }),
+      addTrash: () => this.setState({ trash: this.state.trash + 1 }),
+      readBee: () => this.setState({ bee: this.state.bee + 1 })
+    };
+  }
+}
+</script>
+</body>
+</html>

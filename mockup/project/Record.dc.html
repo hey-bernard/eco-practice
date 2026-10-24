@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>나의 기록 화면</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2E6A4C}a:hover{color:#1F4A35}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F2; font-family: 'Noto Sans KR', sans-serif; color: #1C2620; display: flex; flex-direction: column; overflow: hidden">
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 28px 20px 16px; overflow: hidden">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end">
+      <h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px">나의 기록</h1>
+      <div style="font-size: 14px; font-weight: 500; color: #55625A">2026년 10월</div>
+    </div>
+
+    <section aria-label="10월 기록 달력" style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 16px; padding: 14px 12px">
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center; font-size: 11px; color: #55625A; margin-bottom: 6px">
+        <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+        <sc-for list="{{days}}" as="d" hint-placeholder-count="35">
+          <div style="height: 40px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; background: {{d.bg}}; border: {{d.border}}">
+            <div style="font-size: 12px; font-weight: {{d.weight}}; color: {{d.color}}">{{d.label}}</div>
+            <div style="font-size: 10px; color: {{d.countColor}}">{{d.countText}}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 10px; font-size: 11px; color: #55625A">
+        <div style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #CFE3D5; display: inline-block"></span>1~2개</div>
+        <div style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #2E6A4C; display: inline-block"></span>3개 이상</div>
+      </div>
+    </section>
+
+    <div style="background: #E3EEE6; border-radius: 14px; padding: 12px 14px; font-size: 13px; line-height: 1.5; color: #1F4A35">3일, 4일엔 기록이 없었지만 괜찮아요. 5일에 다시 시작했어요.</div>
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-size: 16px; font-weight: 700">이번 달 쌓인 변화</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 14px; padding: 14px 12px; display: flex; flex-direction: column; gap: 4px">
+          <div style="font-size: 24px; font-weight: 700; color: #7A4212">12개</div>
+          <div style="font-size: 12px; color: #55625A; line-height: 1.4">아낀 일회용 컵</div>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 14px; padding: 14px 12px; display: flex; flex-direction: column; gap: 4px">
+          <div style="font-size: 24px; font-weight: 700; color: #7A4212">9번</div>
+          <div style="font-size: 12px; color: #55625A; line-height: 1.4">대중교통 이동</div>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 14px; padding: 14px 12px; display: flex; flex-direction: column; gap: 4px">
+          <div style="font-size: 24px; font-weight: 700; color: #7A4212">6장</div>
+          <div style="font-size: 12px; color: #55625A; line-height: 1.4">아낀 비닐봉투</div>
+        </div>
+      </div>
+      <a href="#method" style="font-size: 13px">탄소 추정치와 산정 방법 보기</a>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <div style="font-size: 15px; font-weight: 700">가을 40일 챌린지</div>
+        <div style="font-size: 13px; color: #55625A">10일째</div>
+      </div>
+      <div role="progressbar" aria-label="챌린지 진행" aria-valuenow="10" aria-valuemin="0" aria-valuemax="40" style="height: 10px; border-radius: 5px; background: #E6EAE4; overflow: hidden">
+        <div style="width: 25%; height: 100%; background: #2E6A4C; border-radius: 5px"></div>
+      </div>
+      <div style="font-size: 12px; color: #55625A">혼자 참여 중 · <a href="Groups.dc.html">함께할 모임 찾기</a></div>
+    </section>
+  </div>
+
+  <nav aria-label="주 메뉴" style="height: 72px; background: #FFFFFF; border-top: 1px solid #DDE3DB; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="Main.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+      오늘
+    </a>
+    <a href="Record.dc.html" aria-current="page" style="text-decoration: none; color: #2E6A4C; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      기록
+    </a>
+    <a href="Groups.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="3.2"/><circle cx="16.5" cy="10" r="2.6"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8M14.5 15c2.6-.4 4.9 1 5.8 4"/></svg>
+      모임
+    </a>
+    <a href="Read.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5c-2-1.6-4.6-2-8-1.5v13c3.4-.5 6 0 8 1.5 2-1.5 4.6-2 8-1.5V5c-3.4-.5-6-.1-8 1.5z"/><path d="M12 6.5V19.5"/></svg>
+      읽기
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const counts = { 1: 2, 2: 1, 5: 2, 6: 3, 7: 1, 8: 2, 9: 2, 10: 1 };
+    const today = 10;
+    const days = [];
+    for (let i = 0; i < 4; i++) {
+      days.push({ label: '', countText: '', bg: 'transparent', border: 'none', weight: 400, color: '#1C2620', countColor: '#55625A' });
+    }
+    for (let d = 1; d <= 31; d++) {
+      const c = counts[d] || 0;
+      const future = d > today;
+      const strong = c >= 3;
+      days.push({
+        label: String(d),
+        countText: c ? c + '개' : '',
+        bg: strong ? '#2E6A4C' : (c ? '#CFE3D5' : (future ? 'transparent' : '#F4F6F2')),
+        border: d === today ? '2px solid #1C2620' : 'none',
+        weight: d === today ? 700 : 400,
+        color: strong ? '#FFFFFF' : (future ? '#7C877F' : '#1C2620'),
+        countColor: strong ? '#FFFFFF' : '#1F4A35'
+      });
+    }
+    return { days };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# 배포에서 빼는 것: 원본 시안·캐릭터 시트·문서
+mockup
+/*.webp
+README.md
+.playwright-mcp
+.env*

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>오늘 화면</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2E6A4C}a:hover{color:#1F4A35}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F2; font-family: 'Noto Sans KR', sans-serif; color: #1C2620; display: flex; flex-direction: column; overflow: hidden">
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 28px 20px 16px; overflow: hidden">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <div style="font-size: 13px; color: #55625A">10월 10일 토요일</div>
+        <h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px">오늘의 실천</h1>
+      </div>
+      <a href="Login.dc.html" style="flex: none; min-height: 44px; min-width: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; border: 1px solid #2E6A4C; background: #FFFFFF; color: #2E6A4C; font-size: 13px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; justify-content: center">로그인</a>
+    </div>
+
+    <section style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+      <div style="font-size: 12px; font-weight: 700; color: #2E6A4C">이번 주 성찰 질문</div>
+      <p style="margin: 0; font-family: 'Gowun Batang', serif; font-size: 19px; line-height: 1.5">오늘 하루, 가장 오래 바라본 자연은 무엇이었나요?</p>
+      <a href="Read.dc.html" style="align-self: flex-start; font-size: 14px; font-weight: 500; text-decoration: none; padding: 10px 14px; border-radius: 10px; background: #E3EEE6; color: #1F4A35">한 줄 남기기</a>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <h2 style="margin: 0; font-size: 16px; font-weight: 700">오늘 고른 실천</h2>
+        <a href="Record.dc.html" style="font-size: 13px; text-decoration: none">카드 더 고르기</a>
+      </div>
+      <sc-for list="{{cards}}" as="card" hint-placeholder-count="3">
+        <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 14px; padding: 14px 14px 14px 16px; display: flex; align-items: center; gap: 12px">
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+            <div style="font-size: 15px; font-weight: 500">{{card.title}}</div>
+            <div style="font-size: 12px; color: #55625A">{{card.level}} · {{card.hint}}</div>
+          </div>
+          <sc-if value="{{card.done}}" hint-placeholder-val="{{false}}">
+            <button type="button" onClick="{{card.toggle}}" aria-label="기록 취소" style="min-width: 76px; min-height: 44px; border-radius: 12px; border: none; background: #2E6A4C; color: #FFFFFF; font: 500 14px 'Noto Sans KR', sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+              했어요
+            </button>
+          </sc-if>
+          <sc-if value="{{card.notDone}}" hint-placeholder-val="{{true}}">
+            <button type="button" onClick="{{card.toggle}}" style="min-width: 76px; min-height: 44px; border-radius: 12px; border: 1.5px solid #2E6A4C; background: #FFFFFF; color: #2E6A4C; font: 500 14px 'Noto Sans KR', sans-serif; cursor: pointer">기록하기</button>
+          </sc-if>
+        </div>
+      </sc-for>
+    </section>
+
+    <a href="Forest.dc.html" style="text-decoration: none; color: inherit; background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+      <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true" style="flex: none"><rect width="44" height="44" rx="12" fill="#E3EEE6"/><path d="M22 34V24" stroke="#2E6A4C" stroke-width="2.2" stroke-linecap="round"/><path d="M22 24c-6 0-8-4.5-8-7 4.5 0 8 2.2 8 7zM22 24c6 0 8-4.5 8-7-4.5 0-8 2.2-8 7z" fill="#2E6A4C"/></svg>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+        <div style="font-size: 12px; font-weight: 700; color: #2E6A4C">나의 숲</div>
+        <div style="font-size: 14px; font-weight: 500">{{forestStage}} · {{forestPoints}}점</div>
+        <div style="height: 6px; border-radius: 3px; background: #E6EAE4; overflow: hidden"><div style="width: {{forestPct}}%; height: 100%; background: #2E6A4C; border-radius: 3px"></div></div>
+        <div style="font-size: 12px; color: #55625A">{{forestNext}}</div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; color: #55625A"><path d="M9 5l7 7-7 7"/></svg>
+    </a>
+
+    <div style="background: #FBF3EA; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B4651E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h11l-1.2 11.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8L6 8z"/><path d="M5 8h13"/><path d="M9 4.5c0 1 .8 1.5.8 2.5M12.5 4c0 1 .8 1.5.8 2.5"/></svg>
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <div style="font-size: 14px; font-weight: 700; color: #7A4212">이번 달 일회용 컵 {{cupCount}}개를 아꼈어요</div>
+        <div style="font-size: 12px; color: #6B4A2A">텀블러 기록 {{cupCount}}번을 컵 개수로 바꿨어요</div>
+      </div>
+    </div>
+
+    <a href="GroupHome.dc.html" style="text-decoration: none; color: inherit; background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px">
+      <div style="font-size: 12px; font-weight: 700; color: #2E6A4C">내 모임 소식</div>
+      <div style="font-size: 14px; font-weight: 500">주말 플로깅 크루 · 일요일 오전 10시</div>
+      <div style="font-size: 12px; color: #55625A">멤버 8명 중 6명이 이번 주 실천을 기록했어요</div>
+    </a>
+  </div>
+
+  <nav aria-label="주 메뉴" style="height: 72px; background: #FFFFFF; border-top: 1px solid #DDE3DB; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="Main.dc.html" aria-current="page" style="text-decoration: none; color: #2E6A4C; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+      오늘
+    </a>
+    <a href="Record.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      기록
+    </a>
+    <a href="Groups.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="3.2"/><circle cx="16.5" cy="10" r="2.6"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8M14.5 15c2.6-.4 4.9 1 5.8 4"/></svg>
+      모임
+    </a>
+    <a href="Read.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5c-2-1.6-4.6-2-8-1.5v13c3.4-.5 6 0 8 1.5 2-1.5 4.6-2 8-1.5V5c-3.4-.5-6-.1-8 1.5z"/><path d="M12 6.5V19.5"/></svg>
+      읽기
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { done: { tumbler: true, transit: false, bag: false } };
+  }
+  renderVals() {
+    const done = this.state.done;
+    const base = [
+      { id: 'tumbler', title: '텀블러 쓰기', level: '쉬움', hint: '카페·사무실에서' },
+      { id: 'transit', title: '대중교통으로 이동하기', level: '쉬움', hint: '오늘 한 번이라도' },
+      { id: 'bag', title: '장바구니 챙기기', level: '보통', hint: '장 보러 갈 때' }
+    ];
+    const cards = base.map((c) => ({
+      ...c,
+      done: !!done[c.id],
+      notDone: !done[c.id],
+      toggle: () => this.setState({ done: { ...this.state.done, [c.id]: !this.state.done[c.id] } })
+    }));
+    const forestStages = [['씨앗', 0], ['새싹', 5], ['어린 묘목', 15], ['꽃', 30], ['나무', 60], ['숲', 120]];
+    const forestPoints = 9 + Object.values(done).filter(Boolean).length;
+    let si = 0;
+    for (let i = 0; i < forestStages.length; i++) if (forestPoints >= forestStages[i][1]) si = i;
+    const nextS = forestStages[si + 1];
+    const forestPct = nextS ? Math.round(((forestPoints - forestStages[si][1]) / (nextS[1] - forestStages[si][1])) * 100) : 100;
+    const forestNext = nextS ? nextS[0] + '까지 ' + (nextS[1] - forestPoints) + '점 남았어요' : '숲을 가꾸고 있어요';
+    return { cards, cupCount: done.tumbler ? 12 : 11, forestStage: forestStages[si][0] + ' 단계', forestPoints, forestPct, forestNext };
+  }
+}
+</script>
+</body>
+</html>

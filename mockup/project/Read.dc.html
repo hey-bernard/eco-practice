@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>생태 성찰 아카이브 화면</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2E6A4C}a:hover{color:#1F4A35}
+button:focus-visible{outline:2px solid #2E6A4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F2; font-family: 'Noto Sans KR', sans-serif; color: #1C2620; display: flex; flex-direction: column; overflow: hidden">
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 28px 20px 16px; overflow-y: auto; min-height: 0">
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <div style="font-size: 13px; color: #55625A">마음의 허브</div>
+      <h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px">생태 성찰 &amp; 뉴스레터</h1>
+    </div>
+
+    <div role="group" aria-label="보기 전환" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #E6EAE4">
+      <button type="button" onClick="{{showReflect}}" aria-pressed="{{reflectPressed}}" style="height: 44px; border-radius: 10px; border: none; background: {{reflectBg}}; color: {{reflectColor}}; font: 500 14px 'Noto Sans KR', sans-serif; cursor: pointer">생태 성찰</button>
+      <button type="button" onClick="{{showNews}}" aria-pressed="{{newsPressed}}" style="height: 44px; border-radius: 10px; border: none; background: {{newsBg}}; color: {{newsColor}}; font: 500 14px 'Noto Sans KR', sans-serif; cursor: pointer">뉴스레터</button>
+    </div>
+
+    <sc-if value="{{isReflect}}" hint-placeholder-val="{{true}}">
+      <section aria-labelledby="climate-h" style="display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <h2 id="climate-h" style="margin: 0; font-size: 15px; font-weight: 700">기후 4대 지표</h2>
+          <div style="font-size: 12px; color: #55625A">세계기상기구(WMO) 2026년 발표 기준</div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+          <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 12px; font-weight: 700; color: #2E6A4C">지구 평균기온</span>
+            <span style="font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums">+1.44℃</span>
+                      </div>
+          <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 12px; font-weight: 700; color: #2E6A4C">해수면</span>
+            <span style="font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums">+11cm</span>
+                      </div>
+          <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 12px; font-weight: 700; color: #2E6A4C">해수 표면온도</span>
+            <span style="font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums">+0.49℃</span>
+                      </div>
+          <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 12px; font-weight: 700; color: #2E6A4C">대기 중 CO₂</span>
+            <span style="font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums">427.09 ppm</span>
+                      </div>
+        </div>
+        <div style="font-size: 10px; line-height: 1.5; color: #55625A">2025년 기준. 기온은 1850–1900년 대비, 해수면은 1993년 대비, 해수 표면온도는 1981–2010년 평균 대비. CO₂는 2025년 2월 월평균(연평균 아님). 출처: 세계기상기구(WMO) 전 지구 기후 현황 보고서, NOAA 온실가스 관측.</div>
+      </section>
+
+      <div role="group" aria-label="주제" style="display: flex; gap: 8px; flex-wrap: wrap">
+        <sc-for list="{{topics}}" as="t" hint-placeholder-count="5">
+          <button type="button" onClick="{{t.pick}}" aria-pressed="{{t.pressed}}" style="min-height: 36px; padding: 0 14px; border-radius: 18px; border: 1px solid {{t.border}}; background: {{t.bg}}; color: {{t.color}}; font: 500 13px 'Noto Sans KR', sans-serif; cursor: pointer">{{t.label}}</button>
+        </sc-for>
+      </div>
+
+      <article style="background: #1F3A2D; color: #F4F6F2; border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+        <div style="font-size: 12px; color: #BFD6C7">이번 주의 카드 · 카드뉴스 · 원문 읽기</div>
+        <h2 style="margin: 0; font-family: 'Gowun Batang', serif; font-size: 22px; font-weight: 700; line-height: 1.4">벌이 사라지면 '진짜' 벌어지는 일</h2>
+        <p style="margin: 0; font-family: 'Gowun Batang', serif; font-size: 15px; line-height: 1.7; color: #DCE8DF">식탁의 과일 하나에도 벌의 수고가 들어 있다. 벌이 줄면 무엇이 흔들리는지, 내가 할 수 있는 일은 무엇인지 함께 생각해 본다.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px">
+          <div style="font-size: 12px; color: #BFD6C7">국가기후위기대응위원회 · 2026.5.20</div>
+          <a href="https://www.pcccr.go.kr/base/board/read?boardManagementNo=7&amp;boardNo=7555&amp;searchCategory=&amp;page=1&amp;searchType=&amp;searchWord=&amp;menuLevel=2&amp;menuNo=98" target="_blank" rel="noopener" style="font-size: 14px; font-weight: 500; color: #FFFFFF; text-decoration: none; padding: 10px 14px; border-radius: 10px; background: #2E6A4C; min-height: 44px; display: inline-flex; align-items: center; box-sizing: border-box">원문 보기</a>
+        </div>
+      </article>
+
+      <section style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+        <label for="reflect" style="font-size: 12px; font-weight: 700; color: #2E6A4C">이번 주 성찰 질문 · 오늘 가장 오래 바라본 자연은?</label>
+        <div style="display: flex; gap: 8px">
+          <input id="reflect" type="text" placeholder="한 줄로 남겨 보세요" style="flex: 1; min-width: 0; height: 44px; box-sizing: border-box; border: 1px solid #C9D2C6; border-radius: 10px; padding: 0 12px; font: 400 14px 'Noto Sans KR', sans-serif; color: #1C2620; background: #FFFFFF">
+          <button type="button" style="height: 44px; padding: 0 14px; border-radius: 10px; border: none; background: #2E6A4C; color: #FFFFFF; font: 500 14px 'Noto Sans KR', sans-serif; cursor: pointer">남기기</button>
+        </div>
+        <div style="font-size: 12px; color: #55625A">나만 보기 · 모임에 나누기는 선택</div>
+      </section>
+
+      <div style="font-size: 12px; color: #55625A">{{countLabel}}</div>
+
+      <section style="display: flex; flex-direction: column; gap: 2px">
+        <sc-for list="{{posts}}" as="p" hint-placeholder-count="5">
+          <a href="{{p.url}}" target="_blank" rel="noopener" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid #DDE3DB; min-height: 44px">
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+              <div style="font-family: 'Gowun Batang', serif; font-size: 16px; font-weight: 700">{{p.title}}</div>
+              <div style="font-size: 13px; color: #3E4A43; line-height: 1.5">{{p.intro}}</div>
+              <div style="font-size: 12px; color: #55625A">{{p.meta}}</div>
+            </div>
+            <span aria-hidden="true" style="flex: none; font-size: 12px; color: #2E6A4C; font-weight: 500">원문</span>
+          </a>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isNews}}" hint-placeholder-val="{{false}}">
+      <section style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <div style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #E3EEE6; color: #1F4A35">예시 호</div>
+          <div style="font-size: 12px; color: #55625A">2026년 10월 3주차</div>
+        </div>
+        <div style="font-family: 'Gowun Batang', serif; font-size: 18px; font-weight: 700">이번 주 생태 동향</div>
+        <div style="font-size: 12px; color: #55625A; line-height: 1.5">실제 기사 수집과 운영자 승인 뒤에 채워집니다. 아래 칸은 구조를 보여 주는 자리입니다.</div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 10px">
+        <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+          <div style="font-size: 11px; font-weight: 700; color: #2E6A4C">물·바다 · 출처 등급 1</div>
+          <div style="height: 16px; width: 85%; border-radius: 6px; background: #E6EAE4"></div>
+          <div style="font-size: 13px; color: #3E4A43; line-height: 1.5">기사 3줄 요약이 들어가는 자리</div>
+          <div style="font-size: 12px; color: #55625A">출처 · 날짜 · 원문 링크 · 관련 실천 카드</div>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+          <div style="font-size: 11px; font-weight: 700; color: #2E6A4C">숲·자연 · 2개 매체 확인</div>
+          <div style="height: 16px; width: 70%; border-radius: 6px; background: #E6EAE4"></div>
+          <div style="font-size: 13px; color: #3E4A43; line-height: 1.5">기사 3줄 요약이 들어가는 자리</div>
+          <div style="font-size: 12px; color: #55625A">출처 · 날짜 · 원문 링크 · 관련 실천 카드</div>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+          <div style="font-size: 11px; font-weight: 700; color: #2E6A4C">소비·이동 · 정책</div>
+          <div style="height: 16px; width: 90%; border-radius: 6px; background: #E6EAE4"></div>
+          <div style="font-size: 13px; color: #3E4A43; line-height: 1.5">기사 3줄 요약이 들어가는 자리</div>
+          <div style="font-size: 12px; color: #55625A">출처 · 날짜 · 원문 링크 · 관련 실천 카드</div>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 8px">
+        <div style="font-size: 12px; font-weight: 700; color: #2E6A4C">지난 호</div>
+        <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 12px; padding: 12px 14px; font-size: 13px; color: #55625A">2026년 10월 2주차 · 예시</div>
+        <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 12px; padding: 12px 14px; font-size: 13px; color: #55625A">2026년 10월 1주차 · 예시</div>
+      </section>
+
+      <div style="font-size: 12px; color: #55625A; line-height: 1.5">요약과 링크만 싣습니다. 원문 전문은 출처 누리집에서 읽어요.</div>
+    </sc-if>
+  </div>
+
+  <nav aria-label="주 메뉴" style="height: 72px; background: #FFFFFF; border-top: 1px solid #DDE3DB; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="Main.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"></path></svg>
+      오늘
+    </a>
+    <a href="Record.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>
+      기록
+    </a>
+    <a href="Groups.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="3.2"></circle><circle cx="16.5" cy="10" r="2.6"></circle><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8M14.5 15c2.6-.4 4.9 1 5.8 4"></path></svg>
+      모임
+    </a>
+    <a href="Read.dc.html" aria-current="page" style="text-decoration: none; color: #2E6A4C; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5c-2-1.6-4.6-2-8-1.5v13c3.4-.5 6 0 8 1.5 2-1.5 4.6-2 8-1.5V5c-3.4-.5-6-.1-8 1.5z"></path><path d="M12 6.5V19.5"></path></svg>
+      읽기
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { topic: 'all', tab: 'reflect' };
+  }
+  renderVals() {
+    const list = [
+      { id: 'all', label: '전체' },
+      { id: 'water', label: '물·바다' },
+      { id: 'forest', label: '숲·자연' },
+      { id: 'food', label: '먹거리' },
+      { id: 'life', label: '소비·이동' }
+    ];
+    const topics = list.map((t) => {
+      const on = this.state.topic === t.id;
+      return {
+        ...t,
+        pressed: on ? 'true' : 'false',
+        bg: on ? '#1F3A2D' : '#FFFFFF',
+        color: on ? '#FFFFFF' : '#1C2620',
+        border: on ? '#1F3A2D' : '#C9D2C6',
+        pick: () => this.setState({ topic: t.id })
+      };
+    });
+    const base = 'https://www.pcccr.go.kr/base/board/read?boardManagementNo=7&searchCategory=&page=1&searchType=&searchWord=&menuLevel=2&menuNo=98&boardNo=';
+    const all = [
+      { topic: 'water', title: '한 번 쓴 물도 다시 쓰는 나라?', intro: '싱가포르가 작은 나라에서 물을 얻는 네 가지 방법', meta: '카드뉴스 · 2026.6.12 · 물', id: 7559 },
+      { topic: 'water', title: '해변의 흔적을 줍줍~ 바다를 즐기는 방법', intro: '해변을 걸으며 쓰레기를 살피고 줍는 비치코밍', meta: '카드뉴스 · 2026.8.14 · 물·바다', id: 7779 },
+      { topic: 'water', title: '내 반려해변을 입양할 수 있다?', intro: '해변을 정기적으로 돌보는 국민참여 제도', meta: '카드뉴스 · 2026.6.8 · 물·바다', id: 7558 },
+      { topic: 'forest', title: '5/22 국제 생물다양성의 날, 기후변화 생물지표종은 알고 가자!', intro: '기후에 민감한 생물을 시민이 관찰해 기록하는 방법', meta: '카드뉴스 · 2026.5.22 · 숲·자연', id: 7556 },
+      { topic: 'forest', title: "벌이 사라지면 '진짜' 벌어지는 일", intro: '꿀벌이 식탁과 생태계에 주는 가치', meta: '카드뉴스 · 2026.5.20 · 숲·자연', id: 7555 },
+      { topic: 'food', title: '요즘 장보기, 로컬이 더 힙하다고?', intro: '지역 먹거리와 제철 식재료를 고르는 장보기', meta: '카드뉴스 · 2026.5.13 · 먹거리', id: 7553 },
+      { topic: 'life', title: '티켓 한 장으로 어디든 갈 수 있는 나라?', intro: '오스트리아 기후티켓과 자동차 이용 감소 효과', meta: '카드뉴스 · 2026.5.7 · 소비·이동', id: 7552 },
+      { topic: 'life', title: 'Vol.2 리페어 컬처 - 좋아하는 것을 오래 누리는 즐거움', intro: '고쳐 쓰고 오래 누리는 문화와 리페어카페', meta: '카드뉴스 · 2026.4.14 · 소비', id: 7462 },
+      { topic: 'life', title: '봄맞이 옷정리, 이렇게 하세요', intro: '비우기·분류·수납으로 옷장 정리하는 법', meta: '카드뉴스 · 2026.3.26 · 소비', id: 7402 },
+      { topic: 'forest', title: '3월 21일은 세계 산림의 날', intro: '나무가 탄소와 열을 흡수하는 역할과 산림 수칙', meta: '카드뉴스 · 2026.3.19 · 숲·자연', id: 7401 },
+      { topic: 'food', title: 'Vol.1 제철코어 봄동, 코어가 되다', intro: '제철 식재료를 즐기는 흐름과 기후변화', meta: '카드뉴스 · 2026.3.10 · 먹거리', id: 7400 },
+      { topic: 'life', title: '설명절 밸런스 게임', intro: '명절 이동·음식·포장에서 저탄소 선택 고르기', meta: '카드뉴스 · 2026.2.13 · 소비·먹거리', id: 7397 },
+      { topic: 'forest', title: '바다가 만든 탄소저장고 블루카본', intro: '갯벌과 잘피가 탄소를 저장하는 원리', meta: '카드뉴스 · 2025.12.12 · 숲·자연', id: 7236 },
+      { topic: 'life', title: '오늘도 그린 하루 EP.9 · 알아두면 쓸모 있는 분리배출 방법', intro: '폐의약품·프라이팬·컵라면 용기 등 헷갈리는 배출법', meta: '카드뉴스 · 2024.5.27 · 소비', id: 3431 }
+    ];
+    const current = this.state.topic;
+    const shown = current === 'all' ? all : all.filter((p) => p.topic === current);
+    const posts = shown.map((p) => ({
+      title: p.title,
+      intro: p.intro,
+      meta: p.meta,
+      url: base + p.id
+    }));
+    const countLabel = current === 'all' ? '카드 ' + all.length + '편 · 원문은 국가기후위기대응위원회 누리집에서 읽어요' : '카드 ' + posts.length + '편 · 원문은 국가기후위기대응위원회 누리집에서 읽어요';
+    const isReflect = this.state.tab === 'reflect';
+    const isNews = !isReflect;
+    return {
+      topics,
+      posts,
+      countLabel,
+      isReflect,
+      isNews,
+      reflectPressed: isReflect ? 'true' : 'false',
+      newsPressed: isNews ? 'true' : 'false',
+      reflectBg: isReflect ? '#FFFFFF' : 'transparent',
+      reflectColor: isReflect ? '#1F4A35' : '#55625A',
+      newsBg: isNews ? '#FFFFFF' : 'transparent',
+      newsColor: isNews ? '#1F4A35' : '#55625A',
+      showReflect: () => this.setState({ tab: 'reflect' }),
+      showNews: () => this.setState({ tab: 'news' })
+    };
+  }
+}
+</script>
+</body>
+</html>

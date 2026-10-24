@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>모임 찾기 화면</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2E6A4C}a:hover{color:#1F4A35}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F2; font-family: 'Noto Sans KR', sans-serif; color: #1C2620; display: flex; flex-direction: column; overflow: hidden">
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 28px 20px 16px; overflow: hidden">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end">
+      <h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px">모임 찾기</h1>
+      <a href="GroupHome.dc.html" style="font-size: 14px; font-weight: 500; text-decoration: none; padding: 10px 12px; border-radius: 10px; background: #E3EEE6; color: #1F4A35">+ 모임 만들기</a>
+    </div>
+
+    <div style="position: relative">
+      <label for="q" class="sr">모임 검색</label>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#55625A" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="position: absolute; left: 14px; top: 13px"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+      <input id="q" type="search" placeholder="관심 주제나 모임 이름" style="width: 100%; height: 44px; box-sizing: border-box; border: 1px solid #C9D2C6; border-radius: 12px; padding: 0 12px 0 40px; font: 400 14px 'Noto Sans KR', sans-serif; color: #1C2620; background: #FFFFFF">
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <div role="group" aria-label="모임 방식" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; background: #E6EAE4; padding: 4px; border-radius: 12px">
+        <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+          <button type="button" onClick="{{m.pick}}" aria-pressed="{{m.pressed}}" style="height: 36px; border: none; border-radius: 9px; background: {{m.bg}}; color: #1C2620; font: {{m.font}}; cursor: pointer">{{m.label}}</button>
+        </sc-for>
+      </div>
+      <div style="display: flex; gap: 8px; overflow: hidden">
+        <button type="button" style="flex: none; min-height: 34px; padding: 0 12px; border-radius: 17px; border: 1px dashed #8A968D; background: transparent; color: #55625A; font: 500 13px 'Noto Sans KR', sans-serif; cursor: pointer">지역 선택 안 함</button>
+        <button type="button" style="flex: none; min-height: 34px; padding: 0 12px; border-radius: 17px; border: 1px solid #C9D2C6; background: #FFFFFF; color: #1C2620; font: 500 13px 'Noto Sans KR', sans-serif">제로웨이스트</button>
+        <button type="button" style="flex: none; min-height: 34px; padding: 0 12px; border-radius: 17px; border: 1px solid #C9D2C6; background: #FFFFFF; color: #1C2620; font: 500 13px 'Noto Sans KR', sans-serif">기후 공부</button>
+        <button type="button" style="flex: none; min-height: 34px; padding: 0 12px; border-radius: 17px; border: 1px solid #C9D2C6; background: #FFFFFF; color: #1C2620; font: 500 13px 'Noto Sans KR', sans-serif">플로깅</button>
+      </div>
+    </div>
+
+    <div style="font-size: 12px; color: #55625A">관심 주제 기준 추천 · {{count}}개</div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+        <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+            <div style="font-size: 16px; font-weight: 700">{{g.name}}</div>
+            <div style="flex: none; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: {{g.modeBg}}; color: {{g.modeColor}}">{{g.mode}}</div>
+          </div>
+          <div style="font-size: 13px; color: #55625A">{{g.topic}} · {{g.place}} · 멤버 {{g.members}}명</div>
+          <div style="display: flex; justify-content: space-between; align-items: center">
+            <div style="font-size: 13px">다음 활동 · {{g.next}}</div>
+            <a href="GroupHome.dc.html" style="font-size: 14px; font-weight: 500; text-decoration: none; padding: 9px 12px; border-radius: 10px; border: 1.5px solid #2E6A4C">둘러보기</a>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <nav aria-label="주 메뉴" style="height: 72px; background: #FFFFFF; border-top: 1px solid #DDE3DB; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="Main.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+      오늘
+    </a>
+    <a href="Record.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      기록
+    </a>
+    <a href="Groups.dc.html" aria-current="page" style="text-decoration: none; color: #2E6A4C; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="3.2"/><circle cx="16.5" cy="10" r="2.6"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8M14.5 15c2.6-.4 4.9 1 5.8 4"/></svg>
+      모임
+    </a>
+    <a href="Read.dc.html" style="text-decoration: none; color: #55625A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5c-2-1.6-4.6-2-8-1.5v13c3.4-.5 6 0 8 1.5 2-1.5 4.6-2 8-1.5V5c-3.4-.5-6-.1-8 1.5z"/><path d="M12 6.5V19.5"/></svg>
+      읽기
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'all' };
+  }
+  renderVals() {
+    const modeList = [
+      { id: 'all', label: '전체' },
+      { id: 'on', label: '온라인' },
+      { id: 'off', label: '오프라인' }
+    ];
+    const modes = modeList.map((m) => {
+      const on = this.state.mode === m.id;
+      return {
+        ...m,
+        pressed: on ? 'true' : 'false',
+        bg: on ? '#FFFFFF' : 'transparent',
+        font: on ? "700 13px 'Noto Sans KR', sans-serif" : "500 13px 'Noto Sans KR', sans-serif",
+        pick: () => this.setState({ mode: m.id })
+      };
+    });
+    const all = [
+      { name: '주말 플로깅 크루', kind: 'off', topic: '플로깅', place: '서울 마포구', members: 8, next: '일요일 오전 10시' },
+      { name: '기후 책 읽기 모임', kind: 'on', topic: '기후 공부', place: '온라인', members: 15, next: '격주 수요일 저녁 8시' },
+      { name: '제로웨이스트 장보기', kind: 'off', topic: '제로웨이스트', place: '서울 성동구', members: 11, next: '매달 첫째 토요일' }
+    ];
+    const groups = all
+      .filter((g) => this.state.mode === 'all' || g.kind === this.state.mode)
+      .map((g) => ({
+        ...g,
+        mode: g.kind === 'on' ? '온라인' : '오프라인',
+        modeBg: g.kind === 'on' ? '#E4ECF6' : '#FBF3EA',
+        modeColor: g.kind === 'on' ? '#22466E' : '#7A4212'
+      }));
+    return { modes, groups, count: groups.length };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>구글 캘린더 알림</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F2; font-family: 'Noto Sans KR', sans-serif; color: #1C2620; display: flex; flex-direction: column; overflow: hidden">
+  <div style="padding: 52px 20px 12px; display: flex; flex-direction: column; gap: 4px">
+    <div style="font-size: 12px; font-weight: 700; color: #2E6A4C">구글 캘린더에 만들어지는 알림</div>
+    <h1 style="margin: 0; font-family: 'Gowun Batang', serif; font-size: 20px; font-weight: 700">매일 세 번, 캘린더가 알려요</h1>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 8px 20px 20px; overflow: hidden">
+    <section style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 14px; overflow: hidden">
+      <div style="padding: 10px 14px; border-bottom: 1px solid #EEF1EC; font-size: 12px; font-weight: 700; color: #55625A">10월 19일 (일) · 일정</div>
+      <div style="display: flex; flex-direction: column">
+        <div style="display: flex; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #EEF1EC; align-items: flex-start">
+          <span style="width: 40px; font-size: 12px; color: #55625A; font-variant-numeric: tabular-nums">08:00</span>
+          <div style="flex: 1; background: #E3EEE6; border-left: 3px solid #2E6A4C; border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 13px; font-weight: 700; color: #1C2620">생태 실천 · 아침</span>
+            <span style="font-size: 11px; color: #3E4A43">매일 반복 · 알림 0분 전</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #EEF1EC; align-items: flex-start">
+          <span style="width: 40px; font-size: 12px; color: #55625A; font-variant-numeric: tabular-nums">12:30</span>
+          <div style="flex: 1; background: #E3EEE6; border-left: 3px solid #2E6A4C; border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 13px; font-weight: 700; color: #1C2620">생태 실천 · 점심</span>
+            <span style="font-size: 11px; color: #3E4A43">매일 반복 · 알림 0분 전</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; padding: 10px 14px; align-items: flex-start">
+          <span style="width: 40px; font-size: 12px; color: #55625A; font-variant-numeric: tabular-nums">19:00</span>
+          <div style="flex: 1; background: #E3EEE6; border-left: 3px solid #2E6A4C; border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 13px; font-weight: 700; color: #1C2620">생태 실천 · 저녁</span>
+            <span style="font-size: 11px; color: #3E4A43">매일 반복 · 알림 0분 전</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <div style="font-size: 12px; font-weight: 700; color: #2E6A4C">19:00 알림이 울리면</div>
+      <div style="background: #1C2620; color: #F4F6F2; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 11px; color: #B9C6BC">구글 캘린더 · 지금</span>
+        <span style="font-size: 14px; font-weight: 700">생태 실천 · 저녁</span>
+        <span style="font-size: 12px; line-height: 1.5; color: #D9E2DB">오늘 실천을 아직 기록하지 않았어요. 카드 3장 중 하나를 골라 보세요.</span>
+      </div>
+      <div style="font-size: 11px; line-height: 1.6; color: #55625A">알림 문구는 일정 제목과 설명에서 가져옵니다. 알림을 눌러 앱의 특정 화면으로 바로 여는 기능은 보장되지 않으므로, 설명에는 앱 주소를 텍스트로만 적습니다.</div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px; margin-top: auto">
+      <div style="font-size: 12px; font-weight: 700; color: #2E6A4C">연결 순서</div>
+      <div style="background: #FFFFFF; border: 1px solid #DDE3DB; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 12px; line-height: 1.5; color: #3E4A43">
+        <div><b style="color: #2E6A4C">1.</b> 구글 로그인</div>
+        <div><b style="color: #2E6A4C">2.</b> 캘린더 권한 동의 (알림 일정 만들기·수정)</div>
+        <div><b style="color: #2E6A4C">3.</b> 매일 반복 일정 3개 생성 (08:00 · 12:30 · 19:00)</div>
+        <div><b style="color: #2E6A4C">4.</b> 시각이 되면 구글 캘린더가 알림</div>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
