@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#25543B">
+<meta name="description" content="작은 실천을 기록하면 숲이 자라는 생태 실천 웹앱 · Google Stitch 디자인 버전">
+<title>오늘의 실천 · Stitch</title>
+<link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0&display=block" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+  // Google Stitch 프로젝트 '오늘의 실천 – Stitch 버전'의 디자인 시스템(Mindful Habit Companion) 토큰
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: '#093d26', 'primary-container': '#25543b', 'on-primary': '#ffffff',
+          secondary: '#4c6358', 'secondary-container': '#cee9da', 'on-secondary-container': '#52695e',
+          tertiary: '#493000', 'tertiary-fixed': '#ffdead', 'tertiary-fixed-dim': '#eac07e',
+          background: '#fcf9f3', surface: '#fcf9f3',
+          'surface-container-lowest': '#ffffff', 'surface-container-low': '#f6f3ed', 'surface-container': '#f0eee8',
+          'surface-container-high': '#ebe8e2', 'surface-container-highest': '#e5e2dc',
+          'on-surface': '#1c1c18', 'on-surface-variant': '#414943',
+          outline: '#717972', 'outline-variant': '#c0c9c1', hairline: '#EFECE6',
+          oat: '#F6EEDB', amber: '#8D6B32', sage: '#8FA89B', done: '#F2F6F4',
+          sky: '#E4ECF6', 'on-sky': '#22466E'
+        },
+        borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
+        fontFamily: {
+          serif: ['"Noto Serif KR"', 'serif'],
+          sans: ['"Noto Sans KR"', 'sans-serif']
+        },
+        fontSize: {
+          'headline-xl': ['28px', { lineHeight: '38px', letterSpacing: '-0.01em' }],
+          'headline-lg': ['22px', { lineHeight: '32px' }],
+          'headline-md': ['18px', { lineHeight: '28px' }],
+          quote: ['17px', { lineHeight: '28px', letterSpacing: '0.01em' }],
+          'body-md': ['15px', { lineHeight: '24px' }],
+          'body-sm': ['13px', { lineHeight: '20px' }],
+          'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.02em' }],
+          'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.03em' }]
+        }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-background text-on-surface font-sans antialiased">
+<div class="relative mx-auto min-h-[100dvh] w-full max-w-[560px] bg-background">
+  <main id="screen"></main>
+  <nav id="nav" aria-label="주 메뉴" class="fixed bottom-0 left-1/2 z-40 w-full max-w-[560px] -translate-x-1/2 border-t border-outline-variant/30 bg-surface/95 backdrop-blur-md"></nav>
+  <div id="layer"></div>
+</div>
+<noscript>이 앱은 자바스크립트가 필요합니다.</noscript>
+<script type="module" src="app.js"></script>
+</body>
+</html>

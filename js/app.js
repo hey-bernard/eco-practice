@@ -345,6 +345,7 @@ function viewRecord() {
         <div class="small">지금은 <b>${COPY.label}</b>으로 쓰고 있어요</div>
         <button type="button" class="btn btn-ghost" data-act="switch-audience" style="font-size:13px;flex:none">대상 바꾸기</button>
       </div>
+      <a href="stitch/#/record" class="small" style="align-self:center">Stitch 디자인으로 보기</a>
     </div>`;
 }
 

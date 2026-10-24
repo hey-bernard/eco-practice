@@ -36,6 +36,7 @@ GitHub 저장소(hey-bernard/eco-practice)의 `main`에 push하면 Vercel이 자
 | `images/village/earth.webp`, `risa.webp` | 지구지킴이·리사 정면. 시트에서 잘라 배경 제거 |
 | `images/forest/stage1~6.webp` | 학생용 지구지킴이 성장 6단계. `22a5fae709d12dd5.webp` 시트의 Lv.1~6을 잘라 2배 확대 |
 | `images/forest/plant1~6.svg` | 성인용 식물 성장 6단계 (씨앗→숲). 숲 화면 동물 그림과 같은 358×220 좌표 |
+| `stitch/` | Google Stitch 디자인 버전 (아래 'Stitch 디자인 버전') |
 
 ## 학생용 · 성인용
 
@@ -52,6 +53,15 @@ GitHub 저장소(hey-bernard/eco-practice)의 `main`에 push하면 Vercel이 자
 
 - 기록은 대상별로 따로 저장한다 (`eco-practice-student-v1` / 성인은 기존 `eco-practice-v1`).
 - 발표 때 두 버전을 바로 보여 주려면 주소에 `?as=student` 또는 `?as=adult`를 붙인다. 저장된 선택보다 먼저 적용된다.
+
+## Stitch 디자인 버전 (`/stitch/`)
+
+Google Stitch(프로젝트 '오늘의 실천 – Stitch 버전')로 만든 시안을 입힌 두 번째 디자인. 기능과 화면 구성은 원래 버전과 같다.
+
+- 주소: `/stitch/` (예: `/stitch/?as=student#/today`). 원래 버전 기록 화면 맨 아래에서도 들어갈 수 있다.
+- `stitch/app.js`가 화면만 새로 그리고, 데이터·저장·대상 선택은 `js/data.js`, `js/store.js`, `js/audience.js`, `js/village.js`를 그대로 쓴다. 그래서 같은 기기에서는 두 디자인의 기록과 대상 선택이 함께 간다.
+- 디자인 토큰(색·글꼴·모서리)은 Stitch가 만든 디자인 시스템 'Mindful Habit Companion'에서 옮겨 `stitch/index.html`의 Tailwind 설정에 둔다. 아이콘은 Material Symbols.
+- Stitch 시안에 있던 '연속 실천 N일' 표시는 기록이 끊겨도 탓하지 않는다는 원칙에 맞지 않아 넣지 않았다.
 
 ## 화면별 상태 (2주차 기준)
 
