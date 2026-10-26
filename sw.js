@@ -1,10 +1,11 @@
 // 오프라인에서도 열리도록 앱 파일을 캐시한다. 네트워크를 먼저 쓰고, 안 되면 캐시로.
 // 파일을 바꿔 배포할 때 VERSION을 올린다.
-const VERSION = 'v7';
+const VERSION = 'v8';
 const CACHE = `eco-practice-${VERSION}`;
 const SHELL = ['./', './index.html', './css/style.css', './js/app.js', './js/audience.js', './js/data.js', './js/store.js', './js/village.js', './manifest.webmanifest', './icons/icon.svg',
   './stitch/', './stitch/index.html', './stitch/style.css', './stitch/app.js',
   './monitor/', './monitor/index.html', './monitor/style.css', './monitor/app.js',
+  './climate/', './climate/index.html', './climate/style.css', './climate/app.js',
   './images/village/earth.webp', './images/village/risa.webp',
   ...[1, 2, 3, 4, 5, 6].flatMap((n) => [`./images/forest/stage${n}.webp`, `./images/forest/plant${n}.svg`])];
 
