@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f131d">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="작은 실천을 기록하면 숲이 자라는 생태 실천 웹앱 · Stitch '지구 기후 모니터' 다크 디자인 버전">
+<title>오늘의 실천 · 기후 모니터</title>
+<link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0&display=block" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+  // Stitch 샘플 '지구 기후 모니터 · Action Guide'의 다크 토큰.
+  // 화면 코드는 Stitch 버전(../stitch)과 같은 이름의 토큰을 쓰므로, 같은 이름에 다크 값을 넣었다.
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          primary: '#00e38b', 'primary-container': '#00ff9d', 'on-primary': '#00391f', 'on-primary-container': '#007143',
+          secondary: '#b9cbbc', 'secondary-container': '#163a2a', 'on-secondary-container': '#8ef0bf',
+          tertiary: '#ffb86b', 'tertiary-fixed': '#ffdcbc', 'tertiary-fixed-dim': '#ffb86b',
+          background: '#0f131d', surface: '#0f131d',
+          'surface-container-lowest': '#1c1f2a', 'surface-container-low': '#262a35', 'surface-container': '#2c303b',
+          'surface-container-high': '#313540', 'surface-container-highest': '#3a3f4b', 'surface-bright': '#353944',
+          'on-surface': '#dfe2f1', 'on-surface-variant': '#b9cbbc',
+          outline: '#849587', 'outline-variant': '#3b4a3f', hairline: '#262a35',
+          oat: '#2a2316', amber: '#ffb86b', sage: '#2f6a4d', done: '#122a20',
+          sky: '#1d2a40', 'on-sky': '#9cc4ff', error: '#ffb4ab'
+        },
+        borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', '2xl': '0.75rem', full: '9999px' },
+        fontFamily: {
+          serif: ['"Space Grotesk"', '"Noto Sans KR"', 'sans-serif'],
+          sans: ['Inter', '"Noto Sans KR"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', '"Noto Sans KR"', 'monospace']
+        },
+        fontSize: {
+          'headline-xl': ['28px', { lineHeight: '36px', letterSpacing: '-0.01em' }],
+          'headline-lg': ['22px', { lineHeight: '28px' }],
+          'headline-md': ['18px', { lineHeight: '24px' }],
+          quote: ['16px', { lineHeight: '26px' }],
+          'body-md': ['14px', { lineHeight: '20px' }],
+          'body-sm': ['12px', { lineHeight: '16px' }],
+          'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.02em' }],
+          'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.03em' }],
+          metric: ['24px', { lineHeight: '32px', fontWeight: '700' }],
+          'metric-lg': ['36px', { lineHeight: '44px', fontWeight: '700' }]
+        }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-background text-on-surface font-sans antialiased">
+<div class="relative mx-auto min-h-[100dvh] w-full max-w-[560px] bg-background">
+  <main id="screen"></main>
+  <nav id="nav" aria-label="주 메뉴" class="fixed bottom-0 left-1/2 z-40 w-full max-w-[560px] -translate-x-1/2 bg-surface-container-lowest/85 shadow-[0_-4px_20px_rgba(0,0,0,0.4)] backdrop-blur-xl"></nav>
+  <div id="layer"></div>
+</div>
+<noscript>이 앱은 자바스크립트가 필요합니다.</noscript>
+<script type="module" src="app.js"></script>
+</body>
+</html>

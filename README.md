@@ -37,6 +37,7 @@ GitHub 저장소(hey-bernard/eco-practice)의 `main`에 push하면 Vercel이 자
 | `images/forest/stage1~6.webp` | 학생용 지구지킴이 성장 6단계. `22a5fae709d12dd5.webp` 시트의 Lv.1~6을 잘라 2배 확대 |
 | `images/forest/plant1~6.svg` | 성인용 식물 성장 6단계 (씨앗→숲). 숲 화면 동물 그림과 같은 358×220 좌표 |
 | `stitch/` | Google Stitch 디자인 버전 (아래 'Stitch 디자인 버전') |
+| `monitor/` | Stitch 샘플 '지구 기후 모니터'를 입힌 다크 버전 (아래 '기후 모니터 버전') |
 
 ## 학생용 · 성인용
 
@@ -62,6 +63,15 @@ Google Stitch(프로젝트 '오늘의 실천 – Stitch 버전')로 만든 시�
 - `stitch/app.js`가 화면만 새로 그리고, 데이터·저장·대상 선택은 `js/data.js`, `js/store.js`, `js/audience.js`, `js/village.js`를 그대로 쓴다. 그래서 같은 기기에서는 두 디자인의 기록과 대상 선택이 함께 간다.
 - 디자인 토큰(색·글꼴·모서리)은 Stitch가 만든 디자인 시스템 'Mindful Habit Companion'에서 옮겨 `stitch/index.html`의 Tailwind 설정에 둔다. 아이콘은 Material Symbols.
 - Stitch 시안에 있던 '연속 실천 N일' 표시는 기록이 끊겨도 탓하지 않는다는 원칙에 맞지 않아 넣지 않았다.
+
+## 기후 모니터 버전 (`/monitor/`)
+
+Stitch 샘플 코드 '지구 기후 모니터 · Action Guide'(다크 배경, 네온 초록, Space Grotesk·Inter·JetBrains Mono)를 입힌 세 번째 디자인.
+
+- 주소: `/monitor/` (예: `/monitor/?as=adult#/today`). 세 버전의 기록 화면 맨 아래에서 서로 오갈 수 있다.
+- `monitor/app.js`는 `stitch/app.js`를 바탕으로 했다. 다크 색은 `monitor/index.html`의 Tailwind 설정에서 **같은 토큰 이름에 다크 값**을 넣어 바꿨다. 그래서 대부분의 화면은 Stitch 버전과 구성이 같다.
+- 오늘 화면만 샘플처럼 대시보드로 바꿨다: 실천 트래커(오늘 기록 수 + 숲 다음 단계까지 원형 게이지), 분야 알약 필터, 카드별 이번 달 횟수, 반·모임 미션 배너, 이번 주 읽기.
+- 샘플에 있던 등급(A+), 전국 평균 비교, 연속 실천 일수, 탄소 상쇄 구매는 넣지 않았다. 근거 없는 수치이거나 '탓하지 않기'·'순위 없음' 원칙에 맞지 않기 때문이다.
 
 ## 화면별 상태 (2주차 기준)
 

@@ -440,7 +440,7 @@ function viewRecord() {
         <p class="${K.small}">지금은 <b class="font-semibold text-primary">${COPY.label}</b>으로 쓰고 있어요</p>
         <button type="button" class="${btn('ghost', 'px-1')}" data-act="switch-audience">${ms('swap_horiz', 'text-[16px]')}대상 바꾸기</button>
       </div>
-      <a href="../#/record" class="self-center text-label-md text-secondary underline underline-offset-2">기존 디자인으로 보기</a>
+      <p class="self-center text-label-md text-secondary">다른 디자인: <a href="../#/record" class="underline underline-offset-2">기존</a> · <a href="../monitor/#/record" class="underline underline-offset-2">기후 모니터(다크)</a></p>
     </div>`;
 }
 
