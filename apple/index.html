@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="작은 실천을 기록하면 숲이 자라는 생태 실천 웹앱 · Apple(iOS) 스타일 버전">
+<title>오늘의 실천 · iOS 스타일</title>
+<link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=block" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+  // apple-design 스킬의 iOS 토큰. 색은 style.css의 CSS 변수(RGB 세 값)를 가리켜서 다크 모드에서 저절로 바뀐다.
+  // 화면 코드는 Stitch 버전(../stitch)과 같은 토큰 이름을 쓰므로, 같은 이름에 iOS 의미 색을 넣었다.
+  const v = (name) => `rgb(var(--${name}) / <alpha-value>)`;
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: v('tint'), 'primary-container': v('tint'), 'on-primary': v('on-tint'),
+          secondary: v('secondary-label'), 'secondary-container': v('tint-fill'), 'on-secondary-container': v('tint'),
+          tertiary: v('orange-text'), 'tertiary-fixed': v('orange-fill'), 'tertiary-fixed-dim': v('orange'),
+          background: v('grouped-bg'), surface: v('grouped-bg'),
+          'surface-container-lowest': v('cell-bg'), 'surface-container-low': v('cell-bg-2'), 'surface-container': v('fill'),
+          'surface-container-high': v('fill-2'), 'surface-container-highest': v('fill-3'),
+          'on-surface': v('label'), 'on-surface-variant': v('secondary-label'),
+          outline: v('gray'), 'outline-variant': v('separator'), hairline: v('separator'),
+          oat: v('orange-fill'), amber: v('orange-text'), sage: v('green'), done: v('tint-fill'),
+          sky: v('blue-fill'), 'on-sky': v('blue-text'),
+          green: v('green'), orange: v('orange'), blue: v('blue'), indigo: v('indigo'), teal: v('teal'), pink: v('pink'), red: v('red'), yellow: v('yellow'), brown: v('brown'),
+          label: v('label'), 'cell': v('cell-bg')
+        },
+        borderRadius: { '2xl': '10px', xl: '12px', lg: '10px', full: '9999px' },
+        fontFamily: {
+          serif: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Helvetica Neue"', '"Apple SD Gothic Neo"', 'Pretendard', '"Noto Sans KR"', 'system-ui', 'sans-serif'],
+          sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"Helvetica Neue"', '"Apple SD Gothic Neo"', 'Pretendard', '"Noto Sans KR"', 'system-ui', 'sans-serif'],
+          rounded: ['ui-rounded', '"SF Pro Rounded"', '-apple-system', 'system-ui', 'sans-serif']
+        },
+        // iOS 글자 크기 (기본 Dynamic Type 기준)
+        fontSize: {
+          'headline-xl': ['2.125rem', { lineHeight: '2.5625rem', letterSpacing: '0.37px' }], // Large Title 34
+          'headline-lg': ['1.75rem', { lineHeight: '2.125rem' }],   // Title 1 28
+          'headline-md': ['1.25rem', { lineHeight: '1.5625rem' }],  // Title 3 20
+          quote: ['1.0625rem', { lineHeight: '1.5rem' }],
+          'body-md': ['1.0625rem', { lineHeight: '1.375rem', letterSpacing: '-0.41px' }], // Body 17
+          'body-sm': ['0.9375rem', { lineHeight: '1.25rem', letterSpacing: '-0.24px' }],  // Subheadline 15
+          'label-md': ['0.8125rem', { lineHeight: '1.125rem', letterSpacing: '-0.08px' }], // Footnote 13
+          'label-sm': ['0.75rem', { lineHeight: '1rem' }]           // Caption 12
+        }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-background text-on-surface font-sans antialiased">
+<div class="relative mx-auto min-h-[100dvh] w-full max-w-[560px] bg-background">
+  <main id="screen"></main>
+  <nav id="nav" aria-label="주 메뉴" class="tabbar fixed bottom-0 left-1/2 z-40 w-full max-w-[560px] -translate-x-1/2"></nav>
+  <div id="layer"></div>
+</div>
+<noscript>이 앱은 자바스크립트가 필요합니다.</noscript>
+<script type="module" src="app.js"></script>
+</body>
+</html>
