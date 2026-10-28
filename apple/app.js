@@ -447,7 +447,7 @@ function viewRecord() {
         <p class="${K.small}">지금은 <b class="font-semibold text-primary">${COPY.label}</b>으로 쓰고 있어요</p>
         <button type="button" class="${btn('ghost', 'px-1')}" data-act="switch-audience">${ms('swap_horiz', 'text-[16px]')}대상 바꾸기</button>
       </div>
-      <p class="self-center text-label-md text-on-surface-variant">다른 디자인: <a href="../#/record" class="text-primary">기존</a> · <a href="../stitch/#/record" class="text-primary">Stitch</a> · <a href="../monitor/#/record" class="text-primary">기후 모니터</a> · <a href="../climate/#/earth" class="text-primary">기후 홈</a> · <a href="../material/#/record" class="text-primary">Material 3</a></p>
+      <p class="self-center text-label-md text-on-surface-variant">다른 디자인: <a href="../#/record" class="text-primary">기존</a> · <a href="../stitch/#/record" class="text-primary">Stitch</a> · <a href="../monitor/#/record" class="text-primary">기후 모니터</a> · <a href="../climate/#/earth" class="text-primary">기후 홈</a> · <a href="../material/#/record" class="text-primary">Material 3</a> · <a href="../line/#/record" class="text-primary">LINE 스타일</a></p>
     </div>`;
 }
 
