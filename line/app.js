@@ -4,6 +4,7 @@
 import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audience.js';
 import * as store from '../js/store.js';
+import { mountClimateCharts } from '../js/climate-chart.js';
 import * as village from '../js/village.js';
 
 const $app = document.getElementById('screen');
@@ -562,16 +563,9 @@ function viewRead() {
     <section class="space-y-3" aria-labelledby="climate-h">
       <div class="space-y-0.5 px-1">
         <h2 id="climate-h" class="${K.h2}">기후 4대 지표</h2>
-        <p class="${K.tiny}">세계기상기구(WMO) 2026년 발표 기준</p>
+        <p class="${K.tiny}">연도별 추이 · 그래프를 누르면 그 해 값이 보여요</p>
       </div>
-      <div class="grid grid-cols-2 gap-2">
-        ${[['thermostat', '지구 평균기온', '+1.44℃'], ['waves', '해수면', '+11cm'], ['water', '해수 표면온도', '+0.49℃'], ['air', '대기 중 CO₂', '427.09 ppm']].map(([i, k, v]) => `
-          <div class="${K.card} flex flex-col gap-1 px-3.5 py-3">
-            <span class="flex items-center gap-1 text-label-md font-medium text-secondary">${ms(i, 'text-[16px]')}${k}</span>
-            <b class="font-serif text-[18px] font-semibold tabular-nums">${v}</b>
-          </div>`).join('')}
-      </div>
-      <p class="text-[10px] leading-relaxed text-outline">2025년 기준. 기온은 1850–1900년 대비, 해수면은 1993년 대비, 해수 표면온도는 1981–2010년 평균 대비. CO₂는 2025년 2월 월평균(연평균 아님). 출처: 세계기상기구(WMO) 전 지구 기후 현황 보고서, NOAA 온실가스 관측.</p>
+      <div data-climate-charts></div>
     </section>
 
     <div class="flex flex-wrap gap-2" role="group" aria-label="주제">
@@ -960,6 +954,7 @@ function render(keepScroll = false) {
   const route = ROUTES[currentRoute()];
   const y = window.scrollY;
   $app.innerHTML = route.view();
+  mountClimateCharts($app);
   renderNav(route.tab);
   document.getElementById('fab-slot').innerHTML = route.view === viewToday ? fab() : '';
   window.scrollTo(0, keepScroll ? y : 0);

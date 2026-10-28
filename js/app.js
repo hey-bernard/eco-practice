@@ -3,6 +3,7 @@
 import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from './data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from './audience.js';
 import * as store from './store.js';
+import { mountClimateCharts } from './climate-chart.js';
 import * as village from './village.js';
 
 const $app = document.getElementById('screen');
@@ -454,15 +455,9 @@ function viewRead() {
     <section class="col" style="gap:10px" aria-labelledby="climate-h">
       <div class="col" style="gap:2px">
         <h2 id="climate-h" class="h2 sm">기후 4대 지표</h2>
-        <div class="small">세계기상기구(WMO) 2026년 발표 기준</div>
+        <div class="small">연도별 추이 · 그래프를 누르면 그 해 값이 보여요</div>
       </div>
-      <div class="indicators">
-        <div><span>지구 평균기온</span><b>+1.44℃</b></div>
-        <div><span>해수면</span><b>+11cm</b></div>
-        <div><span>해수 표면온도</span><b>+0.49℃</b></div>
-        <div><span>대기 중 CO₂</span><b>427.09 ppm</b></div>
-      </div>
-      <div class="tiny" style="font-size:10px;line-height:1.5">2025년 기준. 기온은 1850–1900년 대비, 해수면은 1993년 대비, 해수 표면온도는 1981–2010년 평균 대비. CO₂는 2025년 2월 월평균(연평균 아님). 출처: 세계기상기구(WMO) 전 지구 기후 현황 보고서, NOAA 온실가스 관측.</div>
+      <div data-climate-charts></div>
     </section>
 
     <div class="chips" role="group" aria-label="주제">
@@ -860,6 +855,7 @@ function render(keepScroll = false) {
   const route = ROUTES[currentRoute()];
   const y = window.scrollY;
   $app.innerHTML = route.view();
+  mountClimateCharts($app);
   $nav.classList.toggle('hidden', !route.tab);
   $nav.querySelectorAll('a').forEach((a) => {
     if (a.dataset.tab === route.tab) a.setAttribute('aria-current', 'page');

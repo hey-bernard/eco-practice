@@ -3,6 +3,7 @@
 import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audience.js';
 import * as store from '../js/store.js';
+import { mountClimateCharts } from '../js/climate-chart.js';
 import * as village from '../js/village.js';
 
 const $app = document.getElementById('screen');
@@ -310,6 +311,14 @@ function viewEarth() {
         </div>
         ${indicator('waves', 'text-primary-container', '해수면 높이', '1993년 위성 관측 시작 대비', `+${c.sea}cm`, 'text-primary-container', '누적 상승')}
         ${indicator('water', 'text-tertiary', '해수 표면온도', '1981–2010년 평균 대비', `+${c.sst}℃`, 'text-tertiary', '전 지구 평균')}
+      </section>
+
+      <section class="flex flex-col gap-3" aria-labelledby="trend-h">
+        <div class="flex items-center justify-between">
+          <h2 id="trend-h" class="${K.h2}">연도별 추이</h2>
+          <span class="font-mono text-label-sm text-on-surface-variant">눌러서 값 보기</span>
+        </div>
+        <div data-climate-charts></div>
       </section>
 
       <section class="flex flex-col gap-3">
@@ -1192,6 +1201,7 @@ function render(keepScroll = false) {
   const route = ROUTES[currentRoute()];
   const y = window.scrollY;
   $app.innerHTML = route.view();
+  mountClimateCharts($app);
   renderNav(route.tab);
   window.scrollTo(0, keepScroll ? y : 0);
 }

@@ -70,3 +70,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 @media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
+
+/* 기후 지표 그래프 */
+.cc { --cc-accent: #00AD69; --cc-surface: #1c1f2a; --cc-text: #dfe2f1; --cc-muted: #b9cbbc; --cc-grid: #313540;
+  --cc-card-border: 0; --cc-card-radius: 12px; --cc-chip-bg: #313540; --cc-chip-text: #b9cbbc; --cc-chip-on-bg: #00ff9d; --cc-chip-on-text: #00391f; }
+.cc-value { font-family: 'JetBrains Mono', monospace; }

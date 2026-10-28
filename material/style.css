@@ -132,3 +132,8 @@ button { cursor: pointer; }
   .island .tile.target, .ripple { animation: none; }
   .cp-bar { transition: none; }
 }
+
+/* 기후 지표 그래프 */
+.cc { --cc-accent: #386A20; --cc-surface: rgb(var(--md-surface-container-low)); --cc-text: rgb(var(--md-on-surface)); --cc-muted: rgb(var(--md-on-surface-variant)); --cc-grid: rgb(var(--md-outline-variant));
+  --cc-card-border: 0; --cc-card-radius: 12px; --cc-chip-bg: rgb(var(--md-surface-container-high)); --cc-chip-text: rgb(var(--md-on-surface)); --cc-chip-on-bg: rgb(var(--md-secondary-container)); --cc-chip-on-text: rgb(var(--md-on-secondary-container)); --cc-chip-radius: 8px; }
+@media (prefers-color-scheme: dark) { .cc { --cc-accent: #62A845; } }
