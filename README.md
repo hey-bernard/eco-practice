@@ -40,6 +40,7 @@ GitHub 저장소(hey-bernard/eco-practice)의 `main`에 push하면 Vercel이 자
 | `monitor/` | Stitch 샘플 '지구 기후 모니터'를 입힌 다크 버전 (아래 '기후 모니터 버전') |
 | `climate/` | Stitch 샘플 'Climate Home'으로 기후 지표 탭을 앞에 둔 버전 (아래 '기후 홈 버전') |
 | `apple/` | Apple(iOS) 디자인 원칙으로 UX를 바꾼 버전 (아래 'iOS 스타일 버전') |
+| `material/` | Android Material 3 디자인으로 바꾼 버전 (아래 'Material 3 버전') |
 
 ## 학생용 · 성인용
 
@@ -96,6 +97,16 @@ Apple Human Interface Guidelines를 따라 UX를 바꾼 다섯 번째 디자인.
 - 글꼴은 시스템 글꼴(아이폰에서는 SF·Apple SD 산돌고딕), 본문 17px. 틴트는 흰 바탕에서도 읽히는 접근성 초록 `#248A3D`(다크 `#30D158`).
 - SF Symbols와 SF 글꼴 파일은 웹에서 쓸 수 없어 Material Symbols Rounded와 시스템 글꼴로 대신했다. Apple 로고·기기 테두리는 넣지 않는다.
 - 색은 `apple/style.css`의 CSS 변수에 있고, `apple/index.html`의 Tailwind 설정은 Stitch 버전과 같은 토큰 이름이 이 변수를 가리키게 했다. 그래서 기록·숲·읽기·모임 화면은 구성은 같고 iOS 색과 글자만 입었다.
+
+## Material 3 버전 (`/material/`)
+
+구글 Material Design 3(Material You)를 따른 여섯 번째 디자인. 안드로이드 휴대폰을 쓰는 사람에게 익숙한 모양.
+
+- 주소: `/material/` (예: `/material/?as=student#/today`). 시스템 설정에 따라 라이트·다크가 바뀐다.
+- 색: 초록 기준 색에서 뽑은 M3 색 역할(primary, secondary-container, tertiary-container, surface-container 단계 등). `material/style.css`의 `--md-*` 변수에 라이트·다크 값이 있고, Tailwind 설정이 같은 이름으로 가리킨다. Stitch 버전의 토큰 이름이 원래 M3 역할 이름이라 다른 화면도 그대로 M3 색을 입는다.
+- 오늘 화면: 원형 진행 표시가 있는 요약 카드, 아이콘·두 줄 글·체크박스가 있는 목록 항목, 숲(올린 카드)과 아낀 컵(채운 카드) 두 칸, 모임·반 소식(윤곽 카드), 이번 주 질문. '카드 더 고르기'는 오른쪽 아래 **확장 FAB**.
+- 위 **앱 막대**(왼쪽 제목, 오른쪽 계정 아이콘, 스크롤하면 바탕색이 짙어짐), 아래 **내비게이션 막대**(지금 탭 아이콘 뒤 알약 표시), 카드 고르기는 **아래 시트**(끌개, 분야별 목록), 알림은 아래 **스낵바**, 읽기 보기 전환은 **분할 버튼**.
+- 누르면 상태 레이어가 덮이고 누른 자리에서 물결이 퍼진다(움직임 줄이기 설정이면 물결 없음). 글꼴은 Roboto + Noto Sans KR, 아이콘은 Material Symbols.
 
 ## 화면별 상태 (2주차 기준)
 

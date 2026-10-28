@@ -345,7 +345,7 @@ function viewRecord() {
         <div class="small">지금은 <b>${COPY.label}</b>으로 쓰고 있어요</div>
         <button type="button" class="btn btn-ghost" data-act="switch-audience" style="font-size:13px;flex:none">대상 바꾸기</button>
       </div>
-      <div class="small" style="align-self:center">다른 디자인: <a href="stitch/#/record">Stitch 라이트</a> · <a href="monitor/#/record">기후 모니터(다크)</a> · <a href="climate/#/earth">기후 홈</a> · <a href="apple/#/record">iOS 스타일</a></div>
+      <div class="small" style="align-self:center">다른 디자인: <a href="stitch/#/record">Stitch 라이트</a> · <a href="monitor/#/record">기후 모니터(다크)</a> · <a href="climate/#/earth">기후 홈</a> · <a href="apple/#/record">iOS 스타일</a> · <a href="material/#/record">Material 3</a></div>
     </div>`;
 }
 

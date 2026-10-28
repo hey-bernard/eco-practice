@@ -511,7 +511,7 @@ function viewRecord() {
         <p class="${K.small}">지금은 <b class="font-semibold text-primary">${COPY.label}</b>으로 쓰고 있어요</p>
         <button type="button" class="${btn('ghost', 'px-1')}" data-act="switch-audience">${ms('swap_horiz', 'text-[16px]')}대상 바꾸기</button>
       </div>
-      <p class="self-center text-label-md text-secondary">다른 디자인: <a href="../#/record" class="underline underline-offset-2">기존</a> · <a href="../stitch/#/record" class="underline underline-offset-2">Stitch 라이트</a> · <a href="../climate/#/earth" class="underline underline-offset-2">기후 홈</a> · <a href="../apple/#/record" class="underline underline-offset-2">iOS 스타일</a></p>
+      <p class="self-center text-label-md text-secondary">다른 디자인: <a href="../#/record" class="underline underline-offset-2">기존</a> · <a href="../stitch/#/record" class="underline underline-offset-2">Stitch 라이트</a> · <a href="../climate/#/earth" class="underline underline-offset-2">기후 홈</a> · <a href="../apple/#/record" class="underline underline-offset-2">iOS 스타일</a> · <a href="../material/#/record" class="underline underline-offset-2">Material 3</a></p>
     </div>`;
 }
 
