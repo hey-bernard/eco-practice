@@ -68,6 +68,12 @@ export function addPick(day, cardId) {
   }
 }
 
+// '카드 더 고르기'에서 선택 취소: 오늘 화면에서 뺀다 (기록은 건드리지 않는다)
+export function removePick(day, cardId) {
+  state.picks[day] = getPicks(day).filter((id) => id !== cardId);
+  save();
+}
+
 function recommend(day) {
   let seed = [...day].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
   const rand = () => ((seed = (seed * 1103515245 + 12345) >>> 0) / 2 ** 32);

@@ -215,7 +215,6 @@ function viewEarth() {
             </div>
           </div>
         </div>
-        <a href="#/login" class="${btn('line', 'min-h-[36px] px-3')}">${ms(IS_STUDENT ? 'school' : 'person', 'text-[18px]')}${IS_STUDENT ? '반 참여' : '로그인'}</a>
       </header>
 
       <div data-earth-now></div>
@@ -461,18 +460,28 @@ function viewToday() {
     </div>`;
 }
 
+// 고르기 시트의 카드 한 줄: 오늘 화면에 있는 카드는 '선택 취소' (오늘 이미 기록한 카드는 취소하지 않는다)
+function pickRow(c) {
+  const today = store.dateKey();
+  const label = `${ms(CARD_ICON[c.id] || 'eco', 'mr-2 align-[-4px] text-[18px] text-secondary')}${esc(c.title)}`;
+  if (!store.getPicks(today).includes(c.id)) return sheetRow(`data-act="add-pick" data-id="${c.id}" data-pick-row`, label, LEVEL_LABEL[c.level]);
+  return `
+    <div class="flex min-h-[52px] items-center justify-between gap-2 rounded-2xl border border-primary-container/30 bg-surface-container-lowest px-4 py-2 text-body-md" data-pick-row>
+      <span class="min-w-0">${label}</span>
+      ${store.isDone(today, c.id)
+        ? `<span class="shrink-0 ${K.small}">오늘 기록함</span>`
+        : `<button type="button" class="tap shrink-0 rounded-full border border-outline-variant px-3 py-1.5 text-label-md text-on-surface hover:border-primary-container" data-act="remove-pick" data-id="${c.id}" aria-label="${esc(c.title)} 선택 취소">선택 취소</button>`}
+    </div>`;
+}
+
 function openPicker() {
-  const picks = store.getPicks(store.dateKey());
   const areas = [...new Set(CARDS.map((c) => c.area))];
   sheet(COPY.pickerTitle, `
     <h2 class="${K.h2}">${COPY.pickerTitle}</h2>
-    <p class="${K.small}">${COPY.pickerSub}</p>
+    <p class="${K.small}">${COPY.pickerSub}. 오늘 화면에 있는 ${IS_STUDENT ? '미션' : '카드'}은 '선택 취소'로 뺄 수 있어요.</p>
     ${areas.map((area) => `
       <div class="mt-2 ${K.eyebrow}">${esc(area)}</div>
-      ${CARDS.filter((c) => c.area === area).map((c) => {
-        const has = picks.includes(c.id);
-        return sheetRow(`data-act="add-pick" data-id="${c.id}"`, `${ms(CARD_ICON[c.id] || 'eco', 'mr-2 align-[-4px] text-[18px] text-secondary')}${esc(c.title)}`, has ? '오늘 화면에 있음' : LEVEL_LABEL[c.level], has);
-      }).join('')}`).join('')}
+      ${CARDS.filter((c) => c.area === area).map(pickRow).join('')}`).join('')}
     <button type="button" class="${btn('ghost', 'mt-1')}" data-act="close">닫기</button>`);
 }
 
@@ -1105,7 +1114,7 @@ function renderNav(tab) {
   $nav.classList.toggle('hidden', !tab);
   $nav.innerHTML = `
     <div class="flex h-16 items-center justify-around px-1 pb-[env(safe-area-inset-bottom)]">
-      ${['earth', 'today', 'record', 'groups', 'read'].map((t) => {
+      ${['earth', 'today', 'record', 'read', 'groups'].map((t) => {
         const on = t === tab;
         return `<a href="#/${t}" class="tap flex min-h-[44px] min-w-[56px] flex-col items-center justify-center gap-1 px-2 py-1 ${on ? 'font-semibold text-primary-container' : 'text-on-surface-variant hover:text-on-surface'}" ${on ? 'aria-current="page"' : ''}>
           ${ms(NAV_ICON[t], 'text-[22px]', on)}<span class="text-label-sm tracking-tight">${t === 'earth' ? '지구' : COPY.nav[t]}</span>
@@ -1154,6 +1163,12 @@ document.addEventListener('click', (e) => {
       store.addPick(today, id);
       closeSheet();
       toast(`'${cardById[id].title}' ${COPY.added}`);
+      break;
+    case 'remove-pick':
+      // 시트는 열어 둔 채 그 줄만 바꾸고, 뒤의 오늘 화면을 다시 그린다
+      store.removePick(today, id);
+      el.closest('[data-pick-row]').outerHTML = pickRow(cardById[id]);
+      toast(`'${cardById[id].title}' 오늘 화면에서 뺐어요`);
       break;
     case 'close':
       closeSheet();
