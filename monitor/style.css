@@ -74,3 +74,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* 기후 지표 그래프 (모양은 css/climate-chart.css, 여기서는 모서리만 맞춘다) */
 .cc { --cc-radius: 12px; }
 .cc-value { font-family: 'JetBrains Mono', monospace; }
+
+/* 기록 › 나의 성과 위젯 색 (js/achievements-widget.js의 --acw-* 변수) */
+.ach-fold .acw.acw-dark { --acw-surface: #1c1f2a; --acw-surface-2: #262a35; --acw-line: #313540; --acw-ink: #dfe2f1; --acw-ink-2: #b9cbbc; --acw-green: #00e38b; --acw-green-strong: #00ff9d; --acw-green-soft: #163a2a; --acw-chip: #163a2a; --acw-chip-ink: #8ef0bf; --acw-radius: 12px; }

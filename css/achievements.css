@@ -1,0 +1,10 @@
+/* 기록 화면 '나의 성과' 접고 펴기 틀 (js/achievements.js). 안쪽 위젯 스타일은 js/achievements-widget.js가 .acw 아래로 넣는다 */
+.ach-fold > summary { list-style: none; display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+.ach-fold > summary::-webkit-details-marker { display: none; }
+.ach-fold .ach-title { flex: 1 1 auto; }
+.ach-fold .ach-meta { flex: none; font-variant-numeric: tabular-nums; }
+/* 펼침 표시: 아래 화살표 → 펼치면 위로 */
+.ach-fold > summary::after { content: ''; flex: none; width: 8px; height: 8px; margin: 0 4px 4px 4px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); opacity: .6; transition: transform .2s; }
+.ach-fold[open] > summary::after { transform: translateY(3px) rotate(225deg); }
+.ach-fold .ach-body { padding-top: 12px; }
+@media (prefers-reduced-motion: reduce) { .ach-fold > summary::after { transition: none; } }

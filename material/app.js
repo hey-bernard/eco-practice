@@ -4,6 +4,7 @@ import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audience.js';
 import * as store from '../js/store.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
+import { achievementsFold, mountAchievements } from '../js/achievements.js';
 import * as village from '../js/village.js';
 
 const $app = document.getElementById('screen');
@@ -450,6 +451,7 @@ function viewRecord() {
         ${stats}
       </section>
       <section class="${K.card} space-y-3 p-5">${challenge}</section>
+      ${achievementsFold({ fold: `${K.card} p-5`, title: K.h2, meta: K.meta })}
       <div class="flex items-center justify-between gap-2 px-1">
         <p class="${K.small}">지금은 <b class="font-semibold text-primary">${COPY.label}</b>으로 쓰고 있어요</p>
         <button type="button" class="${btn('ghost', 'px-1')}" data-act="switch-audience">${ms('swap_horiz', 'text-[16px]')}대상 바꾸기</button>
@@ -971,6 +973,7 @@ function render(keepScroll = false) {
   const y = window.scrollY;
   $app.innerHTML = route.view();
   mountClimateCharts($app);
+  mountAchievements($app, '');
   renderNav(route.tab);
   document.getElementById('fab-slot').innerHTML = route.view === viewToday ? fab() : '';
   window.scrollTo(0, keepScroll ? y : 0);

@@ -64,3 +64,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* 기후 지표 그래프 (모양은 css/climate-chart.css, 여기서는 모서리만 맞춘다) */
 .cc { --cc-radius: 16px; }
+
+/* 기록 › 나의 성과 위젯 색 (js/achievements-widget.js의 --acw-* 변수) */
+.ach-fold .acw.acw-light { --acw-green: #25543b; --acw-green-strong: #1d4430; --acw-green-soft: #cee9da; --acw-surface-2: #f6f3ed; --acw-line: #ebe8e2; }

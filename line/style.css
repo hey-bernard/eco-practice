@@ -87,3 +87,6 @@ button:disabled { cursor: default; }
 
 /* 기후 지표 그래프 (모양은 css/climate-chart.css, 여기서는 모서리만 맞춘다) */
 .cc { --cc-radius: 7px; }
+
+/* 기록 › 나의 성과 위젯 색 (js/achievements-widget.js의 --acw-* 변수) */
+.ach-fold .acw.acw-light { --acw-surface: #FFFFFF; --acw-surface-2: #F5F5F5; --acw-line: #EFEFEF; --acw-ink: #000000; --acw-ink-2: #555555; --acw-green: #06C755; --acw-green-strong: #04A647; --acw-green-soft: #DDF5E6; --acw-radius: 7px; --acw-shadow: none; }

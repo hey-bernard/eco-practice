@@ -4,6 +4,7 @@ import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from './audience.js';
 import * as store from './store.js';
 import { mountClimateCharts } from './climate-chart.js';
+import { achievementsFold, mountAchievements } from './achievements.js';
 import * as village from './village.js';
 
 const $app = document.getElementById('screen');
@@ -347,6 +348,7 @@ function viewRecord() {
         ${stats}
       </section>
       <section class="card">${challenge}</section>
+      ${achievementsFold({ fold: 'card', title: 'h2 sm', meta: 'meta' })}
       <div class="row" style="padding:0 2px">
         <div class="small">지금은 <b>${COPY.label}</b>으로 쓰고 있어요</div>
         <button type="button" class="btn btn-ghost" data-act="switch-audience" style="font-size:13px;flex:none">대상 바꾸기</button>
@@ -868,6 +870,7 @@ function render(keepScroll = false) {
   const y = window.scrollY;
   $app.innerHTML = route.view();
   mountClimateCharts($app);
+  mountAchievements($app, 'light');
   $nav.classList.toggle('hidden', !route.tab);
   $nav.querySelectorAll('a').forEach((a) => {
     if (a.dataset.tab === route.tab) a.setAttribute('aria-current', 'page');

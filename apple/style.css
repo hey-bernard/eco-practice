@@ -143,3 +143,6 @@ button { cursor: pointer; }
 
 /* 기후 지표 그래프 (모양은 css/climate-chart.css, 여기서는 모서리만 맞춘다) */
 .cc { --cc-radius: 10px; }
+
+/* 기록 › 나의 성과 위젯: 다크 모드에서 iOS 회색 카드에 맞춤 */
+@media (prefers-color-scheme: dark) { .ach-fold .acw:not(.acw-light) { --acw-surface: #2C2C2E; --acw-surface-2: #3A3A3C; --acw-line: #38383A; --acw-ink: #FFFFFF; --acw-ink-2: #AEAEB2; --acw-green: #30D158; --acw-green-strong: #4CD964; --acw-green-soft: #1E3A26; } }
