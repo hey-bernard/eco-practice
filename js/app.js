@@ -1,6 +1,6 @@
 // 화면 라우터와 화면들. 해시(#/today 등)로 이동하고, 화면마다 HTML 문자열을 그려 넣는다.
 // 첫 실행에는 대상 고르기(#/start)를 보여 주고, 고른 대상(학생·성인)에 맞는 카드·문구·화면으로 들어간다.
-import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from './data.js';
+import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from './data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from './audience.js';
 import * as store from './store.js';
 import { mountClimateCharts } from './climate-chart.js';
@@ -499,22 +499,27 @@ function viewRead() {
         </a>`).join('')}
     </section>`;
 
-  const placeholder = (label) => `
-    <div class="card s" style="gap:8px">
-      <div class="eyebrow" style="font-size:11px">${label}</div>
-      <div class="skeleton" style="width:85%"></div>
-      <div style="font-size:13px;color:var(--text-2);line-height:1.5">기사 3줄 요약이 들어가는 자리</div>
-      <div class="small">출처 · 날짜 · 원문 링크 · 관련 실천 카드</div>
-    </div>`;
+  const newsItem = (n) => `
+    <article class="card s" style="gap:8px">
+      <div class="eyebrow" style="font-size:11px">${n.label} · ${esc(n.source)} · ${n.date}</div>
+      <h4 class="serif" style="margin:0;font-size:16px;font-weight:700;line-height:1.45">${esc(n.title)}</h4>
+      <ul class="news-lines">${n.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
+      <div class="row">
+        <span class="small">${n.act ? `관련 실천 · ${n.act}` : ''}</span>
+        <a href="${n.url}" target="_blank" rel="noopener" class="news-go">원문 보기</a>
+      </div>
+    </article>`;
   const news = `
     <section class="card" style="gap:6px">
-      <div style="display:flex;align-items:center;gap:8px"><span class="badge">예시 호</span><span class="small">2026년 10월 3주차</span></div>
-      <div class="serif" style="font-size:18px;font-weight:700">이번 주 생태 동향</div>
-      <div class="small">실제 기사 수집과 운영자 승인 뒤에 채워집니다. 아래 칸은 구조를 보여 주는 자리입니다.</div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="badge">${NEWSLETTER.issue}</span><span class="small">${NEWSLETTER.published} 발행</span></div>
+      <div class="serif" style="font-size:18px;font-weight:700">이번 달 생태 동향</div>
+      <div class="small">${NEWSLETTER.intro}</div>
     </section>
-    <section class="col" style="gap:10px">
-      ${placeholder('물·바다 · 출처 등급 1')}${placeholder('숲·자연 · 2개 매체 확인')}${placeholder('소비·이동 · 정책')}
-    </section>
+    ${NEWSLETTER.sections.map((sec) => `
+      <section class="col" style="gap:10px">
+        <h3 class="h2 sm">${sec.title}</h3>
+        ${sec.items.map(newsItem).join('')}
+      </section>`).join('')}
     <div class="small">요약과 링크만 싣습니다. 원문 전문은 출처 누리집에서 읽어요.</div>`;
 
   return `

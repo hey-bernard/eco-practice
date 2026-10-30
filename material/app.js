@@ -1,6 +1,6 @@
 // Android Material 3 스타일 버전. 초록 기준 색에서 뽑은 M3 색 역할, 위 앱 막대, 알약 표시가 있는 내비게이션 막대, 확장 FAB, 목록 항목, 아래 시트, 스낵바.
 // Stitch 버전(../stitch/app.js)을 바탕으로 오늘 화면·카드 고르기·메뉴를 M3 패턴으로 바꿨다. 데이터·저장은 원래 버전(../js)을 그대로 쓴다.
-import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
+import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audience.js';
 import * as store from '../js/store.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
@@ -607,20 +607,27 @@ function viewRead() {
         </a>`).join('')}
     </section>`;
 
-  const placeholder = (label) => `
-    <div class="${K.card} space-y-2 p-4">
-      <div class="${K.eyebrow}">${label}</div>
-      <div class="h-4 w-[85%] rounded-full bg-surface-container"></div>
-      <p class="text-body-sm text-on-surface-variant">기사 3줄 요약이 들어가는 자리</p>
-      <p class="${K.tiny}">출처 · 날짜 · 원문 링크 · 관련 실천 카드</p>
-    </div>`;
+  const newsItem = (n) => `
+    <article class="${K.card} space-y-2 p-4">
+      <div class="${K.eyebrow}">${n.label} · ${esc(n.source)} · ${n.date}</div>
+      <h4 class="font-serif text-body-md font-semibold leading-snug">${esc(n.title)}</h4>
+      <ul class="list-disc space-y-1 pl-4 text-body-sm leading-relaxed text-on-surface-variant">${n.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
+      <div class="flex items-center justify-between gap-2">
+        <span class="${K.tiny}">${n.act ? `관련 실천 · ${n.act}` : ''}</span>
+        <a href="${n.url}" target="_blank" rel="noopener" class="flex min-h-[44px] shrink-0 items-center text-label-md font-medium text-primary">원문 보기${ms('chevron_right', 'text-[18px]')}</a>
+      </div>
+    </article>`;
   const news = `
     <section class="${K.card} space-y-1.5 p-5">
-      <div class="flex items-center gap-2"><span class="${K.pill} bg-secondary-container text-primary">예시 호</span><span class="${K.small}">2026년 10월 3주차</span></div>
-      <h2 class="font-serif text-headline-md font-semibold">이번 주 생태 동향</h2>
-      <p class="${K.small}">실제 기사 수집과 운영자 승인 뒤에 채워집니다. 아래 칸은 구조를 보여 주는 자리입니다.</p>
+      <div class="flex items-center gap-2"><span class="${K.pill} bg-secondary-container text-primary">${NEWSLETTER.issue}</span><span class="${K.small}">${NEWSLETTER.published} 발행</span></div>
+      <h2 class="font-serif text-headline-md font-semibold">이번 달 생태 동향</h2>
+      <p class="${K.small}">${NEWSLETTER.intro}</p>
     </section>
-    <section class="space-y-2.5">${placeholder('물·바다 · 출처 등급 1')}${placeholder('숲·자연 · 2개 매체 확인')}${placeholder('소비·이동 · 정책')}</section>
+    ${NEWSLETTER.sections.map((sec) => `
+      <section class="space-y-2.5">
+        <h3 class="px-1 text-label-md font-semibold">${sec.title}</h3>
+        ${sec.items.map(newsItem).join('')}
+      </section>`).join('')}
     <p class="px-1 ${K.small}">요약과 링크만 싣습니다. 원문 전문은 출처 누리집에서 읽어요.</p>`;
 
   return `
