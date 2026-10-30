@@ -1,6 +1,6 @@
 // 오프라인에서도 열리도록 앱 파일을 캐시한다. 네트워크를 먼저 쓰고, 안 되면 캐시로.
 // 파일을 바꿔 배포할 때 VERSION을 올린다.
-const VERSION = 'v13';
+const VERSION = 'v14';
 const CACHE = `eco-practice-${VERSION}`;
 const SHELL = ['./', './index.html', './css/style.css', './js/app.js', './js/audience.js', './js/data.js', './js/store.js', './js/village.js', './js/climate-data.js', './js/climate-chart.js', './css/climate-chart.css', './manifest.webmanifest', './icons/icon.svg',
   './stitch/', './stitch/index.html', './stitch/style.css', './stitch/app.js',

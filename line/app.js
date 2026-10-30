@@ -576,6 +576,7 @@ function viewRead() {
       <span class="text-label-md text-gray-600">이번 주의 카드 · 카드뉴스 · 원문 읽기</span>
       <h2 class="font-serif text-[21px] font-semibold leading-snug">${esc(post.title)}</h2>
       <p class="font-serif text-body-md leading-relaxed text-gray-700">${esc(post.intro)}</p>
+      <p class="text-body-sm leading-relaxed text-gray-700">${esc(post.summary)}</p>
       <div class="mt-1 flex items-center justify-between gap-2">
         <span class="text-label-sm text-gray-600">국가기후위기대응위원회 · ${post.date}</span>
         <a href="${post.url}" target="_blank" rel="noopener" class="${btn('solid')}" data-act="read-post" data-id="${post.id}">원문 보기${ms('open_in_new', 'text-[16px]')}</a>
@@ -600,6 +601,7 @@ function viewRead() {
           <div class="flex flex-1 flex-col gap-1">
             <div class="font-serif text-body-md font-semibold">${esc(p.title)}</div>
             <div class="text-body-sm text-on-surface-variant">${esc(p.intro)}</div>
+            <p class="text-body-sm leading-relaxed text-on-surface-variant">${esc(p.summary)}</p>
             <div class="${K.tiny}">카드뉴스 · ${p.date} · ${p.tag}</div>
           </div>
           <span class="flex shrink-0 items-center text-label-md font-medium text-primary">원문${ms('chevron_right', 'text-[18px]')}</span>

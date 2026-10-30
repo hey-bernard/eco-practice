@@ -468,6 +468,7 @@ function viewRead() {
       <div class="k">이번 주의 카드 · 카드뉴스 · 원문 읽기</div>
       <h2>${esc(post.title)}</h2>
       <p>${esc(post.intro)}</p>
+      <p class="sum">${esc(post.summary)}</p>
       <div class="row" style="margin-top:4px">
         <div class="k">국가기후위기대응위원회 · ${post.date}</div>
         <a href="${post.url}" target="_blank" rel="noopener" class="btn btn-solid" data-act="read-post" data-id="${post.id}">원문 보기</a>
@@ -491,6 +492,7 @@ function viewRead() {
           <div class="col" style="flex:1">
             <div class="t">${esc(p.title)}</div>
             <div class="i">${esc(p.intro)}</div>
+            <div class="sum">${esc(p.summary)}</div>
             <div class="small">카드뉴스 · ${p.date} · ${p.tag}</div>
           </div>
           <span class="go" aria-hidden="true">원문</span>
