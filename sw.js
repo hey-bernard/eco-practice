@@ -1,6 +1,6 @@
 // 오프라인에서도 열리도록 앱 파일을 캐시한다. 네트워크를 먼저 쓰고, 안 되면 캐시로.
 // 파일을 바꿔 배포할 때 VERSION을 올린다.
-const VERSION = 'v16';
+const VERSION = 'v17';
 const CACHE = `eco-practice-${VERSION}`;
 const SHELL = ['./', './index.html', './css/style.css', './js/app.js', './js/audience.js', './js/data.js', './js/store.js', './js/village.js', './js/climate-data.js', './js/climate-chart.js', './css/climate-chart.css', './manifest.webmanifest', './icons/icon.svg',
   './stitch/', './stitch/index.html', './stitch/style.css', './stitch/app.js',
@@ -9,6 +9,7 @@ const SHELL = ['./', './index.html', './css/style.css', './js/app.js', './js/aud
   './apple/', './apple/index.html', './apple/style.css', './apple/app.js',
   './material/', './material/index.html', './material/style.css', './material/app.js',
   './line/', './line/index.html', './line/style.css', './line/app.js',
+  './js/earth-now-widget.js', './images/earth/earth-day.webp', './images/earth/earth-night.webp', './images/earth/earth-clouds.webp',
   './images/village/earth.webp', './images/village/risa.webp',
   ...[1, 2, 3, 4, 5, 6].flatMap((n) => [`./images/forest/stage${n}.webp`, `./images/forest/plant${n}.svg`])];
 
@@ -25,7 +26,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
+  if (e.request.method !== 'GET' || new URL(e.request.url).pathname.startsWith('/api/')) return;
   e.respondWith(
     fetch(e.request)
       .then((res) => {

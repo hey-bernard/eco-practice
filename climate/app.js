@@ -187,17 +187,9 @@ function viewStart() {
 // ───────── ① 오늘 ─────────
 
 // ───────── ⓪ 지구 (기후 홈) ─────────
-// Stitch 샘플 'Climate Home'의 배치를 따르되, 실시간처럼 보이는 가짜 수치 대신 출처가 있는 발표 값만 쓴다.
+// 머리(지구 기후 모니터) 아래는 '지구 지금' 위젯(js/earth-now-widget.js): 위성 지구 + 기온·CO₂·해수면·수온·산성화 실시간 자료.
+// 자료는 서버 함수 api/earth-now.js가 Copernicus·NOAA·하와이대 공개 자료를 모아 준다.
 
-const CLIMATE = {
-  temp: 1.44, // 2025년, 1850–1900년 대비 (WMO)
-  temp2024: 1.55, // 2024년, 처음으로 한 해 1.5℃를 넘은 해 (WMO)
-  co2: 427.09, // 2025년 2월 월평균 ppm (NOAA)
-  co2Pre: 280, // 산업화 이전 대략값 ppm
-  sea: 11, // 1993년 대비 cm (WMO)
-  sst: 0.49, // 1981–2010년 평균 대비 ℃ (WMO)
-  budget: 130 // 2025년 초 기준 1.5℃(50% 확률) 남은 탄소 예산 GtCO₂ (IGCC 2024)
-};
 
 function viewEarth() {
   const today = store.dateKey();
@@ -207,24 +199,7 @@ function viewEarth() {
   const monthTotal = Object.entries(store.getState().records).filter(([k]) => k.startsWith(prefix)).reduce((n, [, list]) => n + list.length, 0);
   const f = forestInfo(store.totalPoints());
   const post = weeklyPost();
-  const c = CLIMATE;
-  const tempPct = Math.min(100, (c.temp / 1.5) * 100);
-  const glass = 'relative overflow-hidden rounded-xl bg-surface-container-lowest/90 p-4 shadow-md backdrop-blur-md';
   const label = 'font-mono text-label-sm text-on-surface-variant';
-  const indicator = (icon, iconCls, name, sub, value, valueCls, note) => `
-    <div class="flex items-center justify-between gap-3 rounded-xl bg-surface-container-lowest/80 p-4 shadow-sm">
-      <div class="flex min-w-0 items-center gap-3">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-container-high ${iconCls}">${ms(icon, 'text-[22px]')}</div>
-        <div class="flex min-w-0 flex-col">
-          <span class="text-body-md font-medium">${name}</span>
-          <span class="font-mono text-[11px] text-on-surface-variant">${sub}</span>
-        </div>
-      </div>
-      <div class="flex shrink-0 flex-col items-end">
-        <span class="num text-metric ${valueCls}">${value}</span>
-        <span class="font-mono text-[10px] text-on-surface-variant">${note}</span>
-      </div>
-    </div>`;
 
   return `
     <div class="${K.screen}">
@@ -235,91 +210,14 @@ function viewEarth() {
             <h1 class="font-serif text-headline-md font-medium leading-tight tracking-tight">지구 기후 모니터</h1>
             <div class="flex items-center gap-1.5">
               <span class="font-mono text-label-sm uppercase text-on-surface-variant">Climate Home</span>
-              <span class="inline-flex items-center gap-1 rounded-full bg-primary-container/15 px-1.5 py-0.5 font-mono text-[10px] text-primary-container"><span class="live-dot h-1.5 w-1.5 rounded-full bg-primary-container"></span>2025 관측</span>
+              <span class="inline-flex items-center gap-1 rounded-full bg-primary-container/15 px-1.5 py-0.5 font-mono text-[10px] text-primary-container"><span class="live-dot h-1.5 w-1.5 rounded-full bg-primary-container"></span>실시간</span>
             </div>
           </div>
         </div>
         <a href="#/login" class="${btn('line', 'min-h-[36px] px-3')}">${ms(IS_STUDENT ? 'school' : 'person', 'text-[18px]')}${IS_STUDENT ? '반 참여' : '로그인'}</a>
       </header>
 
-      <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
-          <span class="relative flex h-2.5 w-2.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-container opacity-75 motion-reduce:animate-none"></span><span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary-container"></span></span>
-          <span class="font-mono text-label-sm uppercase tracking-wider">지구 상태 한눈에</span>
-        </div>
-        <span class="flex items-center gap-1.5 rounded-full bg-surface-container-high px-2.5 py-1 font-mono text-label-sm text-on-surface-variant">${ms('sensors', 'text-[14px] text-tertiary')}WMO · NOAA · IGCC</span>
-      </div>
-
-      <section class="${glass} flex flex-col gap-2" aria-label="지구 평균기온">
-        <div class="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-error/15 blur-2xl"></div>
-        <div class="flex items-start justify-between">
-          <div class="flex flex-col">
-            <span class="${label}">지구 평균기온 (산업화 이전 대비)</span>
-            <div class="mt-0.5 flex flex-wrap items-baseline gap-2">
-              <span class="num text-metric-lg tracking-tight text-error">+${c.temp}℃</span>
-              <span class="flex items-center gap-0.5 rounded-full bg-error/15 px-2 py-0.5 font-mono text-label-sm text-error">${ms('arrow_upward', 'text-[12px]')}1.5℃에 가까워요</span>
-            </div>
-          </div>
-          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-container-high text-error">${ms('thermostat', 'text-[20px]')}</div>
-        </div>
-        <div class="mt-1 flex flex-col gap-1.5">
-          <div class="flex items-center justify-between font-mono text-label-sm">
-            <span class="text-on-surface-variant">1.5℃까지 남은 폭</span>
-            <span class="font-semibold text-error">${(1.5 - c.temp).toFixed(2)}℃ (${Math.round(tempPct)}% 도달)</span>
-          </div>
-          <div class="relative flex h-3 w-full items-center overflow-hidden rounded-full bg-surface-container-highest p-0.5" role="progressbar" aria-label="1.5℃ 대비" aria-valuenow="${c.temp}" aria-valuemin="0" aria-valuemax="1.5">
-            <div class="h-full rounded-full bg-gradient-to-r from-primary-container via-tertiary to-error" style="width:${tempPct}%"></div>
-          </div>
-          <div class="flex justify-between px-0.5 font-mono text-[10px] text-on-surface-variant/70"><span>0.0℃ 1850–1900년</span><span class="text-error/90">1.5℃ 파리협정 목표</span></div>
-        </div>
-        <p class="mt-1 rounded-lg bg-surface-container-high/60 p-2.5 text-body-sm leading-relaxed text-on-surface-variant">2024년은 +${c.temp2024}℃로 처음 한 해 기준 1.5℃를 넘었어요. 파리협정의 1.5℃는 한 해가 아니라 20년 평균으로 판단하기 때문에, 아직 늦지 않았어요.</p>
-      </section>
-
-      <div class="grid grid-cols-2 gap-3">
-        <section class="${glass} flex flex-col justify-between gap-3" aria-label="대기 중 이산화탄소">
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center justify-between"><span class="${label}">대기 중 CO₂</span>${ms('co2', 'text-[16px] text-primary-container')}</div>
-            <span class="num text-metric text-primary-container">${c.co2}</span>
-            <span class="font-mono text-[10px] text-on-surface-variant">ppm · 2025년 2월 월평균</span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <div class="flex h-2 w-full overflow-hidden rounded-full bg-surface-container-highest">
-              <div class="h-full bg-on-surface-variant/50" style="width:${(c.co2Pre / c.co2) * 100}%"></div>
-              <div class="h-full flex-1 bg-primary-container"></div>
-            </div>
-            <div class="flex items-center justify-between font-mono text-[10px]"><span class="text-on-surface-variant">산업화 이전 약 ${c.co2Pre}</span><span class="font-semibold text-primary-container">약 ${(c.co2 / c.co2Pre).toFixed(1)}배</span></div>
-          </div>
-        </section>
-        <section class="${glass} flex flex-col justify-between gap-3" aria-label="남은 탄소 예산">
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center justify-between"><span class="${label}">남은 탄소 예산</span>${ms('hourglass_bottom', 'text-[16px] text-tertiary')}</div>
-            <div class="flex items-baseline gap-1"><span class="num text-metric">${c.budget}</span><span class="font-mono text-label-sm text-on-surface-variant">GtCO₂</span></div>
-            <span class="font-mono text-[10px] text-on-surface-variant">1.5℃ · 50% 확률 · 2025년 초</span>
-          </div>
-          <div class="flex flex-col gap-0.5 rounded-lg bg-surface-container-high/60 p-2">
-            <span class="font-mono text-[10px] font-medium text-tertiary">지금 배출 속도라면</span>
-            <span class="font-serif text-headline-md tracking-tight">약 3년치</span>
-            <span class="font-mono text-[9px] text-on-surface-variant/80">${IS_STUDENT ? '기가톤(Gt) = 10억 톤' : '세계 연간 배출 기준'}</span>
-          </div>
-        </section>
-      </div>
-
-      <section class="flex flex-col gap-3">
-        <div class="flex items-center justify-between">
-          <h2 class="${K.h2}">바다 지표</h2>
-          <span class="${label}">WMO 2025</span>
-        </div>
-        ${indicator('waves', 'text-primary-container', '해수면 높이', '1993년 위성 관측 시작 대비', `+${c.sea}cm`, 'text-primary-container', '누적 상승')}
-        ${indicator('water', 'text-tertiary', '해수 표면온도', '1981–2010년 평균 대비', `+${c.sst}℃`, 'text-tertiary', '전 지구 평균')}
-      </section>
-
-      <section class="flex flex-col gap-3" aria-labelledby="trend-h">
-        <div class="flex items-center justify-between">
-          <h2 id="trend-h" class="${K.h2}">연도별 추이</h2>
-          <span class="font-mono text-label-sm text-on-surface-variant">눌러서 값 보기</span>
-        </div>
-        <div data-climate-charts></div>
-      </section>
+      <div data-earth-now></div>
 
       <section class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
@@ -1219,6 +1117,8 @@ function render(keepScroll = false) {
   const y = window.scrollY;
   $app.innerHTML = route.view();
   mountClimateCharts($app);
+  const earth = $app.querySelector('[data-earth-now]');
+  if (earth && window.EarthNow) window.EarthNow.mount(earth, { api: '/api/earth-now', assets: '../images/earth/', title: '지구 지금' });
   renderNav(route.tab);
   window.scrollTo(0, keepScroll ? y : 0);
 }
