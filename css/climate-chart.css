@@ -1,53 +1,73 @@
-/* 기후 4대 지표 추이 그래프 (js/climate-chart.js). 색은 각 버전이 .cc 변수로 정한다 */
+/* 기후 4대 지표 추이 그래프 (js/climate-chart.js)
+   기상청 종합 기후변화감시정보 첫 화면처럼 어두운 바다 배경 위 패널. 모든 버전에서 같은 모습이고, 버전은 --cc-radius만 바꾼다 */
 .cc {
-  --cc-accent: #2E6A4C;        /* 선·끝점 */
-  --cc-surface: #FFFFFF;       /* 카드 바탕 = 끝점 테두리 */
-  --cc-text: #1C2620;
-  --cc-muted: #55625A;
-  --cc-grid: #E6EAE4;
-  --cc-card-border: 1px solid #DDE3DB;
-  --cc-card-radius: 16px;
-  --cc-card-shadow: none;
-  --cc-chip-bg: #E3EEE6;
-  --cc-chip-text: #1C2620;
-  --cc-chip-on-bg: #2E6A4C;
-  --cc-chip-on-text: #FFFFFF;
-  --cc-chip-radius: 999px;
-  display: flex; flex-direction: column; gap: 12px; color: var(--cc-text);
+  --cc-radius: 16px;
+  --cc-bg: #0E1824;            /* 표 머리처럼 단색이 필요한 곳 */
+  --cc-text: #F2F5F8;
+  --cc-muted: #AEBBC8;
+  --cc-grid: rgb(255 255 255 / .10);
+  --cc-axis: rgb(255 255 255 / .55);
+  display: flex; flex-direction: column; gap: 14px; padding: 16px 0 14px; border-radius: var(--cc-radius); overflow: hidden;
+  color: var(--cc-text); color-scheme: dark;
+  /* 해 질 녘 극지방 바다: 수평선 쪽 노을 + 아래로 갈수록 깊은 바다 */
+  background:
+    radial-gradient(140% 38% at 50% 0%, rgb(236 128 64 / .38), transparent 70%),
+    linear-gradient(180deg, #24324A 0%, #1C2A3F 22%, #132132 55%, #0B141E 100%);
 }
+.cc > * { margin-left: 16px; margin-right: 16px; }
 .cc-range { display: flex; gap: 8px; flex-wrap: wrap; }
-.cc-chip { min-height: 36px; padding: 0 14px; border: 0; border-radius: var(--cc-chip-radius); background: var(--cc-chip-bg); color: var(--cc-chip-text);
+.cc-chip { min-height: 36px; padding: 0 14px; border: 1px solid rgb(255 255 255 / .28); border-radius: 999px; background: rgb(255 255 255 / .06); color: var(--cc-text);
   font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
-.cc-chip[aria-pressed="true"] { background: var(--cc-chip-on-bg); color: var(--cc-chip-on-text); font-weight: 700; }
-.cc-list { display: grid; gap: 12px; }
-.cc-card { margin: 0; padding: 14px 14px 10px; background: var(--cc-surface); border: var(--cc-card-border); border-radius: var(--cc-card-radius); box-shadow: var(--cc-card-shadow); }
-.cc-head { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; row-gap: 2px; }
-.cc-label { font-size: 14px; font-weight: 600; flex: 1 1 auto; }
-.cc-value { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
-.cc-meta { flex-basis: 100%; font-size: 12px; color: var(--cc-muted); }
-.cc-note { margin: 4px 0 0; font-size: 12px; line-height: 1.5; color: var(--cc-muted); }
-.cc-chart { position: relative; margin-top: 6px; }
-.cc-chart svg { display: block; max-width: 100%; overflow: visible; touch-action: pan-y; }
+.cc-chip[aria-pressed="true"] { background: #F2F5F8; border-color: #F2F5F8; color: #0E1824; font-weight: 700; }
+
+/* 지표 패널: 옆으로 넘기기, 다음 패널이 살짝 보이게 */
+.cc > .cc-list { margin: 0; display: flex; gap: 12px; padding: 0 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 16px;
+  scrollbar-width: none; overscroll-behavior-x: contain; }
+.cc-list::-webkit-scrollbar { display: none; }
+.cc-card { flex: 0 0 calc(100% - 28px); scroll-snap-align: start; margin: 0; padding: 14px 12px 12px; border-radius: 12px;
+  background: rgb(255 255 255 / .05); border: 1px solid rgb(255 255 255 / .10); }
+.cc-head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; column-gap: 8px; row-gap: 2px; }
+.cc-icon { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.cc-label { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+.cc-value { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cc-meta { grid-column: 1 / -1; font-size: 12px; color: var(--cc-muted); }
+.cc-note { margin: 8px 0 0; font-size: 12px; line-height: 1.5; color: var(--cc-muted); }
+.cc-chart { position: relative; margin-top: 10px; }
+.cc-chart svg { display: block; max-width: 100%; overflow: visible; }
 .cc-chart svg:focus { outline: none; }
-.cc-chart svg:focus-visible { outline: 2px solid var(--cc-accent); outline-offset: 2px; border-radius: 4px; }
+.cc-chart svg:focus-visible { outline: 2px solid #F2F5F8; outline-offset: 2px; border-radius: 4px; }
 .cc-grid { stroke: var(--cc-grid); stroke-width: 1; shape-rendering: crispEdges; }
-.cc-ref { stroke: var(--cc-muted); stroke-width: 1; opacity: .6; shape-rendering: crispEdges; }
+.cc-axis { stroke: var(--cc-axis); stroke-width: 1; shape-rendering: crispEdges; }
+.cc-ref { stroke: #F2F5F8; stroke-width: 1; stroke-dasharray: 4 3; opacity: .7; }
 .cc-tick { fill: var(--cc-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-.cc-line { fill: none; stroke: var(--cc-accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.cc-dot { fill: var(--cc-accent); stroke: var(--cc-surface); stroke-width: 2; }
-.cc-cross { stroke: var(--cc-muted); stroke-width: 1; }
+.cc-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.cc-dot { stroke: var(--cc-bg); stroke-width: 2; }
+.cc-cross { stroke: rgb(255 255 255 / .6); stroke-width: 1; }
 .cc-hit { fill: transparent; cursor: crosshair; }
 .cc-tip { position: absolute; z-index: 2; pointer-events: none; display: flex; align-items: baseline; gap: 6px; padding: 5px 9px; border-radius: 6px; white-space: nowrap;
-  background: var(--cc-text); color: var(--cc-surface); font-size: 12px; box-shadow: 0 2px 8px rgb(0 0 0 / .18); }
+  background: #F2F5F8; color: #0E1824; font-size: 12px; box-shadow: 0 2px 10px rgb(0 0 0 / .35); }
 .cc-tip[hidden] { display: none; }
 .cc-tip b { font-size: 14px; }
-.cc-tip span { opacity: .8; }
+.cc-tip span { opacity: .75; }
+
+/* 색 범례 막대 */
+.cc-legend { margin: 10px 0 0 42px; }
+.cc-legend i { display: block; height: 8px; border-radius: 4px; }
+.cc-legend div { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: var(--cc-muted); font-variant-numeric: tabular-nums; }
+
+/* 넘김 점 (누르면 그 패널로) */
+.cc-dots { display: flex; justify-content: center; gap: 2px; margin-top: -6px; }
+.cc-dots button { width: 28px; height: 28px; border: 0; padding: 0; background: none; cursor: pointer; display: grid; place-items: center; }
+.cc-dots button::before { content: ''; width: 7px; height: 7px; border-radius: 4px; background: rgb(255 255 255 / .35); transition: width .2s, background-color .2s; }
+.cc-dots button[aria-current]::before { width: 18px; background: #F2F5F8; }
+
 .cc-table summary { cursor: pointer; font-size: 13px; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
 .cc-table-wrap { max-height: 320px; overflow: auto; border-radius: 8px; border: 1px solid var(--cc-grid); }
 .cc-table table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
 .cc-table th, .cc-table td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--cc-grid); }
-.cc-table thead th { position: sticky; top: 0; background: var(--cc-surface); font-weight: 600; vertical-align: bottom; }
+.cc-table thead th { position: sticky; top: 0; background: var(--cc-bg); font-weight: 600; vertical-align: bottom; }
 .cc-table th[scope="row"], .cc-table thead th:first-child { text-align: left; }
 .cc-table small { font-weight: 400; color: var(--cc-muted); }
-.cc-src { margin: 0; font-size: 11px; line-height: 1.6; color: var(--cc-muted); }
+.cc-src { font-size: 11px; line-height: 1.6; color: var(--cc-muted); }
+@media (prefers-reduced-motion: reduce) { .cc-dots button::before { transition: none; } }
 @media (forced-colors: active) { .cc-line { stroke: CanvasText; } .cc-dot { fill: CanvasText; } }

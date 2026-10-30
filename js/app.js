@@ -455,7 +455,7 @@ function viewRead() {
     <section class="col" style="gap:10px" aria-labelledby="climate-h">
       <div class="col" style="gap:2px">
         <h2 id="climate-h" class="h2 sm">기후 4대 지표</h2>
-        <div class="small">연도별 추이 · 그래프를 누르면 그 해 값이 보여요</div>
+        <div class="small">연도별 추이 · 옆으로 넘기고, 그래프를 누르면 그 해 값이 보여요</div>
       </div>
       <div data-climate-charts></div>
     </section>

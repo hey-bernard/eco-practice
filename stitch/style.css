@@ -62,6 +62,5 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   animation: fade 2.2s ease-in-out forwards; }
 @keyframes fade { 0% { opacity: 0; } 10%, 85% { opacity: 1; } 100% { opacity: 0; } }
 
-/* 기후 지표 그래프 */
-.cc { --cc-accent: #2B8A4E; --cc-surface: #FFFFFF; --cc-text: #1c1c18; --cc-muted: #414943; --cc-grid: #ebe8e2;
-  --cc-card-border: 1px solid #EFECE6; --cc-card-radius: 16px; --cc-chip-bg: #cee9da; --cc-chip-text: #093d26; --cc-chip-on-bg: #25543b; --cc-chip-on-text: #FFFFFF; }
+/* 기후 지표 그래프 (모양은 css/climate-chart.css, 여기서는 모서리만 맞춘다) */
+.cc { --cc-radius: 16px; }

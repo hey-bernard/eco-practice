@@ -215,6 +215,3 @@ textarea { padding: 10px 12px; line-height: 1.6; resize: none; }
 
 /* 학생용 미션의 장소 태그 (등하굣길·교실·집 등) */
 .place { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; margin-right: 6px; border-radius: 5px; background: var(--blue-bg); color: var(--blue); vertical-align: 1px; }
-
-/* 기후 지표 그래프 */
-.cc { --cc-accent: #2F8F57; }

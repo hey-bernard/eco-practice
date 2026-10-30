@@ -141,7 +141,5 @@ button { cursor: pointer; }
   .ring-bar { transition: none; }
 }
 
-/* 기후 지표 그래프 */
-.cc { --cc-accent: #248A3D; --cc-surface: rgb(var(--cell-bg)); --cc-text: rgb(var(--label)); --cc-muted: rgb(var(--secondary-label)); --cc-grid: rgb(var(--fill));
-  --cc-card-border: 0; --cc-card-radius: 10px; --cc-chip-bg: rgb(var(--fill)); --cc-chip-text: rgb(var(--label)); --cc-chip-on-bg: rgb(var(--tint)); --cc-chip-on-text: rgb(var(--on-tint)); }
-@media (prefers-color-scheme: dark) { .cc { --cc-accent: #2AA845; } }
+/* 기후 지표 그래프 (모양은 css/climate-chart.css, 여기서는 모서리만 맞춘다) */
+.cc { --cc-radius: 10px; }
