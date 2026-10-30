@@ -1,6 +1,6 @@
 // Google Stitch로 만든 디자인을 입힌 버전. 화면 구성·기록·대상 분기는 원래 버전(../js)의 데이터와 저장 모듈을 그대로 쓴다.
 // 같은 기기에서는 원래 버전과 기록이 함께 쌓인다 (같은 localStorage 키).
-import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
+import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audience.js';
 import * as store from '../js/store.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
@@ -249,6 +249,14 @@ function viewToday() {
     <div class="${K.screen}">
       ${header(`${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAYS[now.getDay()]}요일`, COPY.todayTitle,
         `<a href="#/login" class="${btn('line', 'min-h-[36px] border-outline-variant/60 px-3.5')}">${IS_STUDENT ? '반 참여' : '로그인'}</a>`, IS_STUDENT ? 'eco' : 'spa')}
+
+      <section class="flex gap-3 rounded-2xl bg-secondary-container/50 p-4" aria-label="저탄소 실천 다짐">
+        ${ms('eco', 'mt-0.5 text-[22px] text-primary', true)}
+        <div class="flex min-w-0 flex-col gap-1.5">
+          <p class="text-body-md font-semibold leading-snug [word-break:keep-all]">${PLEDGE.lead}</p>
+          <p class="text-body-sm leading-relaxed text-on-surface-variant [word-break:keep-all]">${PLEDGE.pledge}</p>
+        </div>
+      </section>
 
       <section class="space-y-3.5 rounded-2xl border border-amber/20 bg-oat/70 p-5">
         <span class="inline-flex items-center gap-1.5 rounded-full border border-amber/15 bg-surface-container-lowest px-2.5 py-1 text-label-sm text-tertiary">${ms('edit_note', 'text-[14px]')}${COPY.question}</span>

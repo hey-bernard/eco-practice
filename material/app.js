@@ -1,6 +1,6 @@
 // Android Material 3 스타일 버전. 초록 기준 색에서 뽑은 M3 색 역할, 위 앱 막대, 알약 표시가 있는 내비게이션 막대, 확장 FAB, 목록 항목, 아래 시트, 스낵바.
 // Stitch 버전(../stitch/app.js)을 바탕으로 오늘 화면·카드 고르기·메뉴를 M3 패턴으로 바꿨다. 데이터·저장은 원래 버전(../js)을 그대로 쓴다.
-import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
+import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audience.js';
 import * as store from '../js/store.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
@@ -234,6 +234,14 @@ function viewToday() {
     <div class="${K.screen}">
       ${header(`${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAYS[now.getDay()]}요일`, COPY.todayTitle,
         `<a href="#/login" class="tap grid h-12 w-12 place-items-center rounded-full text-on-surface-variant" aria-label="${IS_STUDENT ? '반 참여' : '로그인'}">${ms('account_circle', 'text-[26px]')}</a>`)}
+
+      <section class="flex gap-3 rounded-2xl bg-secondary-container/60 p-4" aria-label="저탄소 실천 다짐">
+        ${ms('eco', 'mt-0.5 text-[22px] text-primary', true)}
+        <div class="flex min-w-0 flex-col gap-1.5">
+          <p class="text-body-md font-semibold leading-snug [word-break:keep-all]">${PLEDGE.lead}</p>
+          <p class="text-body-sm leading-relaxed text-on-surface-variant [word-break:keep-all]">${PLEDGE.pledge}</p>
+        </div>
+      </section>
 
       <section class="flex items-center gap-4 rounded-xl bg-primary-container p-5 text-on-primary-container" aria-label="오늘 요약">
         ${progressCircle(doneCount, picks.length)}

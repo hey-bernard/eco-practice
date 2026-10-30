@@ -1,6 +1,6 @@
 // 화면 라우터와 화면들. 해시(#/today 등)로 이동하고, 화면마다 HTML 문자열을 그려 넣는다.
 // 첫 실행에는 대상 고르기(#/start)를 보여 주고, 고른 대상(학생·성인)에 맞는 카드·문구·화면으로 들어간다.
-import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from './data.js';
+import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from './data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from './audience.js';
 import * as store from './store.js';
 import { mountClimateCharts } from './climate-chart.js';
@@ -168,6 +168,11 @@ function viewToday() {
         </div>
         <a href="#/login" class="btn btn-line" style="font-size:13px;flex:none">${IS_STUDENT ? '반 참여' : '로그인'}</a>
       </div>
+
+      <section class="card s pledge" aria-label="저탄소 실천 다짐">
+        <strong>${PLEDGE.lead}</strong>
+        <span>${PLEDGE.pledge}</span>
+      </section>
 
       <section class="card">
         <div class="eyebrow">${COPY.question}</div>

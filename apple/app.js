@@ -1,6 +1,6 @@
 // apple-design 스킬(Apple Human Interface Guidelines)로 바꾼 iOS 스타일 버전.
 // Stitch 버전(../stitch/app.js)을 바탕으로 오늘 화면·카드 고르기·하단 탭·알림을 iOS 패턴(묶음 목록, 활동 링, 시트, HUD)으로 바꿨다. 데이터·저장은 원래 버전(../js)을 그대로 쓴다.
-import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
+import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audience.js';
 import * as store from '../js/store.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
@@ -243,6 +243,14 @@ function viewToday() {
     <div class="${K.screen}">
       ${header(`${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAYS[now.getDay()]}요일`, COPY.todayTitle,
         `<a href="#/login" class="tap inline-flex min-h-[44px] items-center text-body-md text-primary">${IS_STUDENT ? '반 참여' : '로그인'}</a>`)}
+
+      <section class="flex gap-3 rounded-2xl bg-surface-container-lowest p-4" aria-label="저탄소 실천 다짐">
+        ${ms('eco', 'mt-0.5 text-[22px] text-primary', true)}
+        <div class="flex min-w-0 flex-col gap-1.5">
+          <p class="text-body-md font-semibold leading-snug [word-break:keep-all]">${PLEDGE.lead}</p>
+          <p class="text-body-sm leading-relaxed text-on-surface-variant [word-break:keep-all]">${PLEDGE.pledge}</p>
+        </div>
+      </section>
 
       <section class="group flex items-center gap-4 p-4" aria-label="오늘 요약">
         ${ring(doneCount, picks.length)}

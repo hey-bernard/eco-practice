@@ -1,7 +1,7 @@
 // line-design-system.md(LINE Design System, LDSG)를 적용한 버전. 흰 표면 + 8px 연회색 띠, 그린·블랙·그레이, 5/7/12px 라운드,
 // 바탕별 그림자, 불투명도 상태, 선택 탭 = 검정 채운 아이콘, 알약 떠 있는 버튼, 검정 80% 토스트, 닫기만 있는 아래 시트, 밑줄 탭.
 // Stitch 버전(../stitch/app.js)을 바탕으로 했고 데이터·저장은 원래 버전(../js)을 그대로 쓴다.
-import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
+import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audience.js';
 import * as store from '../js/store.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
@@ -231,6 +231,14 @@ function viewToday() {
     <div class="flex flex-col px-4 pb-36">
       ${header(`${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAYS[now.getDay()]}요일`, COPY.todayTitle,
         `<a href="#/login" class="tap grid h-11 w-11 place-items-center" aria-label="${IS_STUDENT ? '반 참여' : '로그인'}">${ms('person', 'text-[26px]')}</a>`)}
+
+      <section class="flex gap-3 rounded-2xl bg-gray-150 p-4 mt-2" aria-label="저탄소 실천 다짐">
+        ${ms('eco', 'mt-0.5 text-[22px] text-green', true)}
+        <div class="flex min-w-0 flex-col gap-1.5">
+          <p class="text-body-md font-semibold leading-snug [word-break:keep-all]">${PLEDGE.lead}</p>
+          <p class="text-body-sm leading-relaxed text-on-surface-variant [word-break:keep-all]">${PLEDGE.pledge}</p>
+        </div>
+      </section>
 
       <a href="#/forest" class="tap flex items-center gap-4 py-4" aria-label="나의 숲 ${f.name} 단계 ${points}점">
         <img class="stage-thumb ${stageClass}" src="${stageImage(f.si)}" alt="" aria-hidden="true">

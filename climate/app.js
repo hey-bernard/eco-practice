@@ -1,6 +1,6 @@
 // Stitch 샘플 '지구 기후 모니터 · Climate Home'을 입힌 네 번째 디자인. 첫 탭 '지구'에서 기후 지표를 보고 오늘 실천으로 이어진다.
 // 기후 모니터 버전(../monitor/app.js)을 바탕으로 지구 화면과 5칸 메뉴를 더했다. 데이터·저장은 원래 버전(../js)을 그대로 쓴다.
-import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
+import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audience.js';
 import * as store from '../js/store.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
@@ -466,6 +466,14 @@ function viewToday() {
         </div>
         <a href="#/login" class="${btn('line', 'min-h-[36px] px-3')}">${ms(IS_STUDENT ? 'school' : 'person', 'text-[18px]')}${IS_STUDENT ? '반 참여' : '로그인'}</a>
       </header>
+
+      <section class="flex gap-3 rounded-2xl bg-surface-container-high p-4" aria-label="저탄소 실천 다짐">
+        ${ms('eco', 'mt-0.5 text-[22px] text-primary-container', true)}
+        <div class="flex min-w-0 flex-col gap-1.5">
+          <p class="text-body-md font-semibold leading-snug [word-break:keep-all]">${PLEDGE.lead}</p>
+          <p class="text-body-sm leading-relaxed text-on-surface-variant [word-break:keep-all]">${PLEDGE.pledge}</p>
+        </div>
+      </section>
 
       <section class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-4 shadow-xl" aria-label="오늘 기록 요약">
         <div class="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-primary-container/10 blur-3xl"></div>
