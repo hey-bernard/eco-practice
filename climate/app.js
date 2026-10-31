@@ -116,10 +116,11 @@ function closeSheet() {
   $layer.innerHTML = '';
 }
 
-function sheet(label, body) {
+// outside: false면 바깥(어두운 막)을 눌러도 닫히지 않는다 ('닫기' 버튼으로만)
+function sheet(label, body, { outside = true } = {}) {
   $layer.innerHTML = `
     <div class="sheet">
-      <button type="button" class="dim" data-act="close" aria-label="닫기"></button>
+      ${outside ? '<button type="button" class="dim" data-act="close" aria-label="닫기"></button>' : '<div class="dim" aria-hidden="true"></div>'}
       <div class="panel" role="dialog" aria-label="${label}">
         <div class="mx-auto mb-1 h-1 w-10 rounded-full bg-outline-variant" aria-hidden="true"></div>
         ${body}
@@ -477,13 +478,17 @@ function pickRow(c) {
 
 function openPicker() {
   const areas = [...new Set(CARDS.map((c) => c.area))];
+  // 여러 장을 이어서 고르는 시트라 바깥을 눌러도 닫히지 않는다. 긴 목록이라 닫기는 위·아래 두 곳
   sheet(COPY.pickerTitle, `
-    <h2 class="${K.h2}">${COPY.pickerTitle}</h2>
+    <div class="flex items-center justify-between gap-2">
+      <h2 class="${K.h2}">${COPY.pickerTitle}</h2>
+      <button type="button" class="tap -mr-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface" data-act="close" aria-label="닫기">${ms('close', 'text-[22px]')}</button>
+    </div>
     <p class="${K.small}">${COPY.pickerSub}. 오늘 화면에 있는 ${IS_STUDENT ? '미션' : '카드'}은 '선택 취소'로 뺄 수 있어요.</p>
     ${areas.map((area) => `
       <div class="mt-2 ${K.eyebrow}">${esc(area)}</div>
       ${CARDS.filter((c) => c.area === area).map(pickRow).join('')}`).join('')}
-    <button type="button" class="${btn('ghost', 'mt-1')}" data-act="close">닫기</button>`);
+    <button type="button" class="${btn('ghost', 'mt-1')}" data-act="close">닫기</button>`, { outside: false });
 }
 
 // ───────── ② 로그인 ─────────
