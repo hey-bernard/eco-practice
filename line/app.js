@@ -6,6 +6,7 @@ import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audie
 import * as store from '../js/store.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
 import { achievementsFold, mountAchievements } from '../js/achievements.js';
+import { seriesSection, mountSeries } from '../js/series.js';
 import * as village from '../js/village.js';
 
 const $app = document.getElementById('screen');
@@ -570,6 +571,7 @@ function viewRead() {
     </div>`;
 
   const reflect = `
+    ${seriesSection()}
     <section class="space-y-3" aria-labelledby="climate-h">
       <div class="space-y-0.5 px-1">
         <h2 id="climate-h" class="${K.h2}">기후 4대 지표</h2>
@@ -975,6 +977,7 @@ function render(keepScroll = false) {
   $app.innerHTML = route.view();
   mountClimateCharts($app);
   mountAchievements($app, 'light');
+  mountSeries($app);
   renderNav(route.tab);
   document.getElementById('fab-slot').innerHTML = route.view === viewToday ? fab() : '';
   window.scrollTo(0, keepScroll ? y : 0);

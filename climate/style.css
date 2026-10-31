@@ -83,3 +83,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .dark .ach-fold .acw.acw-dark { --acw-surface: #262a35; --acw-surface-2: #313540; --acw-line: #3a3f4b; --acw-ink: #dfe2f1; --acw-ink-2: #b9cbbc; --acw-green: #00e38b; --acw-green-strong: #00ff9d; --acw-green-soft: #163a2a; --acw-chip: #163a2a; --acw-chip-ink: #8ef0bf; --acw-radius: 12px; }
 .dark .sheet .panel { background: rgba(23, 27, 38, .96); box-shadow: 0 -8px 30px rgba(0,0,0,.5); }
 .dark .toast { background: #262a35; box-shadow: 0 0 20px -6px rgba(0,255,157,.4); }
+
+/* 읽기 › 기초부터 읽기 색 (css/series.css의 --srs-* 변수) */
+:root { --srs-bg: rgb(var(--c-surface)); --srs-surface: rgb(var(--c-surface-container-lowest)); --srs-surface-2: rgb(var(--c-surface-container-low)); --srs-line: rgb(var(--c-outline-variant)); --srs-ink: rgb(var(--c-on-surface)); --srs-ink-2: rgb(var(--c-on-surface-variant)); --srs-accent: rgb(var(--c-primary)); --srs-on-accent: rgb(var(--c-on-primary)); --srs-accent-soft: rgb(var(--c-secondary-container)); --srs-radius: 12px; }
+.dark { --srs-warm: #ffb86b; --srs-cool: #6fb4ff; }

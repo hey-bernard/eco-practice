@@ -146,3 +146,7 @@ button { cursor: pointer; }
 
 /* 기록 › 나의 성과 위젯: 다크 모드에서 iOS 회색 카드에 맞춤 */
 @media (prefers-color-scheme: dark) { .ach-fold .acw:not(.acw-light) { --acw-surface: #2C2C2E; --acw-surface-2: #3A3A3C; --acw-line: #38383A; --acw-ink: #FFFFFF; --acw-ink-2: #AEAEB2; --acw-green: #30D158; --acw-green-strong: #4CD964; --acw-green-soft: #1E3A26; } }
+
+/* 읽기 › 기초부터 읽기 색 (css/series.css의 --srs-* 변수) */
+:root { --srs-bg: rgb(var(--cell-bg-2)); --srs-surface: rgb(var(--cell-bg)); --srs-surface-2: rgb(var(--cell-bg-2)); --srs-line: rgb(var(--separator)); --srs-ink: rgb(var(--label)); --srs-ink-2: rgb(var(--secondary-label)); --srs-accent: rgb(var(--tint)); --srs-on-accent: rgb(var(--on-tint)); --srs-accent-soft: rgb(var(--tint-fill)); --srs-radius: 10px; }
+@media (prefers-color-scheme: dark) { :root { --srs-bg: #000000; --srs-warm: #FF9F0A; --srs-cool: #64D2FF; } }

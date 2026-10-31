@@ -5,6 +5,7 @@ import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from './audience.
 import * as store from './store.js';
 import { mountClimateCharts } from './climate-chart.js';
 import { achievementsFold, mountAchievements } from './achievements.js';
+import { seriesSection, mountSeries } from './series.js';
 import * as village from './village.js';
 
 const $app = document.getElementById('screen');
@@ -459,6 +460,7 @@ function viewRead() {
   const mine = store.getState().reflections.slice(0, 3);
 
   const reflect = `
+    ${seriesSection()}
     <section class="col" style="gap:10px" aria-labelledby="climate-h">
       <div class="col" style="gap:2px">
         <h2 id="climate-h" class="h2 sm">기후 4대 지표</h2>
@@ -871,6 +873,7 @@ function render(keepScroll = false) {
   $app.innerHTML = route.view();
   mountClimateCharts($app);
   mountAchievements($app, 'light');
+  mountSeries($app);
   $nav.classList.toggle('hidden', !route.tab);
   $nav.querySelectorAll('a').forEach((a) => {
     if (a.dataset.tab === route.tab) a.setAttribute('aria-current', 'page');

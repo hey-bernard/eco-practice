@@ -5,6 +5,7 @@ import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audie
 import * as store from '../js/store.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
 import { achievementsFold, mountAchievements } from '../js/achievements.js';
+import { seriesSection, mountSeries } from '../js/series.js';
 import * as village from '../js/village.js';
 
 const $app = document.getElementById('screen');
@@ -742,6 +743,7 @@ function viewRead() {
     </div>`;
 
   const reflect = `
+    ${seriesSection()}
     <a href="#/earth" class="tap ${K.card} flex items-center justify-between gap-3 p-4">
       <span class="flex items-center gap-2 text-body-md font-medium">${ms('public', 'text-[20px] text-primary-container')}기후 지표는 '지구' 탭에서 볼 수 있어요</span>
       ${chev}
@@ -1148,6 +1150,7 @@ function render(keepScroll = false) {
   $app.innerHTML = route.view();
   mountClimateCharts($app);
   mountAchievements($app, isDark() ? 'dark' : 'light');
+  mountSeries($app);
   const earth = $app.querySelector('[data-earth-now]');
   if (earth && window.EarthNow) window.EarthNow.mount(earth, { api: '/api/earth-now', assets: '../images/earth/', title: '지구 지금' });
   renderNav(route.tab);

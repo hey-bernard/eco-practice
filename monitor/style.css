@@ -77,3 +77,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* 기록 › 나의 성과 위젯 색 (js/achievements-widget.js의 --acw-* 변수) */
 .ach-fold .acw.acw-dark { --acw-surface: #1c1f2a; --acw-surface-2: #262a35; --acw-line: #313540; --acw-ink: #dfe2f1; --acw-ink-2: #b9cbbc; --acw-green: #00e38b; --acw-green-strong: #00ff9d; --acw-green-soft: #163a2a; --acw-chip: #163a2a; --acw-chip-ink: #8ef0bf; --acw-radius: 12px; }
+
+/* 읽기 › 기초부터 읽기 색 (css/series.css의 --srs-* 변수) */
+:root { --srs-bg: #0f131d; --srs-surface: #1c1f2a; --srs-surface-2: #262a35; --srs-line: #313540; --srs-ink: #dfe2f1; --srs-ink-2: #b9cbbc; --srs-accent: #00e38b; --srs-on-accent: #00391f; --srs-accent-soft: #163a2a; --srs-accent-text: #00e38b; --srs-warm: #ffb86b; --srs-cool: #6fb4ff; --srs-radius: 12px; }

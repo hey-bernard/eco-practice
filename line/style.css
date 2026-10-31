@@ -90,3 +90,6 @@ button:disabled { cursor: default; }
 
 /* 기록 › 나의 성과 위젯 색 (js/achievements-widget.js의 --acw-* 변수) */
 .ach-fold .acw.acw-light { --acw-surface: #FFFFFF; --acw-surface-2: #F5F5F5; --acw-line: #EFEFEF; --acw-ink: #000000; --acw-ink-2: #555555; --acw-green: #06C755; --acw-green-strong: #04A647; --acw-green-soft: #DDF5E6; --acw-radius: 7px; --acw-shadow: none; }
+
+/* 읽기 › 기초부터 읽기 색 (css/series.css의 --srs-* 변수) */
+:root { --srs-bg: #F5F5F5; --srs-surface: #FFFFFF; --srs-surface-2: #F5F5F5; --srs-line: #EFEFEF; --srs-ink: #000000; --srs-ink-2: #555555; --srs-accent: #06C755; --srs-accent-soft: #DDF5E6; --srs-accent-text: #037A33; --srs-radius: 7px; }

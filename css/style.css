@@ -224,3 +224,6 @@ textarea { padding: 10px 12px; line-height: 1.6; resize: none; }
 .pledge { gap: 6px; border-left: 3px solid var(--green); }
 .pledge strong { font-size: 15px; line-height: 1.5; word-break: keep-all; }
 .pledge span { font-size: 13px; line-height: 1.6; color: var(--text-2); word-break: keep-all; }
+
+/* 읽기 › 기초부터 읽기 색 (css/series.css의 --srs-* 변수) */
+:root { --srs-bg: var(--bg); --srs-surface: var(--surface); --srs-surface-2: var(--track); --srs-line: var(--line); --srs-ink: var(--text); --srs-ink-2: var(--muted); --srs-accent: var(--green); --srs-accent-soft: var(--green-soft); --srs-radius: 14px; }

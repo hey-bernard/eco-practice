@@ -135,3 +135,7 @@ button { cursor: pointer; }
 
 /* 기후 지표 그래프 (모양은 css/climate-chart.css, 여기서는 모서리만 맞춘다) */
 .cc { --cc-radius: 24px; }
+
+/* 읽기 › 기초부터 읽기 색 (css/series.css의 --srs-* 변수) */
+:root { --srs-bg: rgb(var(--md-surface)); --srs-surface: rgb(var(--md-surface-container-lowest)); --srs-surface-2: rgb(var(--md-surface-container-low)); --srs-line: rgb(var(--md-outline-variant)); --srs-ink: rgb(var(--md-on-surface)); --srs-ink-2: rgb(var(--md-on-surface-variant)); --srs-accent: rgb(var(--md-primary)); --srs-on-accent: rgb(var(--md-on-primary)); --srs-accent-soft: rgb(var(--md-secondary-container)); --srs-radius: 24px; }
+@media (prefers-color-scheme: dark) { :root { --srs-warm: #ffb86b; --srs-cool: #8fc8ff; } }
