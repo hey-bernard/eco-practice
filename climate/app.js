@@ -204,7 +204,7 @@ function viewEarth() {
 
   return `
     <div class="${K.screen}">
-      <header class="-mx-4 -mt-5 flex h-16 items-center justify-between bg-surface/80 px-4 shadow-[0_1px_12px_rgba(0,0,0,0.3)] backdrop-blur-xl">
+      <header class="-mx-4 -mt-5 flex h-16 items-center justify-between bg-surface/80 px-4 shadow-[0_1px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_12px_rgba(0,0,0,0.3)] backdrop-blur-xl">
         <div class="flex items-center gap-2">
           <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-container/15 text-primary-container">${ms('public', 'text-[22px]', true)}</div>
           <div class="flex flex-col">
@@ -215,6 +215,7 @@ function viewEarth() {
             </div>
           </div>
         </div>
+        <button type="button" class="tap grid h-10 w-10 place-items-center rounded-full bg-surface-container-high text-on-surface-variant hover:text-on-surface" data-act="theme" aria-label="${isDark() ? '라이트 모드로' : '다크 모드로'} 바꾸기">${ms(isDark() ? 'light_mode' : 'dark_mode', 'text-[20px]')}</button>
       </header>
 
       <div data-earth-now></div>
@@ -351,7 +352,7 @@ function viewToday() {
 
   return `
     <div class="${K.screen}">
-      <header class="-mx-4 -mt-5 flex h-16 items-center justify-between bg-surface/80 px-4 shadow-[0_1px_12px_rgba(0,0,0,0.3)] backdrop-blur-xl">
+      <header class="-mx-4 -mt-5 flex h-16 items-center justify-between bg-surface/80 px-4 shadow-[0_1px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_12px_rgba(0,0,0,0.3)] backdrop-blur-xl">
         <div class="flex items-center gap-2">
           <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-container/15 text-primary-container">${ms(IS_STUDENT ? 'public' : 'energy_savings_leaf', 'text-[22px]', true)}</div>
           <div class="flex flex-col">
@@ -1123,12 +1124,15 @@ function renderNav(tab) {
     </div>`;
 }
 
+const isDark = () => document.documentElement.classList.contains('dark');
+window.addEventListener('themechange', () => render(true));
+
 function render(keepScroll = false) {
   const route = ROUTES[currentRoute()];
   const y = window.scrollY;
   $app.innerHTML = route.view();
   mountClimateCharts($app);
-  mountAchievements($app, 'dark');
+  mountAchievements($app, isDark() ? 'dark' : 'light');
   const earth = $app.querySelector('[data-earth-now]');
   if (earth && window.EarthNow) window.EarthNow.mount(earth, { api: '/api/earth-now', assets: '../images/earth/', title: '지구 지금' });
   renderNav(route.tab);
@@ -1173,6 +1177,14 @@ document.addEventListener('click', (e) => {
     case 'close':
       closeSheet();
       return;
+    case 'theme':
+      try {
+        localStorage.setItem('eco-climate-theme', isDark() ? 'light' : 'dark');
+        window.__applyTheme?.();
+      } catch {
+        document.documentElement.classList.toggle('dark'); // 저장이 막혀도 이번만 바꾼다
+      }
+      break;
     case 'login':
       toast('로그인은 2단계에서 연결돼요. 지금은 이 기기에 저장돼요.');
       return;

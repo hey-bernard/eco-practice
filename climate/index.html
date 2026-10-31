@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f131d">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
 <meta name="description" content="작은 실천을 기록하면 숲이 자라는 생태 실천 웹앱 · Stitch '지구 기후 모니터 · Climate Home' 디자인 버전">
 <title>오늘의 실천 · 기후 홈</title>
 <link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
@@ -12,8 +12,93 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0&display=block" rel="stylesheet">
+<style>
+:root {
+  --c-primary: 0 108 69;
+  --c-primary-container: 0 122 82;
+  --c-on-primary: 255 255 255;
+  --c-on-primary-container: 0 57 31;
+  --c-secondary: 76 99 88;
+  --c-secondary-container: 211 238 224;
+  --c-on-secondary-container: 11 79 49;
+  --c-tertiary: 148 87 10;
+  --c-tertiary-fixed: 255 220 188;
+  --c-tertiary-fixed-dim: 217 147 58;
+  --c-background: 244 247 243;
+  --c-surface: 244 247 243;
+  --c-surface-container-lowest: 255 255 255;
+  --c-surface-container-low: 238 242 237;
+  --c-surface-container: 232 237 231;
+  --c-surface-container-high: 226 232 225;
+  --c-surface-container-highest: 217 224 216;
+  --c-surface-bright: 249 251 248;
+  --c-on-surface: 22 29 25;
+  --c-on-surface-variant: 70 83 75;
+  --c-outline: 111 123 114;
+  --c-outline-variant: 195 206 197;
+  --c-hairline: 225 231 224;
+  --c-oat: 247 238 219;
+  --c-amber: 141 91 18;
+  --c-sage: 143 184 160;
+  --c-done: 230 244 236;
+  --c-sky: 228 236 246;
+  --c-on-sky: 34 70 110;
+  --c-error: 186 26 26;
+  color-scheme: light;
+}
+.dark {
+  --c-primary: 0 227 139;
+  --c-primary-container: 0 255 157;
+  --c-on-primary: 0 57 31;
+  --c-on-primary-container: 0 113 67;
+  --c-secondary: 185 203 188;
+  --c-secondary-container: 22 58 42;
+  --c-on-secondary-container: 142 240 191;
+  --c-tertiary: 255 184 107;
+  --c-tertiary-fixed: 255 220 188;
+  --c-tertiary-fixed-dim: 255 184 107;
+  --c-background: 15 19 29;
+  --c-surface: 15 19 29;
+  --c-surface-container-lowest: 28 31 42;
+  --c-surface-container-low: 38 42 53;
+  --c-surface-container: 44 48 59;
+  --c-surface-container-high: 49 53 64;
+  --c-surface-container-highest: 58 63 75;
+  --c-surface-bright: 53 57 68;
+  --c-on-surface: 223 226 241;
+  --c-on-surface-variant: 185 203 188;
+  --c-outline: 132 149 135;
+  --c-outline-variant: 59 74 63;
+  --c-hairline: 38 42 53;
+  --c-oat: 42 35 22;
+  --c-amber: 255 184 107;
+  --c-sage: 47 106 77;
+  --c-done: 18 42 32;
+  --c-sky: 29 42 64;
+  --c-on-sky: 156 196 255;
+  --c-error: 255 180 171;
+  color-scheme: dark;
+}
+</style>
+<script>
+  // 라이트/다크: 지구 탭에서 직접 고르면 이 기기에 기억하고, 아니면 기기 설정을 따른다
+  (function () {
+    var mq = matchMedia('(prefers-color-scheme: dark)');
+    function pick() { try { return localStorage.getItem('eco-climate-theme'); } catch (e) { return null; } }
+    function apply() {
+      var t = pick(), dark = t ? t === 'dark' : mq.matches;
+      document.documentElement.classList.toggle('dark', dark);
+      var m = document.querySelector('meta[name="theme-color"]');
+      if (m) m.content = dark ? '#0f131d' : '#f4f7f3';
+    }
+    apply();
+    mq.addEventListener('change', function () { if (!pick()) { apply(); window.dispatchEvent(new Event('themechange')); } });
+    window.__applyTheme = apply;
+  })();
+</script>
 <script src="https://cdn.tailwindcss.com/3.4.16"></script>
 <script>
+  // 색은 아래 <style>의 --c-* 변수(라이트 :root, 다크 .dark). html의 dark 클래스로 바꾼다.
   // Stitch 샘플 '지구 기후 모니터'(Action Guide·Climate Home 공통)의 다크 토큰.
   // 화면 코드는 Stitch 버전(../stitch)·기후 모니터 버전(../monitor)과 같은 이름의 토큰을 쓰므로, 같은 이름에 다크 값을 넣었다.
   tailwind.config = {
@@ -21,16 +106,36 @@
     theme: {
       extend: {
         colors: {
-          primary: '#00e38b', 'primary-container': '#00ff9d', 'on-primary': '#00391f', 'on-primary-container': '#007143',
-          secondary: '#b9cbbc', 'secondary-container': '#163a2a', 'on-secondary-container': '#8ef0bf',
-          tertiary: '#ffb86b', 'tertiary-fixed': '#ffdcbc', 'tertiary-fixed-dim': '#ffb86b',
-          background: '#0f131d', surface: '#0f131d',
-          'surface-container-lowest': '#1c1f2a', 'surface-container-low': '#262a35', 'surface-container': '#2c303b',
-          'surface-container-high': '#313540', 'surface-container-highest': '#3a3f4b', 'surface-bright': '#353944',
-          'on-surface': '#dfe2f1', 'on-surface-variant': '#b9cbbc',
-          outline: '#849587', 'outline-variant': '#3b4a3f', hairline: '#262a35',
-          oat: '#2a2316', amber: '#ffb86b', sage: '#2f6a4d', done: '#122a20',
-          sky: '#1d2a40', 'on-sky': '#9cc4ff', error: '#ffb4ab'
+          'primary': 'rgb(var(--c-primary) / <alpha-value>)',
+          'primary-container': 'rgb(var(--c-primary-container) / <alpha-value>)',
+          'on-primary': 'rgb(var(--c-on-primary) / <alpha-value>)',
+          'on-primary-container': 'rgb(var(--c-on-primary-container) / <alpha-value>)',
+          'secondary': 'rgb(var(--c-secondary) / <alpha-value>)',
+          'secondary-container': 'rgb(var(--c-secondary-container) / <alpha-value>)',
+          'on-secondary-container': 'rgb(var(--c-on-secondary-container) / <alpha-value>)',
+          'tertiary': 'rgb(var(--c-tertiary) / <alpha-value>)',
+          'tertiary-fixed': 'rgb(var(--c-tertiary-fixed) / <alpha-value>)',
+          'tertiary-fixed-dim': 'rgb(var(--c-tertiary-fixed-dim) / <alpha-value>)',
+          'background': 'rgb(var(--c-background) / <alpha-value>)',
+          'surface': 'rgb(var(--c-surface) / <alpha-value>)',
+          'surface-container-lowest': 'rgb(var(--c-surface-container-lowest) / <alpha-value>)',
+          'surface-container-low': 'rgb(var(--c-surface-container-low) / <alpha-value>)',
+          'surface-container': 'rgb(var(--c-surface-container) / <alpha-value>)',
+          'surface-container-high': 'rgb(var(--c-surface-container-high) / <alpha-value>)',
+          'surface-container-highest': 'rgb(var(--c-surface-container-highest) / <alpha-value>)',
+          'surface-bright': 'rgb(var(--c-surface-bright) / <alpha-value>)',
+          'on-surface': 'rgb(var(--c-on-surface) / <alpha-value>)',
+          'on-surface-variant': 'rgb(var(--c-on-surface-variant) / <alpha-value>)',
+          'outline': 'rgb(var(--c-outline) / <alpha-value>)',
+          'outline-variant': 'rgb(var(--c-outline-variant) / <alpha-value>)',
+          'hairline': 'rgb(var(--c-hairline) / <alpha-value>)',
+          'oat': 'rgb(var(--c-oat) / <alpha-value>)',
+          'amber': 'rgb(var(--c-amber) / <alpha-value>)',
+          'sage': 'rgb(var(--c-sage) / <alpha-value>)',
+          'done': 'rgb(var(--c-done) / <alpha-value>)',
+          'sky': 'rgb(var(--c-sky) / <alpha-value>)',
+          'on-sky': 'rgb(var(--c-on-sky) / <alpha-value>)',
+          'error': 'rgb(var(--c-error) / <alpha-value>)'
         },
         borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', '2xl': '0.75rem', full: '9999px' },
         fontFamily: {
@@ -61,7 +166,7 @@
 <body class="bg-background text-on-surface font-sans antialiased">
 <div class="relative mx-auto min-h-[100dvh] w-full max-w-[560px] bg-background">
   <main id="screen"></main>
-  <nav id="nav" aria-label="주 메뉴" class="fixed bottom-0 left-1/2 z-40 w-full max-w-[560px] -translate-x-1/2 bg-surface-container-lowest/85 shadow-[0_-4px_20px_rgba(0,0,0,0.4)] backdrop-blur-xl"></nav>
+  <nav id="nav" aria-label="주 메뉴" class="fixed bottom-0 left-1/2 z-40 w-full max-w-[560px] -translate-x-1/2 bg-surface-container-lowest/85 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] backdrop-blur-xl"></nav>
   <div id="layer"></div>
 </div>
 <noscript>이 앱은 자바스크립트가 필요합니다.</noscript>
