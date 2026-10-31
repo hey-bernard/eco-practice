@@ -485,9 +485,19 @@ function openPicker() {
       <button type="button" class="tap -mr-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface" data-act="close" aria-label="닫기">${ms('close', 'text-[22px]')}</button>
     </div>
     <p class="${K.small}">${COPY.pickerSub}. 오늘 화면에 있는 ${IS_STUDENT ? '미션' : '카드'}은 '선택 취소'로 뺄 수 있어요.</p>
-    ${areas.map((area) => `
-      <div class="mt-2 ${K.eyebrow}">${esc(area)}</div>
-      ${CARDS.filter((c) => c.area === area).map(pickRow).join('')}`).join('')}
+    ${areas.map((area) => {
+      // 분야마다 머리줄(아이콘 · 이름 · 카드 수 + 구분선)로 묶어, 줄 글자와 헷갈리지 않게
+      const list = CARDS.filter((c) => c.area === area);
+      return `
+      <section class="mt-4 flex flex-col gap-2" aria-label="${esc(area)}">
+        <div class="flex items-center gap-2 border-b border-outline-variant pb-2">
+          <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-secondary-container text-on-secondary-container">${ms(CARD_ICON[list[0].id] || 'eco', 'text-[18px]', true)}</span>
+          <h3 class="font-serif text-[16px] font-semibold text-on-surface">${esc(area)}</h3>
+          <span class="ml-auto font-mono text-label-sm text-on-surface-variant">${list.length}장</span>
+        </div>
+        ${list.map(pickRow).join('')}
+      </section>`;
+    }).join('')}
     <button type="button" class="${btn('ghost', 'mt-1')}" data-act="close">닫기</button>`, { outside: false });
 }
 
