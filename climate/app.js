@@ -1164,8 +1164,9 @@ document.addEventListener('click', (e) => {
       openPicker();
       return;
     case 'add-pick':
+      // 시트는 '닫기'를 누를 때까지 열어 두고 그 줄만 바꾼다 (여러 장을 이어서 고를 수 있게)
       store.addPick(today, id);
-      closeSheet();
+      el.closest('[data-pick-row]').outerHTML = pickRow(cardById[id]);
       toast(`'${cardById[id].title}' ${COPY.added}`);
       break;
     case 'remove-pick':
