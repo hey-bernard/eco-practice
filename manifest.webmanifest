@@ -3,11 +3,11 @@
   "short_name": "오늘의 실천",
   "description": "작은 실천을 기록하면 숲이 자라는 생태 실천 웹앱",
   "lang": "ko",
-  "start_url": "./#/today",
+  "start_url": "./climate/",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#F4F6F2",
-  "theme_color": "#2E6A4C",
+  "background_color": "#0f131d",
+  "theme_color": "#0f131d",
   "icons": [
     { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]

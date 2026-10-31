@@ -1,5 +1,5 @@
 // Stitch 샘플 '지구 기후 모니터 · Climate Home'을 입힌 네 번째 디자인. 첫 탭 '지구'에서 기후 지표를 보고 오늘 실천으로 이어진다.
-// 기후 모니터 버전(../monitor/app.js)을 바탕으로 지구 화면과 5칸 메뉴를 더했다. 데이터·저장은 원래 버전(../js)을 그대로 쓴다.
+// 지구 화면과 5칸 메뉴로 이루어진 하나뿐인 버전이다. 데이터·저장은 공용 모듈(../js)을 쓴다.
 import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audience.js';
 import * as store from '../js/store.js';
@@ -183,7 +183,6 @@ function viewStart() {
         ${ms('lock', 'mt-0.5 text-[16px] text-outline')}
         <p class="text-label-sm leading-relaxed text-outline">기록은 이 기기에만 저장되고, 학생용과 성인용 기록은 따로 쌓여요. 나중에 기록 화면에서 바꿀 수 있어요.</p>
       </div>
-      <a href="../" class="mt-4 self-center text-label-md text-secondary underline underline-offset-2">기존 디자인으로 보기</a>
     </div>`;
 }
 
@@ -630,7 +629,6 @@ function viewRecord() {
         <p class="${K.small}">지금은 <b class="font-semibold text-primary">${COPY.label}</b>으로 쓰고 있어요</p>
         <button type="button" class="${btn('ghost', 'px-1')}" data-act="switch-audience">${ms('swap_horiz', 'text-[16px]')}대상 바꾸기</button>
       </div>
-      <p class="self-center text-label-md text-secondary">다른 디자인: <a href="../#/record" class="underline underline-offset-2">기존</a> · <a href="../stitch/#/record" class="underline underline-offset-2">Stitch 라이트</a> · <a href="../monitor/#/record" class="underline underline-offset-2">기후 모니터</a> · <a href="../apple/#/record" class="underline underline-offset-2">iOS 스타일</a> · <a href="../material/#/record" class="underline underline-offset-2">Material 3</a> · <a href="../line/#/record" class="underline underline-offset-2">LINE 스타일</a></p>
     </div>`;
 }
 
@@ -1325,3 +1323,7 @@ document.addEventListener('submit', (e) => {
 });
 
 render();
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});
+}
