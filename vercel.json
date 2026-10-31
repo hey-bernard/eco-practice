@@ -2,8 +2,7 @@
   "redirects": [
     { "source": "/", "destination": "/climate/", "permanent": false },
     { "source": "/index.html", "destination": "/climate/", "permanent": false },
-    { "source": "/:v(stitch|monitor|apple|material|line)", "destination": "/climate/", "permanent": false },
-    { "source": "/:v(stitch|monitor|apple|material|line)/:path*", "destination": "/climate/", "permanent": false }
+    { "source": "/(stitch|monitor|apple|material|line)(/.*)?", "destination": "/climate/", "permanent": false }
   ],
   "headers": [
     { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
