@@ -406,7 +406,7 @@ function viewToday() {
           <div class="flex items-center gap-1.5">${ms('task_alt', 'text-[20px] text-primary-container')}<h2 class="${K.h2}">${COPY.picksTitle}</h2></div>
           <span class="font-mono text-label-sm text-on-surface-variant">${doneCount}/${picks.length} 완료</span>
         </div>
-        <div class="no-scrollbar -mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1" role="group" aria-label="분야">
+        <div class="flex flex-wrap items-center gap-2" role="group" aria-label="분야">
           ${pill('all', '전체', 'apps')}
           ${areas.map((a) => pill(a, a, areaIcon(a))).join('')}
           <button type="button" class="tap flex shrink-0 items-center gap-1 rounded-full border border-dashed border-outline px-3.5 py-1.5 text-label-sm text-on-surface-variant hover:text-on-surface" data-act="picker">${ms('add', 'text-[15px]')}${COPY.pickMore}</button>
