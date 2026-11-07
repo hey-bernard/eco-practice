@@ -1,6 +1,6 @@
 // Stitch 샘플 '지구 기후 모니터 · Climate Home'을 입힌 네 번째 디자인. 첫 탭 '지구'에서 기후 지표를 보고 오늘 실천으로 이어진다.
 // 지구 화면과 5칸 메뉴로 이루어진 하나뿐인 버전이다. 데이터·저장은 공용 모듈(../js)을 쓴다.
-import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
+import { CARDS, LEVEL_LABEL, STAGES, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import * as store from '../js/store.js';
 import * as auth from '../js/auth.js';
 import * as sync from '../js/sync.js';
@@ -22,7 +22,6 @@ const ui = {
   todayArea: 'all',
   pickerArea: null,
   readTab: 'reflect',
-  readTopic: 'all',
   groupMode: 'all',
   reviewEditing: false,
   reviewShared: false,
@@ -740,7 +739,6 @@ function viewForest() {
 function viewRead() {
   const isReflect = ui.readTab === 'reflect';
   const post = weeklyPost();
-  const shown = ui.readTopic === 'all' ? POSTS : POSTS.filter((p) => p.topic === ui.readTopic);
   const mine = store.getState().reflections.slice(0, 3);
   const seg = (items, cur, act) => `
     <div class="grid auto-cols-fr grid-flow-col gap-1 rounded-full bg-surface-container p-1" role="group" aria-label="보기 전환">
@@ -754,21 +752,6 @@ function viewRead() {
       ${chev}
     </a>
 
-    <div class="flex flex-wrap gap-2" role="group" aria-label="주제">
-      ${TOPICS.map((t) => `<button type="button" class="tap min-h-[36px] rounded-full px-4 text-label-md font-medium ${ui.readTopic === t.id ? 'bg-primary-container text-on-primary' : 'bg-secondary-container/60 text-on-surface'}" data-act="topic" data-id="${t.id}" aria-pressed="${ui.readTopic === t.id}">${t.label}</button>`).join('')}
-    </div>
-
-    <article class="flex flex-col gap-3 rounded-2xl border border-primary-container/25 bg-gradient-to-br from-surface-container-high to-surface-container-low p-6 text-on-surface">
-      <span class="font-mono text-label-md uppercase text-primary">이번 주의 카드 · 카드뉴스 · 원문 읽기</span>
-      <h2 class="font-serif text-[21px] font-semibold leading-snug">${esc(post.title)}</h2>
-      <p class="font-serif text-body-md leading-relaxed text-on-surface-variant">${esc(post.intro)}</p>
-      <p class="text-body-sm leading-relaxed text-on-surface-variant">${esc(post.summary)}</p>
-      <div class="mt-1 flex items-center justify-between gap-2">
-        <span class="font-mono text-label-sm text-on-surface-variant">국가기후위기대응위원회 · ${post.date}</span>
-        <a href="${post.url}" target="_blank" rel="noopener" class="${btn('solid')}" data-act="read-post" data-id="${post.id}">원문 보기${ms('open_in_new', 'text-[16px]')}</a>
-      </div>
-    </article>
-
     <form class="space-y-3 rounded-2xl border border-amber/20 bg-oat/60 p-5" data-act="reflect">
       <label for="reflect" class="block text-label-md font-medium text-tertiary">${COPY.question}</label>
       <p class="font-serif text-quote leading-relaxed">“${esc(post.question)}”</p>
@@ -778,21 +761,7 @@ function viewRead() {
       </div>
       <p class="flex items-center gap-1 text-label-sm text-tertiary/80">${ms('lock', 'text-[14px]')}${COPY.reflectNote}</p>
       ${mine.map((r) => `<div class="border-t border-amber/15 pt-2 font-serif text-body-sm"><span class="mr-1 font-sans text-label-sm text-tertiary/70">${r.date.slice(5).replace('-', '.')}</span>${esc(r.text)}</div>`).join('')}
-    </form>
-
-    <p class="px-1 ${K.small}">카드 ${shown.length}편 · 원문은 국가기후위기대응위원회 누리집에서 읽어요</p>
-    <section class="-mt-4 flex flex-col">
-      ${shown.map((p) => `
-        <a class="flex min-h-[44px] items-center gap-3 border-b border-outline-variant/30 px-1 py-4 hover:bg-surface-container-low" href="${p.url}" target="_blank" rel="noopener" data-act="read-post" data-id="${p.id}">
-          <div class="flex flex-1 flex-col gap-1">
-            <div class="font-serif text-body-md font-semibold">${esc(p.title)}</div>
-            <div class="text-body-sm text-on-surface-variant">${esc(p.intro)}</div>
-            <p class="text-body-sm leading-relaxed text-on-surface-variant">${esc(p.summary)}</p>
-            <div class="${K.tiny}">카드뉴스 · ${p.date} · ${p.tag}</div>
-          </div>
-          <span class="flex shrink-0 items-center text-label-md font-medium text-primary">원문${ms('chevron_right', 'text-[18px]')}</span>
-        </a>`).join('')}
-    </section>`;
+    </form>`;
 
   const newsItem = (n) => `
     <article class="${K.card} space-y-2 p-4">
@@ -1088,9 +1057,6 @@ document.addEventListener('click', (e) => {
       break;
     case 'read-tab':
       ui.readTab = id;
-      break;
-    case 'topic':
-      ui.readTopic = id;
       break;
     case 'read-post':
       store.markRead(Number(id)); // 링크는 그대로 새 창으로 열린다
