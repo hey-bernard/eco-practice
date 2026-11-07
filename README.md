@@ -57,7 +57,10 @@ GitHub 저장소(hey-bernard/eco-practice)의 `main`에 push하면 Vercel이 자
    - 앱 키의 REST API 키 → Supabase Providers > Kakao의 Client ID, 보안 > Client Secret 코드 생성·활성화 → Client Secret
    - 카카오 로그인 활성화, Redirect URI에 `https://<프로젝트>.supabase.co/auth/v1/callback`
    - 동의항목: 닉네임·프로필 사진. Supabase는 이메일(account_email)도 요청하므로, 이메일 동의항목을 켜거나(개인 개발자 비즈 앱 전환 필요) Supabase Kakao 설정에서 이메일 없는 사용자 허용을 켠다.
-6. 배포 후 `sw.js`의 `VERSION`이 올라갔는지 확인한다.
+   - Supabase의 Client Secret 칸에는 REST API 키가 아니라 **Client Secret** 값을 넣는다. 바뀌어 들어가면 `invalid_client "Bad client credentials"`로 로그인이 실패한다(Supabase Logs > Auth에서 보인다).
+   - 동의항목을 켜려면 앱 아이콘(`icons/icon-512.png`)을 등록하고 '개인 개발자 비즈 앱'으로 전환(카카오톡 본인인증)해야 한다. 현재 설정: 닉네임 필수, 프로필 사진·이메일 선택.
+6. 구글 OAuth 동의 화면은 '프로덕션'으로 게시해야 누구나 로그인할 수 있다. 게시하려면 브랜딩에 홈페이지(`/climate/`)와 개인정보처리방침(`/climate/privacy.html`)이 있어야 하고, 로고는 올리지 않는다(올리면 구글 심사 대상).
+7. 배포 후 `sw.js`의 `VERSION`이 올라갔는지 확인한다.
 
 ## 대상
 
