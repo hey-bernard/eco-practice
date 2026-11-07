@@ -53,7 +53,7 @@ function seriesItem(s) {
               ${s.episodes.map((e, i) => `
               <li><button type="button" class="srs-ep" data-srs-open="${e.id}">
                 <span class="srs-n">${i + 1}</span>
-                <span class="srs-ep-t">${esc(e.title)}<small>약 ${minutes(e)}분${isRead(e.id) ? ' · 읽음' : ''}</small></span>
+                <span class="srs-ep-t">${esc(e.title)}<small>약 ${minutes(e)}분</small></span>
                 ${isRead(e.id) ? `<span class="srs-stamp" style="--r:${((i * 37) % 23) - 11}deg" role="img" aria-label="읽음 도장">읽음</span>` : ''}
               </button></li>`).join('')}
             </ol>

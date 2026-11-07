@@ -45,13 +45,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .cal-bg .tree { fill: currentColor; opacity: .2; }
 .cal-bg .grass { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; opacity: .28; }
 .dark .cal-bg .hill1 { opacity: .1; }
+.dark .cal-bg .sun { fill: rgb(var(--c-tertiary)); opacity: .1; }
 .dark .cal-bg .tree { opacity: .14; }
 
 /* 도장: 달력(기록)과 읽기에서 같이 쓴다. 겹 테두리 원 + 아이콘, 살짝 기울어진 잉크 */
-.stamp { --ink: rgb(var(--c-primary-container)); position: absolute; left: 50%; top: 56%; width: 32px; height: 32px; translate: -50% -50%; rotate: var(--r, -8deg);
+.stamp { --ink: rgb(var(--c-primary-container)); position: absolute; left: 56%; top: 60%; width: 30px; height: 30px; translate: -50% -50%; rotate: var(--r, -8deg);
   display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--ink); outline: 1px solid var(--ink); outline-offset: -6px; color: var(--ink); opacity: .9; }
 .stamp .ms { font-size: 17px; }
-.stamp.flower { --ink: rgb(var(--c-tertiary)); width: 36px; height: 36px; border-width: 2.5px; }
+.stamp.flower { --ink: rgb(var(--c-tertiary)); width: 34px; height: 34px; border-width: 2.5px; }
 .stamp.flower .ms { font-size: 20px; }
 .stamp.mini { position: static; translate: none; width: 18px; height: 18px; border-width: 1.5px; outline: 0; }
 .stamp.mini .ms { font-size: 11px; }
