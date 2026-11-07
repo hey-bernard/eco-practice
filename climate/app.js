@@ -1,12 +1,11 @@
 // Stitch 샘플 '지구 기후 모니터 · Climate Home'을 입힌 네 번째 디자인. 첫 탭 '지구'에서 기후 지표를 보고 오늘 실천으로 이어진다.
 // 지구 화면과 5칸 메뉴로 이루어진 하나뿐인 버전이다. 데이터·저장은 공용 모듈(../js)을 쓴다.
-import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, CLASSROOM, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
-import { AUDIENCE, IS_STUDENT, chooseAudience, resetAudience } from '../js/audience.js';
+import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import * as store from '../js/store.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
 import { achievementsFold, mountAchievements } from '../js/achievements.js';
 import { seriesSection, mountSeries } from '../js/series.js';
-import * as village from '../js/village.js';
+import { mountPlant, plantFrame } from '../js/practice-plant.js';
 
 const $app = document.getElementById('screen');
 const $nav = document.getElementById('nav');
@@ -19,6 +18,7 @@ const DEMO = new URLSearchParams(location.search).has('demo');
 const ui = {
   calMonth: null,
   todayArea: 'all',
+  pickerArea: null,
   readTab: 'reflect',
   readTopic: 'all',
   groupMode: 'all',
@@ -26,9 +26,7 @@ const ui = {
   reviewShared: false,
   reviewText: REVIEW_DRAFT,
   feedPicks: {},
-  feedSent: '',
-  villageTab: 'quest',
-  placing: null
+  feedSent: ''
 };
 
 const cardById = Object.fromEntries(CARDS.map((c) => [c.id, c]));
@@ -89,9 +87,8 @@ function forestInfo(points) {
   };
 }
 
-// 성장 6단계 그림: 학생용은 지구지킴이 캐릭터, 성인용은 식물 일러스트 (원래 버전과 같은 그림)
-const stageImage = (si) => (IS_STUDENT ? `${IMG}/forest/stage${si + 1}.webp` : `${IMG}/forest/plant${si + 1}.svg`);
-const stageClass = IS_STUDENT ? '' : 'plant';
+// 성장 6단계 그림: 식물 일러스트
+const stageImage = (si) => `${IMG}/forest/plant${si + 1}.svg`;
 
 // 이번 주 카드: 주차마다 14편을 돌아가며 보여 준다
 function weeklyPost() {
@@ -118,11 +115,12 @@ function closeSheet() {
 }
 
 // outside: false면 바깥(어두운 막)을 눌러도 닫히지 않는다 ('닫기' 버튼으로만)
-function sheet(label, body, { outside = true } = {}) {
+// fixed: true면 내용 길이와 상관없이 시트 높이를 고정한다 (탭을 바꿔도 시트가 출렁이지 않게)
+function sheet(label, body, { outside = true, fixed = false } = {}) {
   $layer.innerHTML = `
     <div class="sheet">
       ${outside ? '<button type="button" class="dim" data-act="close" aria-label="닫기"></button>' : '<div class="dim" aria-hidden="true"></div>'}
-      <div class="panel" role="dialog" aria-label="${label}">
+      <div class="panel${fixed ? ' fixed-h' : ''}" role="dialog" aria-label="${label}">
         <div class="mx-auto mb-1 h-1 w-10 rounded-full bg-outline-variant" aria-hidden="true"></div>
         ${body}
       </div>
@@ -134,57 +132,24 @@ const sheetRow = (attrs, left, right = '', disabled = false) => `
     <span>${left}</span>${right ? `<span class="${K.small}">${right}</span>` : ''}
   </button>`;
 
-// 화면 맨 위: 작은 머리말 + 세리프 제목 (+ 오른쪽 버튼)
+// 라이트/다크 전환: 모든 탭 머리 오른쪽 같은 자리에 둔다. 처음엔 기기 설정을 따르고, 누르면 이 기기에 기억한다
+const themeBtn = () => {
+  const label = isDark() ? '라이트 모드로 바꾸기' : '다크 모드로 바꾸기';
+  return `<button type="button" class="tap grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-container-high text-on-surface-variant hover:text-on-surface" data-act="theme" aria-label="${label}" title="${label}">${ms(isDark() ? 'light_mode' : 'dark_mode', 'text-[20px]')}</button>`;
+};
+
+// 화면 맨 위: 작은 머리말 + 세리프 제목 (+ 오른쪽 버튼 + 테마 전환)
 const header = (meta, title, right = '', icon = '') => `
-  <header class="flex items-end justify-between gap-3">
-    <div class="flex items-center gap-2">
+  <header class="flex items-center justify-between gap-3">
+    <div class="flex min-w-0 items-center gap-2">
       ${icon ? ms(icon, 'text-[26px] text-primary', true) : ''}
-      <div class="flex flex-col gap-0.5">
+      <div class="flex min-w-0 flex-col gap-0.5">
         ${meta ? `<p class="${K.meta}">${meta}</p>` : ''}
         <h1 class="${K.h1}">${title}</h1>
       </div>
     </div>
-    ${right}
+    <div class="flex shrink-0 items-center gap-2">${right}${themeBtn()}</div>
   </header>`;
-
-// ───────── 첫 실행 · 대상 고르기 ─────────
-
-function viewStart() {
-  const choice = (id, badge, badgeCls, title, desc, icons, foot, footIcon) => `
-    <button type="button" class="tap group flex flex-col rounded-2xl border border-outline-variant/50 bg-surface-container-lowest p-6 text-left shadow-[0_4px_20px_-4px_rgba(0,0,0,0.3)] hover:border-primary/40" data-act="choose-audience" data-id="${id}">
-      <div class="flex items-start justify-between gap-3">
-        <div class="flex-1">
-          <span class="${K.pill} ${badgeCls}">${badge}</span>
-          <div class="mt-2 font-serif text-headline-md font-bold text-on-surface group-hover:text-primary">${title}</div>
-          <p class="mt-1.5 text-body-sm leading-relaxed text-on-surface-variant">${desc}</p>
-        </div>
-        <div class="flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl border border-outline-variant/30 bg-surface-container-low text-secondary group-hover:bg-secondary-container/40">
-          ${ms(icons[0], 'text-[24px]')}${ms(icons[1], 'text-[16px] text-primary', true)}
-        </div>
-      </div>
-      <div class="mt-4 flex items-center justify-between border-t border-outline-variant/20 pt-3">
-        <span class="flex items-center gap-1.5 text-label-md text-secondary">${ms(footIcon, 'text-[16px]')}${foot}</span>
-        ${ms('arrow_forward', 'text-[20px] text-outline group-hover:text-primary')}
-      </div>
-    </button>`;
-  return `
-    <div class="flex min-h-[100dvh] flex-col px-5 pb-6 pt-12">
-      <div class="flex flex-col items-start">
-        <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl border border-outline-variant/30 bg-secondary-container/70 text-primary">${ms('eco', 'text-[26px]', true)}</div>
-        <span class="mb-2 text-label-md font-medium tracking-wider text-secondary">오늘의 실천</span>
-        <h1 class="font-serif text-headline-xl font-bold leading-tight text-on-surface">어디에서 실천할지<br>먼저 골라 주세요</h1>
-        <p class="mt-2.5 text-body-sm text-on-surface-variant">고른 쪽에 맞춰 실천 카드와 화면이 달라져요.</p>
-      </div>
-      <div class="my-9 flex flex-col gap-4">
-        ${choice('student', '중학생', 'bg-sky text-on-sky', '학생으로 시작하기', '학교·집에서 하는 오늘의 미션, 반 친구들과 함께 키우는 우리 반 숲, 지구 마을', ['backpack', 'public'], '학교와 집에서 하는 가벼운 미션', 'school')}
-        ${choice('adult', '성인', 'bg-secondary-container text-primary', '성인으로 시작하기', '출퇴근·카페·장보기 속 실천 카드, 동네 모임, 생태 성찰 읽기', ['coffee', 'potted_plant'], '일상 속 지속 가능한 루틴', 'nature_people')}
-      </div>
-      <div class="mt-auto flex items-start justify-center gap-1.5 px-2">
-        ${ms('lock', 'mt-0.5 text-[16px] text-outline')}
-        <p class="text-label-sm leading-relaxed text-outline">기록은 이 기기에만 저장되고, 학생용과 성인용 기록은 따로 쌓여요. 나중에 기록 화면에서 바꿀 수 있어요.</p>
-      </div>
-    </div>`;
-}
 
 // ───────── ① 오늘 ─────────
 
@@ -212,11 +177,11 @@ function viewEarth() {
             <h1 class="font-serif text-headline-md font-medium leading-tight tracking-tight">지구 기후 모니터</h1>
             <div class="flex items-center gap-1.5">
               <span class="font-mono text-label-sm uppercase text-on-surface-variant">Climate Home</span>
-              <span class="inline-flex items-center gap-1 rounded-full bg-primary-container/15 px-1.5 py-0.5 font-mono text-[10px] text-primary-container"><span class="live-dot h-1.5 w-1.5 rounded-full bg-primary-container"></span>실시간</span>
+              <span class="inline-flex items-center gap-1 rounded-full bg-primary-container/15 px-1.5 py-0.5 font-mono text-[12px] text-primary-container"><span class="live-dot h-1.5 w-1.5 rounded-full bg-primary-container"></span>실시간</span>
             </div>
           </div>
         </div>
-        <button type="button" class="tap grid h-10 w-10 place-items-center rounded-full bg-surface-container-high text-on-surface-variant hover:text-on-surface" data-act="theme" aria-label="${isDark() ? '라이트 모드로' : '다크 모드로'} 바꾸기">${ms(isDark() ? 'light_mode' : 'dark_mode', 'text-[20px]')}</button>
+        ${themeBtn()}
       </header>
 
       <div data-earth-now></div>
@@ -228,15 +193,15 @@ function viewEarth() {
         </div>
         <div class="grid grid-cols-2 gap-3">
           <a href="#/forest" class="tap relative block h-36 overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm">
-            <img class="h-full w-full ${IS_STUDENT ? 'object-cover object-[center_30%]' : 'object-contain object-bottom'}" src="${stageImage(f.si)}" alt="" aria-hidden="true">
+            <img class="h-full w-full object-contain object-bottom" src="${stageImage(f.si)}" alt="" aria-hidden="true">
             <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
-            <span class="absolute bottom-2 left-2 rounded bg-surface/70 px-2 py-0.5 font-mono text-[10px] text-primary-container backdrop-blur-sm">나의 숲 · ${f.name} 단계</span>
+            <span class="absolute bottom-2 left-2 rounded bg-surface/70 px-2 py-0.5 font-mono text-[12px] text-primary-container backdrop-blur-sm">나의 숲 · ${f.name} 단계</span>
           </a>
           <a href="#/record" class="tap relative flex h-36 flex-col justify-between overflow-hidden rounded-xl bg-surface-container-lowest p-3 shadow-sm">
             <div class="pointer-events-none absolute -bottom-8 -right-8 h-28 w-28 rounded-full bg-tertiary/15 blur-2xl"></div>
             ${ms('calendar_month', 'text-[22px] text-tertiary')}
             <div><span class="num text-metric-lg leading-none">${monthTotal}</span><span class="ml-1 font-mono text-label-sm text-on-surface-variant">개</span></div>
-            <span class="self-start rounded bg-surface/70 px-2 py-0.5 font-mono text-[10px] text-tertiary">이번 달 실천 기록</span>
+            <span class="self-start rounded bg-surface/70 px-2 py-0.5 font-mono text-[12px] text-tertiary">이번 달 실천 기록</span>
           </a>
         </div>
       </section>
@@ -257,7 +222,7 @@ function viewEarth() {
           <div class="flex min-w-0 items-center gap-3">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-tertiary/15 text-tertiary">${ms('travel_explore', 'text-[22px]')}</div>
             <div class="flex min-w-0 flex-col">
-              <span class="font-serif text-[16px] font-semibold group-hover:text-tertiary">이번 주 ${IS_STUDENT ? '배우기' : '읽기'} · ${esc(post.tag)}</span>
+              <span class="font-serif text-[16px] font-semibold group-hover:text-tertiary">이번 주 읽기 · ${esc(post.tag)}</span>
               <span class="truncate text-body-sm text-on-surface-variant">${esc(post.title)}</span>
             </div>
           </div>
@@ -266,25 +231,21 @@ function viewEarth() {
         <p class="flex items-start gap-1.5 text-body-sm text-on-surface-variant">${ms('spa', 'mt-0.5 text-[16px] text-primary-container')}<span>0.1℃라도 덜 오르면 그만큼 피해가 줄어요. 작은 실천도 그 0.1℃에 보태져요.</span></p>
       </section>
 
-      <p class="text-[10px] leading-relaxed text-outline">기온·해수면·해수 표면온도: 세계기상기구(WMO) 전 지구 기후 현황 보고서(2025년 기준). CO₂: NOAA 마우나로아 관측, 2025년 2월 월평균(연평균 아님). 탄소 예산: Indicators of Global Climate Change 2024(Forster 외, 2025), 2025년 1월 1일부터 센 값. 실시간 관측값이 아니라 발표된 값이에요.</p>
+      <p class="text-[12px] leading-relaxed text-outline">기온·해수면·해수 표면온도: 세계기상기구(WMO) 전 지구 기후 현황 보고서(2025년 기준). CO₂: NOAA 마우나로아 관측, 2025년 2월 월평균(연평균 아님). 탄소 예산: Indicators of Global Climate Change 2024(Forster 외, 2025), 2025년 1월 1일부터 센 값. 실시간 관측값이 아니라 발표된 값이에요.</p>
     </div>`;
 }
 
-// 샘플의 원형 게이지: 나의 숲이 다음 단계까지 얼마나 자랐는지
-function gauge(pct, label) {
-  const r = 40;
-  const len = 2 * Math.PI * r;
+// 오늘의 실천 식물: 오늘 카드를 기록할 때마다 그 자리에서 한 뼘씩 자라고, 다 기록하면 꽃이 핀다 (Lottie, js/practice-plant.js)
+function practicePlant(done, total) {
+  const all = total > 0 && done >= total;
+  const label = all ? '오늘 실천을 모두 기록해 꽃이 피었어요' : `오늘 실천 ${total}개 중 ${done}개를 기록해 식물이 자라고 있어요`;
   return `
-    <div class="relative flex h-24 w-24 shrink-0 items-center justify-center" role="img" aria-label="${label} ${pct}%">
-      <svg class="h-24 w-24 -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
-        <circle class="text-surface-container-highest" cx="50" cy="50" r="${r}" fill="transparent" stroke="currentColor" stroke-width="7"/>
-        <circle class="text-primary-container" cx="50" cy="50" r="${r}" fill="transparent" stroke="currentColor" stroke-width="7" stroke-linecap="round"
-          stroke-dasharray="${len.toFixed(1)}" stroke-dashoffset="${(len * (1 - pct / 100)).toFixed(1)}"/>
-      </svg>
-      <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span class="num text-[16px] font-bold leading-tight text-primary-container">${pct}%</span>
-        <span class="font-mono text-[9px] tracking-tighter text-on-surface-variant">${label}</span>
+    <div class="flex shrink-0 flex-col items-center" role="img" aria-label="${label}">
+      <div class="relative h-28 w-28">
+        <div class="pointer-events-none absolute inset-x-3 bottom-1 h-10 rounded-full bg-primary-container/15 blur-xl" aria-hidden="true"></div>
+        <div class="plant-box relative grid h-full w-full place-items-end justify-center" data-plant data-frame="${plantFrame(done, total)}" aria-hidden="true">${ms('potted_plant', 'mb-3 text-[44px] text-primary-container', true)}</div>
       </div>
+      <span class="-mt-0.5 font-mono text-[12px] tracking-tight ${all ? 'text-tertiary' : 'text-on-surface-variant'}">${all ? '오늘 꽃 피움' : '한 뼘씩 자라요'}</span>
     </div>`;
 }
 
@@ -294,7 +255,6 @@ function viewToday() {
   const picks = store.getPicks(today);
   const points = store.totalPoints();
   const f = forestInfo(points);
-  const nextStage = STAGES[f.si + 1];
   const post = weeklyPost();
   const prefix = monthPrefix();
   const saved = store.countCard(COPY.effect.card, prefix);
@@ -324,19 +284,19 @@ function viewToday() {
               <div class="flex flex-wrap items-center gap-1.5">
                 <h3 class="font-serif text-[16px] font-semibold text-on-surface">${esc(c.title)}</h3>
                 ${done
-                  ? `<span class="rounded bg-primary/20 px-1.5 py-0.5 font-mono text-[10px] text-primary">기록함</span>`
-                  : `<span class="rounded bg-surface-container-highest px-1.5 py-0.5 font-mono text-[10px] text-on-surface-variant">${LEVEL_LABEL[c.level]}</span>`}
+                  ? `<span class="rounded bg-primary/20 px-1.5 py-0.5 font-mono text-[12px] text-primary">기록함</span>`
+                  : `<span class="rounded bg-surface-container-highest px-1.5 py-0.5 font-mono text-[12px] text-on-surface-variant">${LEVEL_LABEL[c.level]}</span>`}
               </div>
-              <p class="mt-0.5 text-body-sm text-on-surface-variant">${IS_STUDENT ? `${esc(c.area)} · ` : ''}${esc(c.hint)}</p>
+              <p class="mt-0.5 text-body-sm text-on-surface-variant">${esc(c.hint)}</p>
             </div>
           </div>
           <div class="flex shrink-0 flex-col items-end">
-            <span class="num text-[18px] font-bold ${month ? 'text-primary-container' : 'text-on-surface-variant'}">${month}<span class="text-[11px] font-medium">${c.unit}</span></span>
-            <span class="font-mono text-[10px] text-on-surface-variant">이번 달</span>
+            <span class="num text-[18px] font-bold ${month ? 'text-primary-container' : 'text-on-surface-variant'}">${month}<span class="text-[12px] font-medium">${c.unit}</span></span>
+            <span class="font-mono text-[12px] text-on-surface-variant">이번 달</span>
           </div>
         </div>
         <div class="flex items-center justify-between gap-2">
-          <span class="flex items-center gap-1 font-mono text-[11px] ${done ? 'text-primary' : 'text-on-surface-variant'}">${ms(done ? 'task_alt' : 'radio_button_unchecked', 'text-[14px]')}${done ? '오늘 기록했어요' : '아직 기록 전'}</span>
+          <span class="flex items-center gap-1 font-mono text-[12px] ${done ? 'text-primary' : 'text-on-surface-variant'}">${ms(done ? 'task_alt' : 'radio_button_unchecked', 'text-[14px]')}${done ? '오늘 기록했어요' : '아직 기록 전'}</span>
           ${done
             ? `<button type="button" class="${btn('line', 'min-h-[36px] px-3')}" data-act="toggle" data-id="${id}" aria-pressed="true" aria-label="${esc(c.title)} 기록 취소">${ms('check', 'text-[16px] text-primary-container')}했어요</button>`
             : `<button type="button" class="${btn('solid', 'min-h-[36px] px-3')}" data-act="toggle" data-id="${id}" aria-pressed="false">${ms('add', 'text-[16px]')}기록하기</button>`}
@@ -345,26 +305,26 @@ function viewToday() {
   }).join('');
 
   const e = COPY.effect;
-  const cls = CLASSROOM;
-  // 샘플의 '오늘의 커뮤니티 미션' 배너 자리: 학생은 반 공동 미션, 성인은 내 모임 (둘 다 예시 데이터)
-  const mission = IS_STUDENT
-    ? { tag: '우리 반 공동 미션', meta: `${cls.name} · 예시`, title: cls.mission.title, body: `오늘 우리 반 ${cls.members}명 중 ${cls.todayDone}명이 미션을 했어요. 함께 채우면 반 숲이 자라요.`, pct: (cls.mission.now / cls.mission.need) * 100, count: `${cls.mission.now}/${cls.mission.need}`, href: '#/groups', btn: '우리 반 보러 가기', icon: 'groups' }
-    : { tag: '내 모임 소식', meta: '예시', title: '주말 플로깅 크루 · 일요일 오전 10시', body: '멤버 8명 중 6명이 이번 주 실천을 기록했어요. 30분 걸으며 쓰레기를 주워요.', pct: 75, count: '6/8', href: '#/group', btn: '모임 보러 가기', icon: 'directions_run' };
+  // 샘플의 '오늘의 커뮤니티 미션' 배너 자리: 내 모임 소식 (예시 데이터)
+  const mission = { tag: '내 모임 소식', meta: '예시', title: '주말 플로깅 크루 · 일요일 오전 10시', body: '멤버 8명 중 6명이 이번 주 실천을 기록했어요. 30분 걸으며 쓰레기를 주워요.', pct: 75, count: '6/8', href: '#/group', btn: '모임 보러 가기', icon: 'directions_run' };
 
   return `
     <div class="${K.screen}">
       <header class="-mx-4 -mt-5 flex h-16 items-center justify-between bg-surface/80 px-4 shadow-[0_1px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_12px_rgba(0,0,0,0.3)] backdrop-blur-xl">
         <div class="flex items-center gap-2">
-          <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-container/15 text-primary-container">${ms(IS_STUDENT ? 'public' : 'energy_savings_leaf', 'text-[22px]', true)}</div>
+          <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-container/15 text-primary-container">${ms('energy_savings_leaf', 'text-[22px]', true)}</div>
           <div class="flex flex-col">
             <h1 class="font-serif text-headline-md font-medium leading-tight tracking-tight">${COPY.todayTitle}</h1>
             <div class="flex items-center gap-1.5">
-              <span class="font-mono text-label-sm uppercase text-on-surface-variant">${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAYS[now.getDay()]}요일</span>
-              <span class="inline-flex items-center gap-1 rounded-full bg-primary-container/15 px-1.5 py-0.5 font-mono text-[10px] text-primary-container"><span class="live-dot h-1.5 w-1.5 rounded-full bg-primary-container"></span>TODAY</span>
+              <span class="whitespace-nowrap font-mono text-label-sm uppercase text-on-surface-variant">${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAYS[now.getDay()]}요일</span>
+              <span class="inline-flex items-center gap-1 rounded-full bg-primary-container/15 px-1.5 py-0.5 font-mono text-[12px] text-primary-container max-[389px]:hidden"><span class="live-dot h-1.5 w-1.5 rounded-full bg-primary-container"></span>TODAY</span>
             </div>
           </div>
         </div>
-        <a href="#/login" class="${btn('line', 'min-h-[36px] px-3')}">${ms(IS_STUDENT ? 'school' : 'person', 'text-[18px]')}${IS_STUDENT ? '반 참여' : '로그인'}</a>
+        <div class="flex shrink-0 items-center gap-2">
+          <a href="#/login" class="${btn('line', 'min-h-[40px] px-3')}">${ms('person', 'text-[18px]')}로그인</a>
+          ${themeBtn()}
+        </div>
       </header>
 
       <section class="flex gap-3 rounded-2xl bg-surface-container-high p-4" aria-label="저탄소 실천 다짐">
@@ -392,9 +352,9 @@ function viewToday() {
               <span class="num text-metric-lg tracking-tight text-on-surface">${doneCount}</span>
               <span class="num text-[18px] font-medium text-on-surface-variant">/ ${picks.length}</span>
             </div>
-            <span class="mt-2 inline-flex items-center gap-1 self-start rounded bg-primary-container/15 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-primary-container">${ms('local_florist', 'text-[13px]')}숲 +${doneCount}점</span>
+            <span class="mt-2 inline-flex items-center gap-1 self-start rounded bg-primary-container/15 px-1.5 py-0.5 font-mono text-[12px] font-semibold text-primary-container">${ms('local_florist', 'text-[13px]')}숲 +${doneCount}점</span>
           </div>
-          ${gauge(f.pct, nextStage ? `${nextStage[0]}까지` : '숲 완성')}
+          ${practicePlant(doneCount, picks.length)}
         </div>
         <a href="#/forest" class="tap relative z-10 mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-2.5">
           <span class="flex items-center gap-1.5 text-body-sm text-on-surface">${ms('forest', 'text-[16px] text-primary-container', true)}나의 숲 · ${f.name} 단계</span>
@@ -417,12 +377,12 @@ function viewToday() {
       </section>
 
       <section class="${K.card} flex items-center gap-3 p-4">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-container-highest text-tertiary">${ms(IS_STUDENT ? 'water_bottle' : 'local_cafe', 'text-[22px]')}</div>
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-container-highest text-tertiary">${ms('local_cafe', 'text-[22px]')}</div>
         <div class="min-w-0 flex-1">
           <p class="font-serif text-[15px] font-semibold">${saved > 0 ? e.done(saved) : e.empty}</p>
           <p class="text-body-sm text-on-surface-variant">${saved > 0 ? e.doneSub(saved) : e.emptySub}</p>
         </div>
-        <span class="num shrink-0 rounded-full bg-tertiary/15 px-2 py-1 text-[11px] font-semibold text-tertiary">+${saved}</span>
+        <span class="num shrink-0 rounded-full bg-tertiary/15 px-2 py-1 text-[12px] font-semibold text-tertiary">+${saved}</span>
       </section>
 
       <section class="relative overflow-hidden rounded-xl bg-gradient-to-br from-surface-container-high to-surface-container-lowest p-4 shadow-xl">
@@ -435,26 +395,24 @@ function viewToday() {
         </div>
         <h3 class="mt-2 font-serif text-headline-md font-medium">${esc(mission.title)}</h3>
         <p class="mt-1 text-body-sm leading-relaxed text-on-surface-variant">${mission.body}</p>
-        <div class="mt-3 flex items-center gap-2">${bar(mission.pct)}<span class="num shrink-0 text-[11px] text-on-surface">${mission.count}</span></div>
+        <div class="mt-3 flex items-center gap-2">${bar(mission.pct)}<span class="num shrink-0 text-[12px] text-on-surface">${mission.count}</span></div>
         <a href="${mission.href}" class="tap glow mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary-container px-4 py-3.5 font-serif text-[15px] font-bold text-on-primary">${ms(mission.icon, 'text-[20px]', true)}${mission.btn}</a>
       </section>
 
-      ${IS_STUDENT ? villageEntry() : ''}
-
       <section class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-1.5">${ms('public', 'text-[20px] text-primary-container')}<h2 class="${K.h2}">이번 주 ${IS_STUDENT ? '배우기' : '읽기'}</h2></div>
+          <div class="flex items-center gap-1.5">${ms('public', 'text-[20px] text-primary-container')}<h2 class="${K.h2}">이번 주 읽기</h2></div>
           <span class="font-mono text-label-sm text-on-surface-variant">국가기후위기대응위원회</span>
         </div>
         <a href="#/read" class="tap ${K.card} flex flex-col gap-2.5 p-4">
           <div class="flex items-center justify-between">
-            <span class="rounded bg-surface-container-highest px-2 py-0.5 font-mono text-[11px] text-on-surface-variant">${esc(post.tag)}</span>
-            <span class="font-mono text-[10px] text-on-surface-variant">${post.date}</span>
+            <span class="rounded bg-surface-container-highest px-2 py-0.5 font-mono text-[12px] text-on-surface-variant">${esc(post.tag)}</span>
+            <span class="font-mono text-[12px] text-on-surface-variant">${post.date}</span>
           </div>
           <h4 class="font-serif text-[15px] font-semibold leading-snug">${esc(post.title)}</h4>
           <p class="line-clamp-2 text-body-sm text-on-surface-variant">${esc(post.intro)}</p>
           <div class="flex items-center justify-between gap-2 pt-1">
-            <span class="flex items-center gap-1 font-mono text-[11px] text-tertiary">${ms('edit_note', 'text-[14px]')}${COPY.question}</span>
+            <span class="flex items-center gap-1 font-mono text-[12px] text-tertiary">${ms('edit_note', 'text-[14px]')}${COPY.question}</span>
             ${ms('arrow_outward', 'text-[18px] text-on-surface-variant')}
           </div>
         </a>
@@ -476,35 +434,57 @@ function pickRow(c) {
     </div>`;
 }
 
+// 분야 탭 모양: 고른 탭은 진한 알약, 나머지는 옅은 알약 (글자 굵기는 같게 둬서 탭을 바꿔도 줄바꿈이 달라지지 않게)
+const PICK_TAB_ON = ['bg-primary-container', 'text-on-primary'];
+const PICK_TAB_OFF = ['bg-surface-container-high', 'text-on-surface-variant'];
+
 function openPicker() {
   const areas = [...new Set(CARDS.map((c) => c.area))];
-  // 여러 장을 이어서 고르는 시트라 바깥을 눌러도 닫히지 않는다. 긴 목록이라 닫기는 위·아래 두 곳
+  if (!areas.includes(ui.pickerArea)) ui.pickerArea = areas[0];
+  // 분야는 탭으로 나눠 한 번에 한 분야만 보여 준다. 탭을 바꿔도 시트는 다시 그리지 않는다 (패널만 숨김/보임)
+  // 여러 장을 이어서 고르는 시트라 바깥을 눌러도 닫히지 않는다
   sheet(COPY.pickerTitle, `
     <div class="flex items-center justify-between gap-2">
       <h2 class="${K.h2}">${COPY.pickerTitle}</h2>
       <button type="button" class="tap -mr-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface" data-act="close" aria-label="닫기">${ms('close', 'text-[22px]')}</button>
     </div>
-    <p class="${K.small}">${COPY.pickerSub}. 오늘 화면에 있는 ${IS_STUDENT ? '미션' : '카드'}은 '선택 취소'로 뺄 수 있어요.</p>
-    ${areas.map((area) => {
-      // 분야마다 머리줄(아이콘 · 이름 · 카드 수 + 구분선)로 묶어, 줄 글자와 헷갈리지 않게
-      const list = CARDS.filter((c) => c.area === area);
-      return `
-      <section class="mt-4 flex flex-col gap-2" aria-label="${esc(area)}">
-        <div class="flex items-center gap-2 border-b border-outline-variant pb-2">
-          <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-secondary-container text-on-secondary-container">${ms(CARD_ICON[list[0].id] || 'eco', 'text-[18px]', true)}</span>
-          <h3 class="font-serif text-[16px] font-semibold text-on-surface">${esc(area)}</h3>
-          <span class="ml-auto font-mono text-label-sm text-on-surface-variant">${list.length}장</span>
-        </div>
-        ${list.map(pickRow).join('')}
-      </section>`;
-    }).join('')}
-    <button type="button" class="${btn('ghost', 'mt-1')}" data-act="close">닫기</button>`, { outside: false });
+    <p class="${K.small}">${COPY.pickerSub}. 오늘 화면에 있는 카드는 '선택 취소'로 뺄 수 있어요.</p>
+    <div class="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="실천 분야">
+      ${areas.map((area, i) => {
+        const on = area === ui.pickerArea;
+        const first = CARDS.find((c) => c.area === area);
+        const n = CARDS.filter((c) => c.area === area).length;
+        return `<button type="button" role="tab" id="pick-tab-${i}" aria-controls="pick-panel-${i}" aria-selected="${on}" tabindex="${on ? 0 : -1}" class="tap flex shrink-0 items-center gap-1 rounded-full px-3 py-2 text-label-md font-medium whitespace-nowrap ${(on ? PICK_TAB_ON : PICK_TAB_OFF).join(' ')}" data-act="picker-tab" data-id="${esc(area)}">${ms(CARD_ICON[first.id] || 'eco', 'text-[16px]')}${esc(area)}<span class="font-mono text-[12px] opacity-70">${n}</span></button>`;
+      }).join('')}
+    </div>
+    <div class="mt-2 shrink-0" data-pick-panels>
+    ${areas.map((area, i) => `
+      <div class="flex-col gap-2" style="${pickPanelStyle(area === ui.pickerArea)}" role="tabpanel" id="pick-panel-${i}" aria-labelledby="pick-tab-${i}" data-pick-panel="${esc(area)}">
+        ${CARDS.filter((c) => c.area === area).map(pickRow).join('')}
+      </div>`).join('')}
+    </div>
+    <button type="button" class="${btn('ghost', 'mt-1')}" data-act="close">닫기</button>`, { outside: false, fixed: true });
+}
+
+// 고른 분야 목록만 보인다. 목록 높이는 그 분야 카드 수만큼이라 아래 빈 공간이 생기지 않는다
+const pickPanelStyle = (on) => `display:${on ? 'flex' : 'none'}`;
+
+// 탭 전환: 시트 안의 탭 모양과 패널만 바꾼다 (고른 줄 상태는 그대로)
+function selectPickerTab(area) {
+  ui.pickerArea = area;
+  $layer.querySelectorAll('[data-act="picker-tab"]').forEach((t) => {
+    const on = t.dataset.id === area;
+    t.setAttribute('aria-selected', on);
+    t.tabIndex = on ? 0 : -1;
+    t.classList.remove(...PICK_TAB_ON, ...PICK_TAB_OFF);
+    t.classList.add(...(on ? PICK_TAB_ON : PICK_TAB_OFF));
+  });
+  $layer.querySelectorAll('[data-pick-panel]').forEach((p) => { p.style.display = p.dataset.pickPanel === area ? 'flex' : 'none'; });
 }
 
 // ───────── ② 로그인 ─────────
 
 function viewLogin() {
-  if (IS_STUDENT) return viewJoinClass();
   return `
     <div class="flex min-h-[100dvh] flex-col px-5 pb-6 pt-12">
       <div class="flex flex-col items-start gap-3">
@@ -526,31 +506,6 @@ function viewLogin() {
       <div class="mt-auto rounded-2xl border border-hairline bg-surface-container-lowest p-4">
         <div class="${K.eyebrow}">받는 정보</div>
         <p class="mt-1 text-body-sm leading-relaxed text-on-surface-variant">필수: 닉네임 · 선택: 프로필 사진<br>비밀번호는 저장하지 않아요. 탈퇴하면 기록과 연결 정보를 함께 지워요.</p>
-      </div>
-    </div>`;
-}
-
-// 학생용 로그인: 실명·연락처 없이 학급 코드와 닉네임만 (화면만, 2단계에서 연결)
-function viewJoinClass() {
-  const input = 'h-12 w-full rounded-2xl border border-outline-variant bg-surface-container-lowest px-4 text-body-md focus:border-primary-container focus:outline-none';
-  return `
-    <div class="flex min-h-[100dvh] flex-col px-5 pb-6 pt-12">
-      <div class="flex flex-col items-start gap-3">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky text-on-sky">${ms('school', 'text-[26px]', true)}</div>
-        <h1 class="mt-3 font-serif text-headline-xl font-bold leading-tight">우리 반에<br>참여해요</h1>
-        <p class="text-body-sm leading-relaxed text-on-surface-variant">선생님께 받은 학급 코드를 넣으면 우리 반 숲과 공동 미션에 함께할 수 있어요.</p>
-      </div>
-      <form class="mt-6 flex flex-col gap-3" data-act="join">
-        <label for="class-code" class="${K.eyebrow}">학급 코드</label>
-        <input id="class-code" class="${input}" type="text" maxlength="8" placeholder="예: HB2-3K7" autocomplete="off">
-        <label for="nickname" class="${K.eyebrow}">닉네임</label>
-        <input id="nickname" class="${input}" type="text" maxlength="10" placeholder="친구들에게 보일 이름" autocomplete="off">
-        <button type="submit" class="${btn('solid', 'mt-2 h-12')}">참여하기</button>
-        <a href="#/today" class="${btn('ghost')}">나중에 하기</a>
-      </form>
-      <div class="mt-auto rounded-2xl border border-hairline bg-surface-container-lowest p-4">
-        <div class="${K.eyebrow}">받는 정보</div>
-        <p class="mt-1 text-body-sm leading-relaxed text-on-surface-variant">학급 코드와 닉네임만 받아요. 이름·전화번호·사진은 받지 않아요.<br>만 14세 미만은 보호자 동의를 받은 뒤 참여해요.</p>
       </div>
     </div>`;
 }
@@ -586,7 +541,7 @@ function viewRecord() {
         <div class="${K.card} flex flex-col gap-1 p-3.5">
           ${ms(CARD_ICON[id] || 'eco', 'text-[20px] text-amber')}
           <b class="font-serif text-[24px] font-semibold leading-tight text-tertiary">${n}<span class="text-body-sm">${cardById[id].unit}</span></b>
-          <span class="text-label-md leading-snug text-on-surface-variant">${esc(cardById[id].stat)}</span>
+          <span class="text-label-md leading-snug text-on-surface-variant [word-break:keep-all]">${esc(cardById[id].stat)}</span>
         </div>`).join('')}</div>`
     : `<p class="${K.small}">이번 달 기록이 쌓이면 여기에 개수로 보여 드려요.</p>`;
 
@@ -625,10 +580,6 @@ function viewRecord() {
       </section>
       <section class="${K.card} space-y-3 p-5">${challenge}</section>
       ${achievementsFold({ fold: `${K.card} p-5`, title: K.h2, meta: K.meta })}
-      <div class="flex items-center justify-between gap-2 px-1">
-        <p class="${K.small}">지금은 <b class="font-semibold text-primary">${COPY.label}</b>으로 쓰고 있어요</p>
-        <button type="button" class="${btn('ghost', 'px-1')}" data-act="switch-audience">${ms('swap_horiz', 'text-[16px]')}대상 바꾸기</button>
-      </div>
     </div>`;
 }
 
@@ -688,7 +639,7 @@ function viewForest() {
       </div>
       <section class="overflow-hidden rounded-2xl border border-hairline" aria-label="숲 그림">
         <div class="stage-art">
-          <img class="main ${stageClass}" src="${stageImage(f.si)}" alt="${IS_STUDENT ? '지구지킴이' : '식물'} ${f.name} 단계 모습">
+          <img class="main plant" src="${stageImage(f.si)}" alt="식물 ${f.name} 단계 모습">
           <svg class="critters" viewBox="0 0 358 220" aria-hidden="true">
             ${bee.ok ? '<g transform="translate(70,120)"><ellipse rx="9" ry="6" fill="#F2C230" stroke="#1C2620" stroke-width="1.5"/></g>' : ''}
             ${bird.ok ? '<path d="M280 46 q8 -8 16 0 q8 -8 16 0" stroke="#dfe2f1" stroke-width="2" fill="none" stroke-linecap="round"/>' : ''}
@@ -700,8 +651,6 @@ function viewForest() {
           <span class="${K.meta}">${points}점 · ${f.nextText}</span>
         </div>
       </section>
-
-      ${IS_STUDENT ? villageEntry() : ''}
 
       <section class="space-y-3">
         <h2 class="${K.h2} px-1">성장 단계</h2>
@@ -731,7 +680,7 @@ function viewForest() {
 // ───────── ⑤ 읽기 ─────────
 
 function viewRead() {
-  const isReflect = IS_STUDENT || ui.readTab === 'reflect'; // 학생용은 뉴스레터 없이 배우기만
+  const isReflect = ui.readTab === 'reflect';
   const post = weeklyPost();
   const shown = ui.readTopic === 'all' ? POSTS : POSTS.filter((p) => p.topic === ui.readTopic);
   const mine = store.getState().reflections.slice(0, 3);
@@ -766,7 +715,7 @@ function viewRead() {
       <label for="reflect" class="block text-label-md font-medium text-tertiary">${COPY.question}</label>
       <p class="font-serif text-quote leading-relaxed">“${esc(post.question)}”</p>
       <div class="flex gap-2">
-        <input id="reflect" name="text" type="text" maxlength="200" placeholder="한 줄로 남겨 보세요" autocomplete="off" class="h-11 min-w-0 flex-1 rounded-full border border-amber/25 bg-surface-container-lowest px-4 text-body-sm focus:border-amber focus:outline-none">
+        <input id="reflect" name="text" type="text" maxlength="200" placeholder="한 줄로 남겨 보세요" autocomplete="off" class="h-11 min-w-0 flex-1 rounded-full border border-amber/25 bg-surface-container-lowest px-4 text-[16px] focus:border-amber focus:outline-none">
         <button type="submit" class="${btn('solid')}">남기기</button>
       </div>
       <p class="flex items-center gap-1 text-label-sm text-tertiary/80">${ms('lock', 'text-[14px]')}${COPY.reflectNote}</p>
@@ -812,8 +761,8 @@ function viewRead() {
 
   return `
     <div class="${K.screen} gap-6">
-      ${header(COPY.readMeta, COPY.readTitle, '', IS_STUDENT ? 'school' : 'menu_book')}
-      ${IS_STUDENT ? '' : seg([['reflect', '생태 성찰'], ['news', '뉴스레터']], isReflect ? 'reflect' : 'news', 'read-tab')}
+      ${header(COPY.readMeta, COPY.readTitle, '', 'menu_book')}
+      ${seg([['reflect', '생태 성찰'], ['news', '뉴스레터']], isReflect ? 'reflect' : 'news', 'read-tab')}
       ${isReflect ? reflect : news}
     </div>`;
 }
@@ -829,7 +778,7 @@ function viewGroups() {
       <div class="relative">
         <label for="q" class="sr">모임 검색</label>
         ${ms('search', 'pointer-events-none absolute left-4 top-3 text-[20px] text-outline')}
-        <input id="q" type="search" placeholder="관심 주제나 모임 이름" class="h-12 w-full rounded-full border border-outline-variant/60 bg-surface-container-lowest pl-11 pr-4 text-body-sm focus:border-primary-container focus:outline-none">
+        <input id="q" type="search" placeholder="관심 주제나 모임 이름" class="h-12 w-full rounded-full border border-outline-variant/60 bg-surface-container-lowest pl-11 pr-4 text-[16px] focus:border-primary-container focus:outline-none">
       </div>
       <div class="grid auto-cols-fr grid-flow-col gap-1 rounded-full bg-surface-container p-1" role="group" aria-label="모임 방식">
         ${modes.map(([id, label]) => `<button type="button" class="tap h-10 rounded-full text-label-md ${ui.groupMode === id ? 'bg-surface-container-lowest font-semibold text-primary shadow-sm' : 'text-on-surface-variant'}" data-act="group-mode" data-id="${id}" aria-pressed="${ui.groupMode === id}">${label}</button>`).join('')}
@@ -854,54 +803,12 @@ function viewGroups() {
     </div>`;
 }
 
-// ───────── ⑥ 우리 반 · 학생용 (정적 예시) ─────────
-
-function viewClass() {
-  const c = CLASSROOM;
-  const m = c.mission;
-  return `
-    <div class="${K.screen} gap-6">
-      ${header(`${c.school} · ${c.members}명 · 담임 ${c.teacher}`, c.name, `<span class="${K.pill} bg-secondary-container text-primary">예시</span>`, 'school')}
-
-      <section class="${K.card} space-y-3 p-5">
-        <div class="flex items-center gap-4">
-          <img class="stage-thumb" src="${IMG}/forest/stage${c.forest.stage + 1}.webp" alt="" aria-hidden="true">
-          <div class="flex-1 space-y-1.5">
-            <div class="flex items-center gap-1.5">${ms('forest', 'text-[18px] text-primary')}<span class="text-body-md font-medium">우리 반 숲 · ${c.forest.name} 단계</span></div>
-            ${bar(c.forest.pct)}
-            <p class="${K.small}">${c.forest.next}</p>
-          </div>
-        </div>
-        <p class="border-t border-outline-variant/20 pt-3 ${K.tiny}">내 미션 기록이 우리 반 숲에 더해져요. 누가 몇 번 했는지는 보여 주지 않아요.</p>
-      </section>
-
-      <section class="${K.card} space-y-3 p-5">
-        <div class="flex items-baseline justify-between"><h2 class="${K.h2}">이번 주 반 공동 미션</h2><span class="${K.meta}">${m.due}까지</span></div>
-        <div class="flex items-center gap-2 text-body-md font-medium">${ms(CARD_ICON[m.card] || 'eco', 'text-[20px] text-secondary')}${m.title}</div>
-        <div role="progressbar" aria-label="공동 미션 진행" aria-valuenow="${m.now}" aria-valuemin="0" aria-valuemax="${m.need}">${bar((m.now / m.need) * 100, 'h-2.5')}</div>
-        <p class="${K.small}">${m.now}개 모였어요 · ${m.due}에 선생님이 확인해요</p>
-        <button type="button" class="${btn('soft')}" data-act="soon">${ms('photo_camera', 'text-[16px]')}내가 모은 것 인증하기</button>
-      </section>
-
-      <a href="#/feed" class="tap ${K.card} block space-y-2 p-5">
-        <div class="flex items-center justify-between"><h2 class="${K.h2}">친구들 소식</h2>${chev}</div>
-        <div class="flex items-center gap-2">
-          <div class="flex -space-x-1.5">${FEED.map((p) => `<span class="inline-flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold text-primary ring-2 ring-surface-container-lowest" style="background:${p.bg}">${esc(p.name.charAt(0))}</span>`).join('')}</div>
-          <p class="${K.small}">오늘 ${c.members}명 중 ${c.todayDone}명이 미션을 했어요 · 응원 남기기</p>
-        </div>
-      </a>
-
-      <div class="flex items-start gap-2 rounded-2xl border border-amber/20 bg-oat/70 px-4 py-3 text-body-sm text-tertiary">${ms('shield_person', 'mt-0.5 text-[18px]')}<span>댓글 대신 정해진 응원 버튼만 쓸 수 있어요. 새 글과 사진은 선생님이 확인한 뒤 반에 보여요.</span></div>
-      <p class="-mt-3 px-1 ${K.tiny}">예시 데이터입니다. 학급 기능은 3단계에서 연결합니다.</p>
-    </div>`;
-}
-
 // ───────── ⑦ 모임 홈 · 운영자 (정적 예시) ─────────
 
 function viewGroupHome() {
   const dots = [1, 1, 1, 1, 1, 1, 0, 0].map((on) => `<span class="h-4 w-4 rounded-full border-[1.5px] border-primary-container ${on ? 'bg-primary-container' : ''}"></span>`).join('');
   const body = ui.reviewEditing
-    ? `<label for="draft" class="${K.small}">후기 고치기</label><textarea id="draft" rows="5" data-act="draft" class="w-full resize-none rounded-2xl border border-outline-variant bg-surface-container-lowest p-3 text-body-sm leading-relaxed focus:border-primary-container focus:outline-none">${esc(ui.reviewText)}</textarea>`
+    ? `<label for="draft" class="${K.small}">후기 고치기</label><textarea id="draft" rows="5" data-act="draft" class="w-full resize-none rounded-2xl border border-outline-variant bg-surface-container-lowest p-3 text-[16px] leading-relaxed focus:border-primary-container focus:outline-none">${esc(ui.reviewText)}</textarea>`
     : `<p class="whitespace-pre-line font-serif text-body-sm leading-relaxed">${esc(ui.reviewText)}</p>`;
   const actions = ui.reviewShared
     ? `<div role="status" class="rounded-2xl bg-done px-4 py-3 text-body-sm font-medium text-primary">멤버 8명에게 공유했어요</div>`
@@ -965,16 +872,11 @@ function viewFeed() {
   }).join('');
   return `
     <div class="${K.screen} gap-4 pt-3">
-      ${IS_STUDENT
-        ? `<a href="#/groups" class="${K.back}">${ms('chevron_left', 'text-[20px]')}우리 반</a>
-      <div class="-mt-2 space-y-1"><h1 class="${K.h1}">이번 주 친구들 미션</h1><p class="${K.small}">${CLASSROOM.members}명 중 ${CLASSROOM.todayDone}명이 오늘 기록했어요 · 순위 없이 응원만 남겨요</p></div>`
-        : `<a href="#/group" class="${K.back}">${ms('chevron_left', 'text-[20px]')}주말 플로깅 크루</a>
-      <div class="-mt-2 space-y-1"><h1 class="${K.h1}">이번 주 멤버 실천</h1><p class="${K.small}">8명 중 6명이 기록했어요 · 순위 없이 응원만 남겨요</p></div>`}
+      <a href="#/group" class="${K.back}">${ms('chevron_left', 'text-[20px]')}주말 플로깅 크루</a>
+      <div class="-mt-2 space-y-1"><h1 class="${K.h1}">이번 주 멤버 실천</h1><p class="${K.small}">8명 중 6명이 기록했어요 · 순위 없이 응원만 남겨요</p></div>
       ${ui.feedSent ? `<div role="status" class="rounded-2xl bg-done px-4 py-3 text-body-sm font-medium text-primary">${esc(ui.feedSent)}</div>` : ''}
       ${posts}
-      <p class="px-1 ${K.tiny}">${IS_STUDENT
-        ? '응원은 우리 반 친구와 선생님만 볼 수 있어요. 댓글 대신 정해진 반응과 문구만 보낼 수 있어요.'
-        : '응원은 이 모임 멤버만 볼 수 있어요. 한 기록에 반응은 하나만 남길 수 있고, 한마디는 정해진 문구로 보내요.'}</p>
+      <p class="px-1 ${K.tiny}">응원은 이 모임 멤버만 볼 수 있어요. 한 기록에 반응은 하나만 남길 수 있고, 한마디는 정해진 문구로 보내요.</p>
     </div>`;
 }
 
@@ -987,144 +889,28 @@ function openPhrases(postId) {
     <button type="button" class="${btn('ghost', 'mt-1')}" data-act="close">취소</button>`);
 }
 
-// ───────── 지구 마을 (미니 게임) ─────────
-
-function villageEntry() {
-  const info = village.villageInfo();
-  const ready = village.readyCount();
-  return `
-    <a href="#/village" class="tap ${K.card} flex items-center gap-4 p-5">
-      <img src="${IMG}/village/earth.webp" alt="" aria-hidden="true" class="h-14 w-12 shrink-0 object-contain">
-      <div class="flex-1 space-y-0.5">
-        <div class="flex items-center gap-1.5">${ms('public', 'text-[18px] text-primary')}<h2 class="${K.h2}">지구 마을</h2></div>
-        <p class="flex items-center gap-1 text-body-sm font-medium">${info.name} · ${village.LEAF} 나뭇잎 ${info.leaves}개</p>
-        <p class="${K.small}">${ready ? `받을 수 있는 퀘스트 보상이 ${ready}개 있어요` : '리사의 부탁을 들어주고 섬을 가꿔요'}</p>
-      </div>
-      ${ready ? `<span class="${K.pill} bg-tertiary-fixed px-2.5 font-bold text-tertiary" aria-label="받을 보상 ${ready}개">${ready}</span>` : ''}
-      ${chev}
-    </a>`;
-}
-
-function viewVillage() {
-  const info = village.villageInfo();
-  const qs = village.quests();
-  const story = qs.find((q) => q.kind === 'story' && !q.claimed);
-  const say = ui.placing
-    ? `${village.josa(village.ITEMS[ui.placing].name, '을', '를')} 어디에 놓을까? 빈 땅을 눌러 줘!`
-    : story
-      ? (story.complete ? '고마워! 아래에서 보상을 받아 줘.' : story.say)
-      : '부탁을 모두 들어줬어! 이번 주 퀘스트로 섬을 계속 가꿔 보자.';
-
-  const cells = [];
-  for (let y = 0; y < village.GRID; y++) {
-    for (let x = 0; x < village.GRID; x++) {
-      const c = village.cellState(x, y, info);
-      if (!c.land) { cells.push('<div class="sea" aria-hidden="true"></div>'); continue; }
-      const shade = (x + y) % 2 ? 'b' : 'a';
-      if (c.home) {
-        cells.push(`<div class="tile ${shade} home"><img src="${IMG}/village/earth.webp" alt="지구지킴이"></div>`);
-        continue;
-      }
-      const target = ui.placing && !c.item ? 'target' : '';
-      const label = c.item ? `${village.ITEMS[c.item].name}, 눌러서 치우기` : ui.placing ? '여기에 놓기' : '빈 땅';
-      cells.push(`<button type="button" class="tile ${shade} ${target}" data-act="tile" data-x="${x}" data-y="${y}" aria-label="${label}">
-        ${c.item ? `<svg viewBox="0 0 40 40" aria-hidden="true">${village.ITEM_SVG[c.item]}</svg>` : ''}</button>`);
-    }
-  }
-
-  const questRow = (q) => `
-    <div class="${K.card} flex items-center gap-3 px-4 py-3.5 ${q.claimed ? 'opacity-60' : ''}">
-      <div class="min-w-0 flex-1 space-y-1.5">
-        <div class="text-body-md font-medium">${esc(q.title)}</div>
-        <div class="flex items-center gap-2">${bar((q.progress / q.need) * 100, 'flex-1')}<span class="shrink-0 text-label-md text-on-surface-variant">${q.progress}/${q.need}</span></div>
-        ${q.unlocks && !q.claimed ? `<div class="${K.tiny}">보상으로 ${village.josa(village.ITEMS[q.unlocks].name, '을', '를')} 만들 수 있어요</div>` : ''}
-      </div>
-      ${q.claimed
-        ? `<span class="shrink-0 ${K.small}">받음</span>`
-        : `<button type="button" class="${btn(q.complete ? 'solid' : 'line', 'min-w-[64px] disabled:opacity-50')}" data-act="claim" data-id="${q.key}" ${q.complete ? '' : 'disabled'}>${village.LEAF}${q.reward}</button>`}
-    </div>`;
-  const group = (title, list) => (list.length ? `<section class="space-y-2.5"><h2 class="${K.h2} px-1">${title}</h2>${list.map(questRow).join('')}</section>` : '');
-  const questsHtml = `
-    ${group('리사의 부탁', qs.filter((q) => q.kind === 'story' && !q.claimed))}
-    ${group('오늘', qs.filter((q) => q.kind === 'day'))}
-    ${group('이번 주', qs.filter((q) => q.kind === 'week'))}
-    <p class="px-1 ${K.small}">퀘스트는 실제 미션 기록으로 채워져요. 기록은 <a class="font-medium text-primary underline underline-offset-2" href="#/today">미션</a> 화면에서 남겨요.</p>`;
-
-  const build = `
-    <div class="grid grid-cols-3 gap-2">
-      ${Object.entries(village.ITEMS).map(([key, it]) => {
-        const open = village.isUnlocked(key, info);
-        const afford = info.leaves >= it.cost;
-        const note = !open ? `${village.unlockText(key)} 열려요` : afford ? '' : `나뭇잎 ${it.cost - info.leaves}개 더 필요`;
-        return `<button type="button" class="tap flex flex-col items-center gap-0.5 rounded-2xl border-[1.5px] px-1.5 pb-2.5 pt-2 ${ui.placing === key ? 'border-primary-container bg-secondary-container/60' : 'border-hairline bg-surface-container-lowest'} disabled:cursor-default disabled:bg-surface-container-low" data-act="pick-item" data-id="${key}" ${open && afford ? '' : 'disabled'} aria-pressed="${ui.placing === key}">
-          <svg viewBox="0 0 40 40" aria-hidden="true" class="item-art ${open ? '' : 'locked'}">${village.ITEM_SVG[key]}</svg>
-          <b class="text-body-sm font-semibold">${open ? it.name : '???'}</b>
-          <span class="inline-flex items-center gap-0.5 text-center text-label-sm leading-snug text-on-surface-variant">${note || `${village.LEAF}${it.cost}`}</span>
-        </button>`;
-      }).join('')}
-    </div>
-    <p class="px-1 ${K.small}">놓은 물건을 누르면 치울 수 있어요. 치우면 나뭇잎을 그대로 돌려받아요.</p>`;
-
-  return `
-    <div class="${K.screen} gap-5 pt-3">
-      <a href="#/forest" class="${K.back}">${ms('chevron_left', 'text-[20px]')}나의 숲</a>
-      <div class="-mt-3 flex items-end justify-between gap-2">
-        <div class="space-y-0.5"><h1 class="${K.h1}">지구 마을</h1><p class="${K.meta}">${info.name} · ${info.nextText}</p></div>
-        <div class="flex shrink-0 items-center gap-1.5 rounded-full border border-hairline bg-surface-container-lowest px-3 py-2 text-body-md" aria-label="나뭇잎 ${info.leaves}개">${village.LEAF}<b>${info.leaves}</b></div>
-      </div>
-
-      <div class="flex items-end gap-2">
-        <img src="${IMG}/village/risa.webp" alt="리사" class="w-16 shrink-0">
-        <p class="flex-1 rounded-[1rem_1rem_1rem_0.25rem] border border-amber/20 bg-oat/70 px-4 py-3 font-serif text-body-sm leading-relaxed">${esc(say)}</p>
-      </div>
-
-      <section class="island" aria-label="섬 지도, ${info.size}칸 × ${info.size}칸">${cells.join('')}</section>
-
-      ${ui.placing ? `<div class="flex items-center justify-between rounded-2xl bg-done px-4 py-2 text-body-sm text-primary"><span>${village.ITEMS[ui.placing].name} 놓는 중</span><button type="button" class="${btn('ghost')}" data-act="cancel-place">그만두기</button></div>` : ''}
-
-      <div class="grid grid-cols-2 gap-1 rounded-full bg-surface-container p-1" role="group" aria-label="보기 전환">
-        ${[['quest', `퀘스트${qs.some((q) => q.complete && !q.claimed) ? ' ●' : ''}`], ['build', '꾸미기']].map(([id, label]) => `<button type="button" class="tap h-10 rounded-full text-label-md ${ui.villageTab === id ? 'bg-surface-container-lowest font-semibold text-primary shadow-sm' : 'text-on-surface-variant'}" data-act="village-tab" data-id="${id}" aria-pressed="${ui.villageTab === id}">${label}</button>`).join('')}
-      </div>
-      ${ui.villageTab === 'quest' ? questsHtml : build}
-    </div>`;
-}
-
-function openRemove(x, y, item) {
-  const it = village.ITEMS[item];
-  sheet(`${it.name} 치우기`, `
-    <h2 class="${K.h2}">${village.josa(it.name, '을', '를')} 치울까요?</h2>
-    <p class="${K.small}">나뭇잎 ${it.cost}개를 그대로 돌려받아요. 다른 자리에 다시 놓을 수 있어요.</p>
-    <button type="button" class="${btn('solid', 'mt-2 h-12')}" data-act="remove-item" data-x="${x}" data-y="${y}">치우기</button>
-    <button type="button" class="${btn('ghost')}" data-act="close">그대로 두기</button>`);
-}
-
 // ───────── 라우터 ─────────
 
 const ROUTES = {
-  start: { view: viewStart, tab: null },
   earth: { view: viewEarth, tab: 'earth' },
   today: { view: viewToday, tab: 'today' },
   login: { view: viewLogin, tab: null },
   record: { view: viewRecord, tab: 'record' },
   forest: { view: viewForest, tab: 'today' },
   read: { view: viewRead, tab: 'read' },
-  groups: { view: IS_STUDENT ? viewClass : viewGroups, tab: 'groups' },
-  group: { view: IS_STUDENT ? viewClass : viewGroupHome, tab: 'groups' },
-  feed: { view: viewFeed, tab: 'groups' },
-  village: { view: viewVillage, tab: 'today' }
+  groups: { view: viewGroups, tab: 'groups' },
+  group: { view: viewGroupHome, tab: 'groups' },
+  feed: { view: viewFeed, tab: 'groups' }
 };
 
+// 예전 주소(#/start 대상 고르기, #/village 학생용 지구 마을)는 오늘 화면으로 보낸다
 function currentRoute() {
-  if (!AUDIENCE) return 'start';
   const name = location.hash.replace(/^#\/?/, '') || 'earth';
-  if (name === 'start' || (name === 'village' && !IS_STUDENT)) return 'today';
   return ROUTES[name] ? name : 'today';
 }
 
 // 하단 메뉴: 샘플처럼 지금 탭만 네온 초록 글자로. 맨 앞에 '지구' 탭을 더해 5칸
-const NAV_ICON = IS_STUDENT
-  ? { earth: 'public', today: 'check_circle', record: 'history_edu', groups: 'group', read: 'school' }
-  : { earth: 'public', today: 'eco', record: 'calendar_today', groups: 'groups', read: 'menu_book' };
+const NAV_ICON = { earth: 'public', today: 'eco', record: 'calendar_today', groups: 'groups', read: 'menu_book' };
 
 function renderNav(tab) {
   $nav.classList.toggle('hidden', !tab);
@@ -1132,7 +918,7 @@ function renderNav(tab) {
     <div class="flex h-16 items-center justify-around px-1 pb-[env(safe-area-inset-bottom)]">
       ${['earth', 'today', 'record', 'read', 'groups'].map((t) => {
         const on = t === tab;
-        return `<a href="#/${t}" class="tap flex min-h-[44px] min-w-[56px] flex-col items-center justify-center gap-1 px-2 py-1 ${on ? 'font-semibold text-primary-container' : 'text-on-surface-variant hover:text-on-surface'}" ${on ? 'aria-current="page"' : ''}>
+        return `<a href="#/${t}" class="tap flex min-h-[44px] min-w-[56px] flex-col items-center justify-center gap-1 px-2 py-1 ${on ? 'font-semibold text-primary-container' : 'text-nav-inactive hover:text-on-surface'}" ${on ? 'aria-current="page"' : ''}>
           ${ms(NAV_ICON[t], 'text-[22px]', on)}<span class="text-label-sm tracking-tight">${t === 'earth' ? '지구' : COPY.nav[t]}</span>
         </a>`;
       }).join('')}
@@ -1149,13 +935,14 @@ function render(keepScroll = false) {
   mountClimateCharts($app);
   mountAchievements($app, isDark() ? 'dark' : 'light');
   mountSeries($app);
+  mountPlant($app);
   const earth = $app.querySelector('[data-earth-now]');
   if (earth && window.EarthNow) window.EarthNow.mount(earth, { api: '/api/earth-now', assets: '../images/earth/', title: '지구 지금' });
   renderNav(route.tab);
   window.scrollTo(0, keepScroll ? y : 0);
 }
 
-window.addEventListener('hashchange', () => { closeSheet(); ui.placing = null; render(); });
+window.addEventListener('hashchange', () => { closeSheet(); render(); });
 
 // 화면 안의 모든 버튼은 data-act 하나로 처리한다
 document.addEventListener('click', (e) => {
@@ -1164,12 +951,6 @@ document.addEventListener('click', (e) => {
   const { act, id } = el.dataset;
   const today = store.dateKey();
   switch (act) {
-    case 'choose-audience':
-      chooseAudience(id);
-      return;
-    case 'switch-audience':
-      resetAudience();
-      return;
     case 'toggle':
       store.toggleRecord(today, id);
       break;
@@ -1178,6 +959,9 @@ document.addEventListener('click', (e) => {
       break;
     case 'picker':
       openPicker();
+      return;
+    case 'picker-tab':
+      selectPickerTab(id);
       return;
     case 'add-pick':
       // 시트는 '닫기'를 누를 때까지 열어 두고 그 줄만 바꾼다 (여러 장을 이어서 고를 수 있게)
@@ -1249,50 +1033,6 @@ document.addEventListener('click', (e) => {
     case 'phrase':
       openPhrases(id);
       return;
-    case 'village-tab':
-      ui.villageTab = id;
-      ui.placing = null;
-      break;
-    case 'claim': {
-      const q = village.quests().find((x) => x.key === id);
-      if (q && q.complete && store.claimQuest(q.key, q.reward)) {
-        toast(q.unlocks ? `나뭇잎 ${q.reward}개를 받았어요. ${village.josa(village.ITEMS[q.unlocks].name, '을', '를')} 만들 수 있어요!` : `나뭇잎 ${q.reward}개를 받았어요`);
-      }
-      break;
-    }
-    case 'pick-item':
-      ui.placing = ui.placing === id ? null : id;
-      render(true);
-      if (ui.placing) window.scrollTo({ top: document.querySelector('.island').offsetTop - 80, behavior: 'smooth' });
-      return;
-    case 'cancel-place':
-      ui.placing = null;
-      break;
-    case 'tile': {
-      const x = Number(el.dataset.x);
-      const y = Number(el.dataset.y);
-      const info = village.villageInfo();
-      const c = village.cellState(x, y, info);
-      if (c.item && !ui.placing) {
-        openRemove(x, y, c.item);
-        return;
-      }
-      if (!ui.placing || c.item) return;
-      if (info.leaves < village.ITEMS[ui.placing].cost) {
-        ui.placing = null;
-        break;
-      }
-      store.placeItem(x, y, ui.placing);
-      const after = village.villageInfo();
-      store.raiseVillageLevel(after.level);
-      if (after.level > info.level) toast(`섬이 넓어졌어요! 이제 ${village.josa(after.name, '이에요', '예요')}`);
-      if (after.leaves < village.ITEMS[ui.placing].cost) ui.placing = null;
-      break;
-    }
-    case 'remove-item':
-      store.removeItem(Number(el.dataset.x), Number(el.dataset.y));
-      closeSheet();
-      break;
     case 'send-phrase':
       ui.feedSent = `${FEED.find((p) => p.id === id).name}${COPY.nim}에게 응원을 보냈어요`;
       closeSheet();
@@ -1308,11 +1048,6 @@ document.addEventListener('input', (e) => {
 });
 
 document.addEventListener('submit', (e) => {
-  if (e.target.dataset.act === 'join') {
-    e.preventDefault();
-    toast('학급 참여는 2단계에서 연결돼요. 지금은 이 기기에 저장돼요.');
-    return;
-  }
   if (e.target.dataset.act !== 'reflect') return;
   e.preventDefault();
   const text = e.target.elements.text.value.trim();

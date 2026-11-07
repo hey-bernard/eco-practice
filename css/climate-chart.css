@@ -30,8 +30,8 @@
 .cc-icon { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .cc-label { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
 .cc-value { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.cc-meta { grid-column: 1 / -1; font-size: 12px; color: var(--cc-muted); }
-.cc-note { margin: 8px 0 0; font-size: 12px; line-height: 1.5; color: var(--cc-muted); }
+.cc-meta { grid-column: 1 / -1; font-size: 13px; color: var(--cc-muted); }
+.cc-note { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: var(--cc-muted); }
 .cc-chart { position: relative; margin-top: 10px; }
 .cc-chart svg { display: block; max-width: 100%; overflow: visible; }
 .cc-chart svg:focus { outline: none; }
@@ -39,13 +39,13 @@
 .cc-grid { stroke: var(--cc-grid); stroke-width: 1; shape-rendering: crispEdges; }
 .cc-axis { stroke: var(--cc-axis); stroke-width: 1; shape-rendering: crispEdges; }
 .cc-ref { stroke: #F2F5F8; stroke-width: 1; stroke-dasharray: 4 3; opacity: .7; }
-.cc-tick { fill: var(--cc-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.cc-tick { fill: var(--cc-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .cc-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .cc-dot { stroke: var(--cc-bg); stroke-width: 2; }
 .cc-cross { stroke: rgb(255 255 255 / .6); stroke-width: 1; }
 .cc-hit { fill: transparent; cursor: crosshair; }
 .cc-tip { position: absolute; z-index: 2; pointer-events: none; display: flex; align-items: baseline; gap: 6px; padding: 5px 9px; border-radius: 6px; white-space: nowrap;
-  background: #F2F5F8; color: #0E1824; font-size: 12px; box-shadow: 0 2px 10px rgb(0 0 0 / .35); }
+  background: #F2F5F8; color: #0E1824; font-size: 13px; box-shadow: 0 2px 10px rgb(0 0 0 / .35); }
 .cc-tip[hidden] { display: none; }
 .cc-tip b { font-size: 14px; }
 .cc-tip span { opacity: .75; }
@@ -53,7 +53,7 @@
 /* 색 범례 막대 */
 .cc-legend { margin: 10px 0 0 42px; }
 .cc-legend i { display: block; height: 8px; border-radius: 4px; }
-.cc-legend div { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: var(--cc-muted); font-variant-numeric: tabular-nums; }
+.cc-legend div { display: flex; justify-content: space-between; margin-top: 4px; font-size: 12px; color: var(--cc-muted); font-variant-numeric: tabular-nums; }
 
 /* 넘김 점 (누르면 그 패널로) */
 .cc-dots { display: flex; justify-content: center; gap: 2px; margin-top: -6px; }
@@ -63,11 +63,11 @@
 
 .cc-table summary { cursor: pointer; font-size: 13px; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
 .cc-table-wrap { max-height: 320px; overflow: auto; border-radius: 8px; border: 1px solid var(--cc-grid); }
-.cc-table table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.cc-table table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
 .cc-table th, .cc-table td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--cc-grid); }
 .cc-table thead th { position: sticky; top: 0; background: var(--cc-bg); font-weight: 600; vertical-align: bottom; }
 .cc-table th[scope="row"], .cc-table thead th:first-child { text-align: left; }
 .cc-table small { font-weight: 400; color: var(--cc-muted); }
-.cc-src { font-size: 11px; line-height: 1.6; color: var(--cc-muted); }
+.cc-src { font-size: 12px; line-height: 1.6; color: var(--cc-muted); }
 @media (prefers-reduced-motion: reduce) { .cc-dots button::before { transition: none; } }
 @media (forced-colors: active) { .cc-line { stroke: CanvasText; } .cc-dot { fill: CanvasText; } }

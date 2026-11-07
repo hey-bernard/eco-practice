@@ -1,6 +1,5 @@
-// 앱에서 쓰는 고정 데이터: 실천 카드(성인 30개 · 학생 25개), 숲 단계, 읽기 카드 14편, 예시 모임·학급, 화면 문구
-// 기준: 노션 기획안 6장(2026-10-17). 첫 화면에서 고른 대상(audience.js)에 따라 내보내는 값이 달라진다.
-import { IS_STUDENT } from './audience.js';
+// 앱에서 쓰는 고정 데이터: 실천 카드 30개, 숲 단계, 읽기 카드 14편, 예시 모임, 화면 문구
+// 기준: 노션 기획안 6장(2026-10-17). 2026-11-02부터 학생용을 없애고 일반(성인) 기준 하나로만 쓴다.
 
 // level: easy 쉬움 · normal 보통 · hard 도전
 // stat/unit: 기록 화면 '이번 달 쌓인 변화'에 보여 줄 이름과 단위 (탄소 수치는 쓰지 않음)
@@ -39,36 +38,7 @@ const ADULT_CARDS = [
   { id: 'groupchal', area: '함께하기', title: '모임 공동 챌린지 인증', level: 'normal', hint: '모임과 함께', stat: '공동 챌린지 인증', unit: '번', group: true }
 ];
 
-// 학생(중학생)용 미션: 학교·집·등하굣길에서 할 수 있는 것만. 지구 마을·동물 해금이 쓰는 id(nature, pickup)는 성인과 같게 둔다.
-const STUDENT_CARDS = [
-  { id: 'walk', area: '등하굣길', title: '걸어서 등교하기', level: 'easy', hint: '가까우면 걸어서', stat: '걸어서 등교', unit: '번' },
-  { id: 'stairs', area: '등하굣길', title: '계단으로 다니기', level: 'easy', hint: '엘리베이터 대신', stat: '계단 이용', unit: '번' },
-  { id: 'transit', area: '등하굣길', title: '학원은 버스·지하철로', level: 'normal', hint: '태워 달라고 하기 전에', stat: '대중교통 이용', unit: '번' },
-  { id: 'bike', area: '등하굣길', title: '자전거로 등교하기', level: 'hard', hint: '헬멧 쓰고 안전하게', stat: '자전거 등교', unit: '번' },
-  { id: 'noleftover', area: '급식·간식', title: '급식 남기지 않기', level: 'easy', hint: '먹을 만큼만 받기', stat: '남김없이 먹은 급식', unit: '번' },
-  { id: 'bottle', area: '급식·간식', title: '개인 물병 챙기기', level: 'easy', hint: '편의점 생수 대신', stat: '아낀 페트병', unit: '개' },
-  { id: 'vegday', area: '급식·간식', title: '채식 급식날 맛있게 먹기', level: 'normal', hint: '채소 반찬도 한 입', stat: '채식 급식', unit: '번' },
-  { id: 'snack', area: '급식·간식', title: '포장 적은 간식 고르기', level: 'normal', hint: '낱개 포장 대신 큰 봉지', stat: '포장 줄인 간식', unit: '번' },
-  { id: 'lightsoff', area: '교실·학교', title: '빈 교실 불 끄기', level: 'easy', hint: '이동 수업 갈 때', stat: '빈 교실 불 끄기', unit: '번' },
-  { id: 'paper', area: '교실·학교', title: '이면지·연습장 끝까지 쓰기', level: 'easy', hint: '새 종이 꺼내기 전에', stat: '이면지 쓰기', unit: '번' },
-  { id: 'sorting', area: '교실·학교', title: '교실 분리배출 꼼꼼히', level: 'normal', hint: '헹구고 나눠서', stat: '꼼꼼한 분리배출', unit: '번' },
-  { id: 'aircon', area: '교실·학교', title: '냉난방 켤 때 문 닫기', level: 'normal', hint: '창문과 앞뒷문 확인', stat: '문 닫고 냉난방', unit: '번' },
-  { id: 'tapoff', area: '집', title: '양치할 때 컵 쓰기', level: 'easy', hint: '물 틀어 놓지 않기', stat: '물 잠그기', unit: '번' },
-  { id: 'unplug', area: '집', title: '충전 끝나면 플러그 뽑기', level: 'easy', hint: '휴대폰·태블릿 충전기', stat: '플러그 뽑기', unit: '번' },
-  { id: 'milkpack', area: '집', title: '우유팩 헹궈서 모으기', level: 'normal', hint: '펼쳐서 말리기', stat: '모은 우유팩', unit: '개' },
-  { id: 'shortshower', area: '집', title: '짧게 샤워하기', level: 'normal', hint: '노래 두 곡 안에', stat: '짧은 샤워', unit: '번' },
-  { id: 'bag', area: '집', title: '장 볼 때 장바구니 챙기기', level: 'normal', hint: '가족과 함께', stat: '아낀 비닐봉투', unit: '장' },
-  { id: 'stationery', area: '물건 아끼기', title: '학용품 끝까지 쓰기', level: 'easy', hint: '새로 사기 전에', stat: '끝까지 쓴 학용품', unit: '개' },
-  { id: 'handkerchief', area: '물건 아끼기', title: '손수건 쓰기', level: 'normal', hint: '화장실 휴지 대신', stat: '손수건 쓰기', unit: '번' },
-  { id: 'share', area: '물건 아끼기', title: '교복·참고서 물려받기·나누기', level: 'hard', hint: '선배에게 받고 후배에게 주기', stat: '물려받기·나누기', unit: '건', occasional: true },
-  { id: 'market', area: '물건 아끼기', title: '학교 나눔 장터 참여', level: 'hard', hint: '안 쓰는 물건 가져가기', stat: '나눔 장터', unit: '번', occasional: true },
-  { id: 'nature', area: '자연·함께', title: '학교 화단 관찰 한 줄', level: 'easy', hint: '바라본 자연을 한 줄로', stat: '자연 관찰', unit: '번' },
-  { id: 'stroll', area: '자연·함께', title: '10분 산책하기', level: 'easy', hint: '학원 가는 길에 공원으로', stat: '산책', unit: '번' },
-  { id: 'pickup', area: '자연·함께', title: '쓰레기 3개 줍기', level: 'normal', hint: '등굣길에 눈에 띈 것', stat: '쓰레기 줍기', unit: '번' },
-  { id: 'classchal', area: '자연·함께', title: '반 공동 미션 인증', level: 'normal', hint: '반 친구들과 함께', stat: '공동 미션 인증', unit: '번', group: true }
-];
-
-export const CARDS = IS_STUDENT ? STUDENT_CARDS : ADULT_CARDS;
+export const CARDS = ADULT_CARDS;
 
 export const LEVEL_LABEL = { easy: '쉬움', normal: '보통', hard: '도전' };
 
@@ -84,24 +54,6 @@ export const TOPICS = [
   { id: 'food', label: '먹거리' },
   { id: 'life', label: '소비·이동' }
 ];
-// 학생용 '생각 한 줄' 질문: 같은 원문을 학교·집 생활에 맞춰 묻는다
-const STUDENT_QUESTIONS = {
-  7559: '우리 집 수도꼭지 물은 어디서 와서 어디로 갈까?',
-  7779: '바닷가에서 가장 많이 본 쓰레기는 무엇이었을까?',
-  7558: '내가 해변 하나를 맡는다면 무엇을 하고 싶을까?',
-  7556: '우리 학교 주변에서 요즘 잘 안 보이는 생물이 있을까?',
-  7555: '벌이 사라지면 급식에서 먼저 사라질 과일은 무엇일까?',
-  7553: '오늘 급식 재료 중 우리 지역에서 온 것은 무엇일까?',
-  7552: '학원 가는 길, 버스로 바꿀 수 있는 날은 언제일까?',
-  7462: '고장 나서 버린 물건 중 고칠 수 있었던 것이 있을까?',
-  7402: '작아져서 못 입는 옷, 누구에게 물려줄 수 있을까?',
-  7401: '학교 주변 나무는 여름에 우리에게 어떤 일을 해 줄까?',
-  7400: '지금 계절에 가장 맛있는 급식 반찬은 무엇일까?',
-  7397: '이번 명절에 줄일 수 있는 쓰레기 하나는?',
-  7236: '갯벌이 사라지면 바다와 우리에게 어떤 일이 생길까?',
-  3431: '이번 주 교실에서 버리기 헷갈렸던 쓰레기는?'
-};
-
 // summary: 원문 카드뉴스 본문을 읽고 쓴 2~3문장 요약 (숫자는 원문 그대로)
 export const POSTS = [
   { id: 7559, topic: 'water', date: '2026.6.12', tag: '물', title: '한 번 쓴 물도 다시 쓰는 나라?', intro: '싱가포르가 작은 나라에서 물을 얻는 네 가지 방법', summary: '싱가포르는 빗물, 말레이시아에서 사 오는 물, 바닷물 담수화, 하수를 정화한 NEWater의 네 갈래로 물을 얻어요. NEWater가 물 공급의 약 40%를 맡고 있고, 55%까지 늘릴 계획이에요.', question: '내가 쓰는 물은 어디서 와서 어디로 갈까?', cards: ['shortshower', 'tapoff'] },
@@ -118,7 +70,7 @@ export const POSTS = [
   { id: 7397, topic: 'life', date: '2026.2.13', tag: '소비·먹거리', title: '설명절 밸런스 게임', intro: '명절 이동·음식·포장에서 저탄소 선택 고르기', summary: '설 연휴에 고를 수 있는 저탄소 선택 네 가지예요. 여유 있는 저탄소 귀성길, 내복 입고 실내 온도 한 칸 낮추기, 알맞은 양의 제철·로컬 상차림, 보자기를 다시 쓰는 선물 포장이에요.', question: '이번 명절에 줄일 수 있는 것 하나는?', cards: ['noleftover'] },
   { id: 7236, topic: 'forest', date: '2025.12.12', tag: '숲·자연', title: '바다가 만든 탄소저장고 블루카본', intro: '갯벌과 잘피가 탄소를 저장하는 원리', summary: '블루카본은 갯벌·잘피·염생식물 같은 바다 생태계가 흡수해 저장하는 탄소예요. 육지보다 최대 50배 빠르게 흡수해 수백~수천 년 저장하고, 갯벌이 많은 우리나라는 잠재력이 커요.', question: '우리 동네 갯벌이나 해안은 어떤 역할을 할까?', cards: [] },
   { id: 3431, topic: 'life', date: '2024.5.27', tag: '소비', title: '오늘도 그린 하루 EP.9 · 알아두면 쓸모 있는 분리배출 방법', intro: '폐의약품·프라이팬·컵라면 용기 등 헷갈리는 배출법', summary: '폐의약품은 약국·보건소·행정복지센터 수거함에, 못 쓰는 프라이팬은 묶어서, 오염된 컵라면 용기는 종량제 봉투에 버려요. 헷갈리면 내 손안의 분리배출 앱으로 확인하고, 비우고 헹구고 분리해요.', question: '이번 주 버린 쓰레기 중 헷갈렸던 것은?', cards: ['sorting'] }
-].map((p) => ({ ...p, question: IS_STUDENT ? STUDENT_QUESTIONS[p.id] : p.question, url: PCCCR + p.id }));
+].map((p) => ({ ...p, url: PCCCR + p.id }));
 
 // 뉴스레터 (읽기 › 뉴스레터, 성인용). 기사·기관 발표 원문을 읽고 세 줄로 요약했다. 숫자는 원문 그대로.
 // 새 호를 낼 때는 issue·published·sections만 바꾼다.
@@ -179,7 +131,7 @@ export const NEWSLETTER = {
   ]
 };
 
-// 오늘 화면 맨 위 다짐 문구 (학생·성인 공통)
+// 오늘 화면 맨 위 다짐 문구
 export const PLEDGE = {
   lead: '0.1℃라도 덜 오르면 그만큼 피해가 줄어요. 작은 실천도 그 0.1℃에 보태져요.',
   pledge: '에너지를 아끼고, 일회용품을 줄이며, 걷기나 대중교통을 이용하고, 분리배출을 철저히 하는 생활 속 저탄소 실천을 다짐합니다.'
@@ -187,18 +139,12 @@ export const PLEDGE = {
 
 export const BEE_POST_ID = 7555;
 
-// 3주차 전까지는 정적 예시 데이터 · 성인은 지역·온라인 모임, 학생은 우리 반
+// 3주차 전까지는 정적 예시 데이터 · 지역·온라인 모임
 export const GROUPS = [
   { name: '주말 플로깅 크루', kind: 'off', topic: '플로깅', place: '서울 마포구', members: 8, next: '일요일 오전 10시' },
   { name: '기후 책 읽기 모임', kind: 'on', topic: '기후 공부', place: '온라인', members: 15, next: '격주 수요일 저녁 8시' },
   { name: '제로웨이스트 장보기', kind: 'off', topic: '제로웨이스트', place: '서울 성동구', members: 11, next: '매달 첫째 토요일' }
 ];
-
-export const CLASSROOM = {
-  school: '한빛중학교', name: '2학년 3반', teacher: '김하늘 선생님', members: 28, todayDone: 17,
-  forest: { stage: 3, name: '꽃', pct: 40, next: '나무까지 우리 반 미션 52번 남았어요' },
-  mission: { title: '우유팩 100개 모으기', now: 62, need: 100, due: '금요일', card: 'milkpack' }
-};
 
 const ADULT_FEED = [
   { id: 'a', name: '하늘', bg: '#E3EEE6', when: '오늘 오전', tag: '텀블러', memo: '카페 세 곳에서 텀블러를 썼어요. 한 곳은 할인도 해 줬어요.', base: [3, 2, 1] },
@@ -206,44 +152,16 @@ const ADULT_FEED = [
   { id: 'c', name: '소담', bg: '#DCE8EE', when: '어제', tag: '대중교통', memo: '이번 주는 출퇴근을 전부 지하철로 했어요.', base: [4, 1, 0] }
 ];
 
-const STUDENT_FEED = [
-  { id: 'a', name: '하람', bg: '#E3EEE6', when: '오늘 아침', tag: '걸어서 등교', memo: '비가 와서 우산 쓰고 걸어왔어요. 10분 걸렸어요.', base: [5, 3, 2] },
-  { id: 'b', name: '도윤', bg: '#F3E6D2', when: '어제', tag: '화단 관찰', memo: '운동장 옆 은행나무가 반쯤 노랗게 물들었어요.', base: [4, 1, 3] },
-  { id: 'c', name: '서아', bg: '#DCE8EE', when: '어제', tag: '급식', memo: '오늘 급식은 남김없이 다 먹었어요. 시금치도요!', base: [6, 2, 1] }
-];
+export const FEED = ADULT_FEED;
 
-export const FEED = IS_STUDENT ? STUDENT_FEED : ADULT_FEED;
-
-// 학생용은 친구끼리 쓰는 말투. 자유 댓글 없이 정해진 반응·문구만 쓴다
-export const REACTIONS = IS_STUDENT ? ['응원해', '나도 할래', '멋져'] : ['응원해요', '대단해요', '함께해요'];
-export const PHRASES = IS_STUDENT
-  ? ['오늘도 잘했어', '덕분에 나도 해 볼래', '내일 학교에서 보자', '꾸준한 거 멋지다']
-  : ['오늘도 수고했어요', '덕분에 저도 힘이 나요', '다음 모임에서 만나요', '꾸준한 모습이 멋져요'];
+// 자유 댓글 없이 정해진 반응·문구만 쓴다
+export const REACTIONS = ['응원해요', '대단해요', '함께해요'];
+export const PHRASES = ['오늘도 수고했어요', '덕분에 저도 힘이 나요', '다음 모임에서 만나요', '꾸준한 모습이 멋져요'];
 
 export const REVIEW_DRAFT = '지난 일요일 아침, 멤버 6명이 한강공원 산책로를 걸으며 쓰레기 4봉지를 주웠어요. 가장 많이 나온 건 일회용 컵 뚜껑이었다는 이야기가 나왔고, 다음 모임에서는 텀블러 챌린지를 함께 해 보기로 했어요.';
 
-// 대상에 따라 바뀌는 화면 문구
-export const COPY = IS_STUDENT ? {
-  label: '학생용',
-  nav: { today: '미션', record: '기록', groups: '우리 반', read: '배우기' },
-  todayTitle: '오늘의 미션',
-  question: '이번 주 생각 한 줄',
-  questionBtn: '한 줄 쓰기',
-  picksTitle: '오늘 고른 미션',
-  pickMore: '미션 더 고르기',
-  pickerTitle: '미션 고르기',
-  pickerSub: '고른 미션은 오늘 화면에 더해져요',
-  added: '미션을 더했어요',
-  firstHint: '하나만 눌러도 오늘 기록이 시작돼요.',
-  forestMeta: '미션 한 번이 숲을 한 뼘 키워요. 기록이 끊겨도 나무는 시들지 않아요.',
-  effect: { card: 'bottle', done: (n) => `이번 달 페트병 ${n}개를 아꼈어요`, doneSub: (n) => `물병 기록 ${n}번을 페트병 개수로 바꿨어요`, empty: '물병을 챙기면 아낀 페트병을 세어 줄게요', emptySub: "'개인 물병 챙기기' 미션을 기록해 보세요" },
-  together: { text: '우리 반 보기', href: '#/groups' },
-  readMeta: '기후 공부',
-  readTitle: '배우기',
-  reflectNote: '나만 보기 · 반에 나누기는 선택 (3단계)',
-  nim: ''
-} : {
-  label: '성인용',
+// 화면 문구
+export const COPY = {
   nav: { today: '오늘', record: '기록', groups: '모임', read: '읽기' },
   todayTitle: '오늘의 실천',
   question: '이번 주 성찰 질문',

@@ -16,36 +16,40 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0&display=block" rel="stylesheet">
 <style>
 :root {
-  --c-primary: 0 108 69;
-  --c-primary-container: 0 122 82;
+  /* 라이트 모드: 생기 에코 컬러 (Fresh Lime & Emerald) */
+  --c-primary: 4 120 87;                  /* #047857 primary-hover · 글자용 진한 에메랄드 */
+  --c-primary-container: 5 150 105;       /* #059669 메인 CTA · 완료 버튼 · 하단 탭 활성 */
   --c-on-primary: 255 255 255;
-  --c-on-primary-container: 0 57 31;
-  --c-secondary: 76 99 88;
-  --c-secondary-container: 211 238 224;
-  --c-on-secondary-container: 11 79 49;
-  --c-tertiary: 148 87 10;
-  --c-tertiary-fixed: 255 220 188;
-  --c-tertiary-fixed-dim: 217 147 58;
-  --c-background: 244 247 243;
-  --c-surface: 244 247 243;
-  --c-surface-container-lowest: 255 255 255;
-  --c-surface-container-low: 238 242 237;
-  --c-surface-container: 232 237 231;
-  --c-surface-container-high: 226 232 225;
-  --c-surface-container-highest: 217 224 216;
-  --c-surface-bright: 249 251 248;
-  --c-on-surface: 22 29 25;
-  --c-on-surface-variant: 70 83 75;
-  --c-outline: 111 123 114;
-  --c-outline-variant: 195 206 197;
-  --c-hairline: 225 231 224;
-  --c-oat: 247 238 219;
-  --c-amber: 141 91 18;
-  --c-sage: 143 184 160;
-  --c-done: 230 244 236;
+  --c-on-primary-container: 6 78 59;
+  --c-secondary: 79 107 94;               /* #4F6B5E */
+  --c-secondary-container: 230 247 240;   /* #E6F7F0 primary-light 칩·태그 */
+  --c-on-secondary-container: 4 120 87;
+  --c-tertiary: 180 83 9;                 /* #B45309 앰버 글자 (F59E0B는 흰 바탕 글자로 너무 옅어 한 단계 진하게) */
+  --c-tertiary-fixed: 254 243 199;        /* #FEF3C7 accent-warm-light 보너스 칩 바탕 */
+  --c-tertiary-fixed-dim: 245 158 11;     /* #F59E0B accent-warm */
+  --c-background: 244 251 247;            /* #F4FBF7 bg-app */
+  --c-surface: 244 251 247;
+  --c-surface-container-lowest: 255 255 255; /* #FFFFFF bg-card */
+  --c-surface-container-low: 238 248 242;
+  --c-surface-container: 233 245 238;
+  --c-surface-container-high: 230 247 240;
+  --c-surface-container-highest: 226 236 229; /* #E2ECE5 ring-track */
+  --c-surface-bright: 250 253 251;
+  --c-on-surface: 15 40 30;               /* #0F281E text-main */
+  --c-on-surface-variant: 79 107 94;      /* #4F6B5E text-muted */
+  --c-outline: 139 168 155;               /* #8BA89B text-dim */
+  --c-outline-variant: 208 230 217;
+  --c-hairline: 225 242 232;              /* #E1F2E8 border-card */
+  --c-oat: 254 243 199;                   /* #FEF3C7 */
+  --c-amber: 180 83 9;
+  --c-sage: 167 217 191;
+  --c-done: 230 247 240;
   --c-sky: 228 236 246;
   --c-on-sky: 34 70 110;
   --c-error: 186 26 26;
+  --c-energy: 132 204 22;                 /* #84CC16 accent-energy 활성 도트 */
+  --c-nav-inactive: 148 163 184;          /* #94A3B8 */
+  --shadow-card: 0 4px 16px -2px rgba(5, 150, 105, 0.07), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
   color-scheme: light;
 }
 .dark {
@@ -79,6 +83,8 @@
   --c-sky: 29 42 64;
   --c-on-sky: 156 196 255;
   --c-error: 255 180 171;
+  --c-energy: 0 255 157;
+  --c-nav-inactive: 185 203 188;
   color-scheme: dark;
 }
 </style>
@@ -91,7 +97,7 @@
       var t = pick(), dark = t ? t === 'dark' : mq.matches;
       document.documentElement.classList.toggle('dark', dark);
       var m = document.querySelector('meta[name="theme-color"]');
-      if (m) m.content = dark ? '#0f131d' : '#f4f7f3';
+      if (m) m.content = dark ? '#0f131d' : '#f4fbf7';
     }
     apply();
     mq.addEventListener('change', function () { if (!pick()) { apply(); window.dispatchEvent(new Event('themechange')); } });
@@ -137,7 +143,9 @@
           'done': 'rgb(var(--c-done) / <alpha-value>)',
           'sky': 'rgb(var(--c-sky) / <alpha-value>)',
           'on-sky': 'rgb(var(--c-on-sky) / <alpha-value>)',
-          'error': 'rgb(var(--c-error) / <alpha-value>)'
+          'error': 'rgb(var(--c-error) / <alpha-value>)',
+          'energy': 'rgb(var(--c-energy) / <alpha-value>)',
+          'nav-inactive': 'rgb(var(--c-nav-inactive) / <alpha-value>)'
         },
         borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', '2xl': '0.75rem', full: '9999px' },
         fontFamily: {
@@ -149,11 +157,12 @@
           'headline-xl': ['28px', { lineHeight: '36px', letterSpacing: '-0.01em' }],
           'headline-lg': ['22px', { lineHeight: '28px' }],
           'headline-md': ['18px', { lineHeight: '24px' }],
+          // 모바일 가독성 기준(2026-11-02): 설명 문장 14px, 본문 15px, 버튼 13px, 작은 라벨 12px 이상
           quote: ['16px', { lineHeight: '26px' }],
-          'body-md': ['14px', { lineHeight: '20px' }],
-          'body-sm': ['12px', { lineHeight: '16px' }],
-          'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.02em' }],
-          'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.03em' }],
+          'body-md': ['15px', { lineHeight: '22px' }],
+          'body-sm': ['14px', { lineHeight: '20px' }],
+          'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0.01em' }],
+          'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.02em' }],
           metric: ['24px', { lineHeight: '32px', fontWeight: '700' }],
           'metric-lg': ['36px', { lineHeight: '44px', fontWeight: '700' }]
         }
@@ -175,6 +184,7 @@
 <noscript>이 앱은 자바스크립트가 필요합니다.</noscript>
 <script src="../js/earth-now-widget.js"></script>
 <script src="../js/achievements-widget.js"></script>
+<script src="../js/vendor/lottie_light.min.js"></script>
 <script type="module" src="app.js"></script>
 </body>
 </html>

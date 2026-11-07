@@ -39,17 +39,17 @@
 .enw .en-tabs [aria-selected="true"] i::after{animation:enw-run 8s linear forwards}
 .enw.manual .en-tabs [aria-selected="true"] i::after{animation:none;width:100%}
 .enw .en-scene{display:flex;flex-direction:column;gap:8px;animation:enw-in .7s ease both}
-.enw .en-kicker{font-size:12px;letter-spacing:.04em;color:#C9D3E2}
+.enw .en-kicker{font-size:13px;letter-spacing:.04em;color:#C9D3E2}
 .enw .en-num{font-size:64px;font-weight:500;line-height:1;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 0 28px color-mix(in srgb,var(--accent) 55%,transparent)}
 .enw .en-num small{font-size:22px;margin-left:4px;color:var(--accent)}
 .enw .en-sub{font-size:15px;line-height:1.55;color:#F2F5FA;max-width:30em}
-.enw .en-cap{font-size:11px;line-height:1.5;color:#8796AD}
-.enw .en-when{margin-top:auto;font-size:11px;color:#8796AD;text-align:right}
+.enw .en-cap{font-size:12px;line-height:1.5;color:#8796AD}
+.enw .en-when{margin-top:auto;font-size:12px;color:#8796AD;text-align:right}
 .enw .en-chart{position:relative}
 .enw .en-chart svg{width:100%;height:auto;display:block;touch-action:pan-y}
 .enw .en-chart .grid line{stroke:rgba(255,255,255,.08)}
 .enw .en-chart .years line{stroke:rgba(255,255,255,.3)}
-.enw .en-chart text{font-size:9.5px;fill:#8796AD;font-family:inherit}
+.enw .en-chart text{font-size:11px;fill:#8796AD;font-family:inherit}
 .enw .en-chart .line{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 3px rgba(255,255,255,.22));stroke-dasharray:1;stroke-dashoffset:1;animation:enw-draw 1.6s ease-out .2s forwards}
 .enw .en-chart .dot{stroke:#0A1020;stroke-width:2;animation:enw-pulse 2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 .enw .en-chart .hdot{fill:#F2F5FA;stroke:#0A1020;stroke-width:2}
@@ -58,15 +58,15 @@
 .enw .en-tip[hidden]{display:none}
 .enw .en-legend{margin:4px 3.1% 0 10.6%}
 .enw .en-legend i{display:block;height:8px;border-radius:4px}
-.enw .en-legend div{position:relative;height:16px;margin-top:3px;font-size:10px;color:#8796AD;font-variant-numeric:tabular-nums}
+.enw .en-legend div{position:relative;height:16px;margin-top:3px;font-size:11px;color:#8796AD;font-variant-numeric:tabular-nums}
 .enw .en-legend span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
 .enw .en-legend span:first-child{transform:none}.enw .en-legend span:last-child{transform:translateX(-100%)}
-.enw details summary{font-size:12px;color:#8796AD;cursor:pointer;min-height:32px;display:flex;align-items:center}
-.enw details table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+.enw details summary{font-size:13px;color:#8796AD;cursor:pointer;min-height:32px;display:flex;align-items:center}
+.enw details table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
 .enw details td,.enw details th{text-align:left;padding:4px;border-top:1px solid rgba(255,255,255,.1);color:#C9D3E2}
 .enw details tbody{display:block;max-height:180px;overflow:auto}
 .enw details thead,.enw details tr{display:table;width:100%;table-layout:fixed}
-.enw-sources{font-size:12px;color:#6B7686;margin:8px 0 0}.enw-sources a{color:inherit}
+.enw-sources{font-size:13px;color:#6B7686;margin:8px 0 0}.enw-sources a{color:inherit}
 @media (max-width:380px){.enw .en-tabs{max-width:none;gap:8px}.enw .en-tabs button{font-size:12px}}
 @keyframes enw-twinkle{from{opacity:.55}to{opacity:.95}}
 @keyframes enw-blink{50%{opacity:.25}}

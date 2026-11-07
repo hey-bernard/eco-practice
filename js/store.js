@@ -1,9 +1,8 @@
 // 기기 저장(localStorage). 2단계에서 로그인·동기화가 붙으면 이 모듈만 바꾼다.
 import { CARDS } from './data.js';
-import { IS_STUDENT } from './audience.js';
 
-// 학생용과 성인용 기록은 따로 저장한다 (성인용은 예전 키를 그대로 써서 기존 기록 유지)
-const KEY = IS_STUDENT ? 'eco-practice-student-v1' : 'eco-practice-v1';
+// 예전 성인용 키를 그대로 써서 기존 기록을 유지한다
+const KEY = 'eco-practice-v1';
 
 const empty = () => ({
   records: {},     // { 'YYYY-MM-DD': [cardId, ...] } 그날 한 실천

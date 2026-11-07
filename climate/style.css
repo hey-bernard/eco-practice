@@ -27,8 +27,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* 기록 달력 */
 .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
-.cal > div { height: 42px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 12px; }
-.cal small { font-size: 10px; font-family: "JetBrains Mono", monospace; color: rgb(var(--c-on-secondary-container)); }
+.cal > div { height: 42px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; }
+.cal small { font-size: 11px; font-family: "JetBrains Mono", monospace; color: rgb(var(--c-on-secondary-container)); }
 .cal .past { background: rgb(var(--c-surface-container-low)); }
 .cal .some { background: rgb(var(--c-secondary-container)); }
 .cal .many { background: rgb(var(--c-primary-container)); color: rgb(var(--c-on-primary)); font-weight: 700; }
@@ -58,6 +58,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .dark .sheet .dim { background: rgba(0, 0, 0, .6); }
 .sheet .panel { position: relative; width: 100%; max-width: 560px; max-height: 80dvh; overflow-y: auto; background: rgb(var(--c-surface) / .97); backdrop-filter: blur(16px); box-shadow: 0 -8px 30px rgba(0,0,0,.12);
   border-radius: 1rem 1rem 0 0; padding: 24px 20px 28px; display: flex; flex-direction: column; gap: 10px; }
+/* 높이 고정 시트(실천 카드 고르기): 탭을 바꿔도 위치가 그대로. 남는 공간은 시트 맨 아래로 간다 */
+.sheet .panel.fixed-h { height: min(80dvh, 760px); }
+.sheet .panel.fixed-h > * { flex-shrink: 0; } /* 내용이 넘쳐도 손잡이 등이 눌려 줄지 않게 (넘치면 시트 안에서 스크롤) */
 
 /* 알림 (디자인 시스템: 오트 베이지 + 앰버 글자) */
 .toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 60; width: calc(100% - 40px); max-width: 480px;
@@ -87,3 +90,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* 읽기 › 기초부터 읽기 색 (css/series.css의 --srs-* 변수) */
 :root { --srs-bg: rgb(var(--c-surface)); --srs-surface: rgb(var(--c-surface-container-lowest)); --srs-surface-2: rgb(var(--c-surface-container-low)); --srs-line: rgb(var(--c-outline-variant)); --srs-ink: rgb(var(--c-on-surface)); --srs-ink-2: rgb(var(--c-on-surface-variant)); --srs-accent: rgb(var(--c-primary)); --srs-on-accent: rgb(var(--c-on-primary)); --srs-accent-soft: rgb(var(--c-secondary-container)); --srs-radius: 12px; }
 .dark { --srs-warm: #ffb86b; --srs-cool: #6fb4ff; }
+
+/* 라이트 모드: 부드러운 그린 앰비언트 그림자 · 활성 도트는 라임 */
+html:not(.dark) .shadow-md, html:not(.dark) .shadow-sm { box-shadow: var(--shadow-card); }
+html:not(.dark) .live-dot { background-color: rgb(var(--c-energy)); }
+
+/* 오늘 탭 실천 식물 (Lottie): 기록하면 화분이 살짝 튀어 오른다 */
+.plant-box svg { display: block; }
+.plant-box.plant-pop { animation: plant-pop .6s cubic-bezier(.3,1.6,.5,1); transform-origin: 50% 100%; }
+@keyframes plant-pop { 0% { transform: scale(1); } 35% { transform: scale(1.06, .96); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .plant-box.plant-pop { animation: none; } }

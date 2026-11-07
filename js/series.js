@@ -238,7 +238,6 @@ function episodeHTML(e) {
     <article class="srs-r-body">
       <p class="srs-r-k"><span class="srs-lv srs-lv${s.level}">${s.level}단계 · ${s.levelName}</span> 약 ${minutes(e)}분</p>
       <h1 class="srs-r-h" id="srs-rt" tabindex="-1">${esc(e.title)}</h1>
-      <section class="srs-sum" aria-label="3줄 요약"><b>3줄 요약</b><ul>${e.sum.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></section>
       <div class="srs-nums">${e.nums.map(([v, t]) => `<div><b>${esc(v)}</b><span>${esc(t)}</span></div>`).join('')}</div>
       ${figsAt(-1)}
       ${e.body.map((p, i) => `<p class="srs-p">${rich(p)}</p>${figsAt(i)}`).join('')}

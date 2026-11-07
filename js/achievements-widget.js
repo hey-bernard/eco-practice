@@ -54,9 +54,9 @@
 .acw-sec{display:flex;flex-direction:column;gap:10px}
 .acw-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .acw-head h3{margin:0;font-size:17px;font-weight:700;letter-spacing:-.4px}
-.acw-note{font-size:12px;color:var(--acw-ink-2)}
+.acw-note{font-size:13px;color:var(--acw-ink-2)}
 .acw-empty{margin:0;font-size:13px}
-.acw-chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--acw-chip);color:var(--acw-chip-ink)}
+.acw-chip{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--acw-chip);color:var(--acw-chip-ink)}
 .acw-bar{height:12px;border-radius:6px;background:var(--acw-surface-2);overflow:hidden;border:1px solid var(--acw-line)}
 .acw-bar>i{display:block;height:100%;background:var(--acw-green);border-radius:6px;transition:width .4s ease}
 .acw-done{background:var(--acw-surface);border:1px solid var(--acw-line);border-radius:16px;padding:4px 14px}
@@ -65,7 +65,7 @@
 .acw-goal{display:flex;flex-direction:column;gap:6px;padding:12px 14px 10px;border:1px solid var(--acw-line);border-radius:var(--acw-radius);background:var(--acw-surface);box-shadow:var(--acw-shadow)}
 .acw-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .acw-top .t{font-weight:700}
-.acw-num{font-size:12px;color:var(--acw-ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.acw-num{font-size:13px;color:var(--acw-ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .acw-race{position:relative;height:38px}
 .acw-race .lane{position:absolute;left:0;right:10px;bottom:4px;height:8px;border-radius:4px;background:repeating-linear-gradient(90deg,var(--acw-surface-2) 0 12px,var(--acw-line) 12px 14px)}
 .acw-race .trail{display:block;height:100%;width:calc(var(--p) * 1%);border-radius:4px;background:linear-gradient(90deg,var(--acw-green-soft),var(--acw-green));animation:acw-trail 1.3s cubic-bezier(.2,.7,.3,1) both}
