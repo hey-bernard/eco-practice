@@ -137,7 +137,11 @@ export const PLEDGE = {
   pledge: '에너지를 아끼고, 일회용품을 줄이며, 걷기나 대중교통을 이용하고, 분리배출을 철저히 하는 생활 속 저탄소 실천을 다짐합니다.'
 };
 
+// 나의 숲 '벌' 해금: 예전엔 카드뉴스 7555('벌이 사라지면')를 읽어야 했다. 2026-11-07 카드뉴스 목록을 화면에서 빼면서
+// 읽기 '기초부터 읽기'의 생태계 변화 편으로 바꿨다 (js/series-data.js). 예전 기록(reads[7555])도 계속 인정한다.
 export const BEE_POST_ID = 7555;
+export const BEE_SERIES_ID = 'B-3';
+export const BEE_SERIES_TITLE = '한반도의 미래와 적응';
 
 // 3주차 전까지는 정적 예시 데이터 · 지역·온라인 모임
 export const GROUPS = [

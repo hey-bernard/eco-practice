@@ -1,6 +1,6 @@
 // Stitch 샘플 '지구 기후 모니터 · Climate Home'을 입힌 네 번째 디자인. 첫 탭 '지구'에서 기후 지표를 보고 오늘 실천으로 이어진다.
 // 지구 화면과 5칸 메뉴로 이루어진 하나뿐인 버전이다. 데이터·저장은 공용 모듈(../js)을 쓴다.
-import { CARDS, LEVEL_LABEL, STAGES, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
+import { CARDS, LEVEL_LABEL, STAGES, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, BEE_SERIES_ID, BEE_SERIES_TITLE, GROUPS, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import * as store from '../js/store.js';
 import * as auth from '../js/auth.js';
 import * as sync from '../js/sync.js';
@@ -166,8 +166,7 @@ function viewEarth() {
   const prefix = monthPrefix();
   const monthTotal = Object.entries(store.getState().records).filter(([k]) => k.startsWith(prefix)).reduce((n, [, list]) => n + list.length, 0);
   const f = forestInfo(store.totalPoints());
-  const post = weeklyPost();
-  const label = 'font-mono text-label-sm text-on-surface-variant';
+  const label ='font-mono text-label-sm text-on-surface-variant';
 
   return `
     <div class="${K.screen}">
@@ -219,16 +218,6 @@ function viewEarth() {
           </div>
           ${ms('arrow_forward', 'text-[20px] text-on-surface-variant group-hover:text-primary-container')}
         </a>
-        <a href="#/read" class="tap group flex items-center justify-between gap-3 rounded-xl bg-surface-container-high/90 p-4 shadow-md hover:bg-surface-bright">
-          <div class="flex min-w-0 items-center gap-3">
-            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-tertiary/15 text-tertiary">${ms('travel_explore', 'text-[22px]')}</div>
-            <div class="flex min-w-0 flex-col">
-              <span class="font-serif text-[16px] font-semibold group-hover:text-tertiary">이번 주 읽기 · ${esc(post.tag)}</span>
-              <span class="truncate text-body-sm text-on-surface-variant">${esc(post.title)}</span>
-            </div>
-          </div>
-          ${ms('arrow_forward', 'text-[20px] text-on-surface-variant group-hover:text-tertiary')}
-        </a>
         <p class="flex items-start gap-1.5 text-body-sm text-on-surface-variant">${ms('spa', 'mt-0.5 text-[16px] text-primary-container')}<span>0.1℃라도 덜 오르면 그만큼 피해가 줄어요. 작은 실천도 그 0.1℃에 보태져요.</span></p>
       </section>
 
@@ -256,7 +245,6 @@ function viewToday() {
   const picks = store.getPicks(today);
   const points = store.totalPoints();
   const f = forestInfo(points);
-  const post = weeklyPost();
   const prefix = monthPrefix();
   const saved = store.countCard(COPY.effect.card, prefix);
   const doneCount = picks.filter((id) => store.isDone(today, id)).length;
@@ -398,25 +386,6 @@ function viewToday() {
         <p class="mt-1 text-body-sm leading-relaxed text-on-surface-variant">${mission.body}</p>
         <div class="mt-3 flex items-center gap-2">${bar(mission.pct)}<span class="num shrink-0 text-[12px] text-on-surface">${mission.count}</span></div>
         <a href="${mission.href}" class="tap glow mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary-container px-4 py-3.5 font-serif text-[15px] font-bold text-on-primary">${ms(mission.icon, 'text-[20px]', true)}${mission.btn}</a>
-      </section>
-
-      <section class="flex flex-col gap-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-1.5">${ms('public', 'text-[20px] text-primary-container')}<h2 class="${K.h2}">이번 주 읽기</h2></div>
-          <span class="font-mono text-label-sm text-on-surface-variant">국가기후위기대응위원회</span>
-        </div>
-        <a href="#/read" class="tap ${K.card} flex flex-col gap-2.5 p-4">
-          <div class="flex items-center justify-between">
-            <span class="rounded bg-surface-container-highest px-2 py-0.5 font-mono text-[12px] text-on-surface-variant">${esc(post.tag)}</span>
-            <span class="font-mono text-[12px] text-on-surface-variant">${post.date}</span>
-          </div>
-          <h4 class="font-serif text-[15px] font-semibold leading-snug">${esc(post.title)}</h4>
-          <p class="line-clamp-2 text-body-sm text-on-surface-variant">${esc(post.intro)}</p>
-          <div class="flex items-center justify-between gap-2 pt-1">
-            <span class="flex items-center gap-1 font-mono text-[12px] text-tertiary">${ms('edit_note', 'text-[14px]')}${COPY.question}</span>
-            ${ms('arrow_outward', 'text-[18px] text-on-surface-variant')}
-          </div>
-        </a>
       </section>
     </div>`;
 }
@@ -672,7 +641,8 @@ function viewForest() {
   const { reads } = store.getState();
 
   const animals = [
-    { name: '벌', icon: 'emoji_nature', cond: "꽃 단계에서 '벌이 사라지면' 카드 읽기", now: reads[BEE_POST_ID] || 0, need: 1, gate: f.si >= 3 },
+    // 벌: 읽기 '기초부터 읽기'의 생태계 변화 글. 예전 카드뉴스('벌이 사라지면')를 읽은 기록도 그대로 인정한다
+    { name: '벌', icon: 'emoji_nature', cond: `꽃 단계에서 읽기 '${BEE_SERIES_TITLE}' 편 읽기`, now: (reads[`s:${BEE_SERIES_ID}`] || 0) + (reads[BEE_POST_ID] || 0), need: 1, gate: f.si >= 3 },
     { name: '새', icon: 'raven', cond: `'${cardById.nature.title}' 기록 3회`, now: store.countCard('nature'), need: 3, gate: true },
     { name: '다람쥐', icon: 'pets', cond: "'쓰레기 3개 줍기' 기록 5회", now: store.countCard('pickup'), need: 5, gate: true }
   ].map((a) => ({ ...a, ok: a.gate && a.now >= a.need }));
@@ -683,7 +653,7 @@ function viewForest() {
       <button type="button" class="${btn('line')}" data-act="demo" data-id="${COPY.effect.card}">실천 기록 +1점</button>
       <button type="button" class="${btn('line')}" data-act="demo" data-id="nature">자연 관찰 +1회</button>
       <button type="button" class="${btn('line')}" data-act="demo" data-id="pickup">쓰레기 줍기 +1회</button>
-      <button type="button" class="${btn('line')}" data-act="demo-bee">벌 카드 읽기</button>
+      <button type="button" class="${btn('line')}" data-act="demo-bee">벌 읽기 편 읽기</button>
     </div>
     <p class="${K.tiny}">시연 모드 버튼입니다. 누른 만큼 오늘 기록이 더해집니다.</p>` : '';
 
@@ -1053,14 +1023,11 @@ document.addEventListener('click', (e) => {
       store.addDemoRecord(id);
       break;
     case 'demo-bee':
-      store.markRead(BEE_POST_ID);
+      store.markRead(`s:${BEE_SERIES_ID}`);
       break;
     case 'read-tab':
       ui.readTab = id;
       break;
-    case 'read-post':
-      store.markRead(Number(id)); // 링크는 그대로 새 창으로 열린다
-      return;
     case 'group-mode':
       ui.groupMode = id;
       break;
