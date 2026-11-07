@@ -27,15 +27,43 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* 기록 달력 */
 .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
-.cal > div { height: 42px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; }
-.cal small { font-size: 11px; font-family: "JetBrains Mono", monospace; color: rgb(var(--c-on-secondary-container)); }
-.cal .past { background: rgb(var(--c-surface-container-low)); }
-.cal .some { background: rgb(var(--c-secondary-container)); }
-.cal .many { background: rgb(var(--c-primary-container)); color: rgb(var(--c-on-primary)); font-weight: 700; }
-.dark .cal .many { box-shadow: 0 0 12px -2px rgba(0,255,157,.5); }
-.cal .many small { color: rgb(var(--c-on-primary)); }
+.cal > div { position: relative; height: 46px; border-radius: 12px; font-size: 12px; }
+.cal .cal-n { position: absolute; left: 6px; top: 3px; line-height: 1; }
+.cal .past { background: rgb(var(--c-surface-container-low) / .6); }
+.cal .has { background: rgb(var(--c-surface-container-lowest) / .55); }
+.cal .has .cal-n { color: rgb(var(--c-on-surface-variant)); }
 .cal .future { color: rgb(var(--c-outline) / .7); }
 .cal .today { box-shadow: inset 0 0 0 2px rgb(var(--c-on-surface)); font-weight: 700; }
+.cal .today .cal-n { color: rgb(var(--c-on-surface)); }
+
+/* 달력 배경 그림 (currentColor = 테마 초록) */
+.cal-bg { color: rgb(var(--c-primary-container)); }
+.cal-bg .sun { fill: rgb(var(--c-tertiary-fixed-dim, 255 196 92)); opacity: .22; }
+.cal-bg .cloud { fill: currentColor; opacity: .08; }
+.cal-bg .hill2 { fill: currentColor; opacity: .09; }
+.cal-bg .hill1 { fill: currentColor; opacity: .14; }
+.cal-bg .tree { fill: currentColor; opacity: .2; }
+.cal-bg .grass { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; opacity: .28; }
+.dark .cal-bg .hill1 { opacity: .1; }
+.dark .cal-bg .tree { opacity: .14; }
+
+/* 도장: 달력(기록)과 읽기에서 같이 쓴다. 겹 테두리 원 + 아이콘, 살짝 기울어진 잉크 */
+.stamp { --ink: rgb(var(--c-primary-container)); position: absolute; left: 50%; top: 56%; width: 32px; height: 32px; translate: -50% -50%; rotate: var(--r, -8deg);
+  display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--ink); outline: 1px solid var(--ink); outline-offset: -6px; color: var(--ink); opacity: .9; }
+.stamp .ms { font-size: 17px; }
+.stamp.flower { --ink: rgb(var(--c-tertiary)); width: 36px; height: 36px; border-width: 2.5px; }
+.stamp.flower .ms { font-size: 20px; }
+.stamp.mini { position: static; translate: none; width: 18px; height: 18px; border-width: 1.5px; outline: 0; }
+.stamp.mini .ms { font-size: 11px; }
+.stamp.new { animation: stamp-in .55s cubic-bezier(.2, 1.5, .4, 1) both; }
+@keyframes stamp-in { 0% { scale: 1.9; opacity: 0; } 55% { scale: .92; opacity: 1; } 100% { scale: 1; opacity: .9; } }
+
+/* 오늘 탭: 기록하면 카드가 흐려지며 접히고, 기록한 줄이 나타난다 */
+.card-out { height: 0 !important; margin-top: -12px; padding-top: 0 !important; padding-bottom: 0 !important; opacity: 0; overflow: hidden;
+  transition: opacity .2s ease, height .3s ease .1s, margin .3s ease .1s, padding .3s ease .1s; }
+.row-in { animation: row-in .35s ease both; }
+@keyframes row-in { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .stamp.new, .row-in { animation: none; } }
 
 /* 지구 마을 섬 */
 .island { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-radius: .75rem; overflow: hidden; padding: 8px;

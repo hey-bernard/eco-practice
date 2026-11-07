@@ -45,7 +45,7 @@ function seriesItem(s) {
             <summary>
               <span class="srs-lv srs-lv${s.level}">${s.level}단계 · ${s.levelName}</span>
               <span class="srs-title">${esc(s.title)}</span>
-              <span class="srs-meta">${done}/${s.episodes.length}편 읽음</span>
+              <span class="srs-meta">${done === s.episodes.length ? `<span class="srs-stamp sm" style="--r:-10deg" aria-label="${done}편 모두 읽음">완독</span>` : `${done}/${s.episodes.length}편 읽음`}</span>
               <span class="srs-bar" aria-hidden="true"><i style="width:${(done / s.episodes.length) * 100}%"></i></span>
             </summary>
             <p class="srs-desc">${esc(s.desc)}</p>
@@ -54,7 +54,7 @@ function seriesItem(s) {
               <li><button type="button" class="srs-ep" data-srs-open="${e.id}">
                 <span class="srs-n">${i + 1}</span>
                 <span class="srs-ep-t">${esc(e.title)}<small>약 ${minutes(e)}분${isRead(e.id) ? ' · 읽음' : ''}</small></span>
-                ${isRead(e.id) ? '<span class="srs-check" aria-label="읽음">✓</span>' : ''}
+                ${isRead(e.id) ? `<span class="srs-stamp" style="--r:${((i * 37) % 23) - 11}deg" role="img" aria-label="읽음 도장">읽음</span>` : ''}
               </button></li>`).join('')}
             </ol>
             <button type="button" class="srs-go" data-srs-open="${(next || s.episodes[0]).id}">${!next ? '처음부터 다시 읽기' : done ? `이어 읽기 · ${nextN}편` : '1편부터 읽기'}</button>
@@ -221,7 +221,8 @@ let reader = null;   // 열려 있는 읽기 창
 let opener = null;   // 닫은 뒤 초점을 돌려줄 버튼
 let pushed = false;  // 뒤로 가기로 닫히도록 기록을 하나 넣었는지
 
-function episodeHTML(e) {
+// fresh: 이번에 처음 읽은 편이면 도장을 '쾅' 찍는다
+function episodeHTML(e, fresh = false) {
   const s = e.series;
   const total = s.episodes.length;
   const idx = EPISODES.indexOf(e);
@@ -236,7 +237,7 @@ function episodeHTML(e) {
       <span class="srs-r-where">${esc(s.title)} · ${e.n}/${total}</span>
     </div>
     <article class="srs-r-body">
-      <p class="srs-r-k"><span class="srs-lv srs-lv${s.level}">${s.level}단계 · ${s.levelName}</span> 약 ${minutes(e)}분</p>
+      <p class="srs-r-k"><span class="srs-lv srs-lv${s.level}">${s.level}단계 · ${s.levelName}</span> 약 ${minutes(e)}분<span class="srs-stamp lg${fresh ? ' new' : ''}" style="--r:-12deg" role="img" aria-label="${fresh ? '읽음 도장을 찍었어요' : '읽은 편'}">읽음</span></p>
       <h1 class="srs-r-h" id="srs-rt" tabindex="-1">${esc(e.title)}</h1>
       <div class="srs-nums">${e.nums.map(([v, t]) => `<div><b>${esc(v)}</b><span>${esc(t)}</span></div>`).join('')}</div>
       ${figsAt(-1)}
@@ -258,6 +259,7 @@ function episodeHTML(e) {
 function openEpisode(id, from) {
   const e = byId[id];
   if (!e) return;
+  const fresh = !isRead(id);
   store.markRead(`s:${id}`);
   if (!reader) {
     opener = from || document.activeElement;
@@ -270,7 +272,7 @@ function openEpisode(id, from) {
     document.documentElement.classList.add('srs-lock');
     try { history.pushState({ srs: true }, ''); pushed = true; } catch { pushed = false; }
   }
-  reader.innerHTML = episodeHTML(e);
+  reader.innerHTML = episodeHTML(e, fresh);
   reader.scrollTop = 0;
   reader.querySelector('#srs-rt').focus({ preventScroll: true });
 }

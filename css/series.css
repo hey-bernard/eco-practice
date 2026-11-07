@@ -42,6 +42,15 @@
 .srs-ep-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 14px; font-weight: 600; line-height: 1.45; }
 .srs-ep-t small { font-size: 13px; font-weight: 400; color: var(--srs-ink-2); }
 .srs-check { flex: none; color: var(--srs-accent-text); font-weight: 700; }
+/* 읽음 도장: 겹 테두리 원 안에 '읽음', 살짝 기울어진 잉크 */
+.srs-stamp { flex: none; display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; rotate: var(--r, -8deg);
+  border: 2px solid var(--srs-accent-text); outline: 1px solid var(--srs-accent-text); outline-offset: -6px;
+  color: var(--srs-accent-text); font-size: 11px; font-weight: 800; letter-spacing: 1px; line-height: 1; opacity: .88; }
+.srs-stamp.sm { width: 34px; height: 34px; font-size: 10px; color: var(--srs-warm); border-color: var(--srs-warm); outline-color: var(--srs-warm); }
+.srs-stamp.lg { width: 52px; height: 52px; margin-left: auto; font-size: 14px; letter-spacing: 2px; border-width: 2.5px; outline-offset: -7px; }
+.srs-stamp.new { animation: srs-stamp-in .6s cubic-bezier(.2, 1.5, .4, 1) .25s both; }
+@keyframes srs-stamp-in { 0% { scale: 2; opacity: 0; } 55% { scale: .9; opacity: 1; } 100% { scale: 1; opacity: .88; } }
+@media (prefers-reduced-motion: reduce) { .srs-stamp.new { animation: none; } }
 .srs-go { display: block; width: calc(100% - 32px); margin: 8px 16px 16px; min-height: 44px; border: 0; border-radius: calc(var(--srs-radius) - 4px); background: var(--srs-accent); color: var(--srs-on-accent); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
 
 /* 읽기 창 */

@@ -1,6 +1,6 @@
 // Stitch 샘플 '지구 기후 모니터 · Climate Home'을 입힌 네 번째 디자인. 첫 탭 '지구'에서 기후 지표를 보고 오늘 실천으로 이어진다.
 // 지구 화면과 5칸 메뉴로 이루어진 하나뿐인 버전이다. 데이터·저장은 공용 모듈(../js)을 쓴다.
-import { CARDS, LEVEL_LABEL, STAGES, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, BEE_SERIES_ID, BEE_SERIES_TITLE, GROUPS, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
+import { CARDS, LEVEL_LABEL, STAGES, POSTS, NEWSLETTER, BEE_POST_ID, BEE_SERIES_ID, BEE_SERIES_TITLE, GROUPS, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import * as store from '../js/store.js';
 import * as auth from '../js/auth.js';
 import * as sync from '../js/sync.js';
@@ -31,7 +31,8 @@ const ui = {
   feedSent: '',
   keep: {},          // 입력 중인 값 (data-keep): 화면을 다시 그려도 남게
   loginReturn: '',   // 로그인 뒤 돌아갈 화면
-  confirmFn: null    // 확인 시트에서 '예'를 누르면 할 일
+  confirmFn: null,   // 확인 시트에서 '예'를 누르면 할 일
+  justDone: null     // 방금 기록한 카드 (기록한 줄에 나타나는 효과)
 };
 const keep = (k, d = '') => (ui.keep[k] ?? d);
 
@@ -275,12 +276,24 @@ function viewToday() {
   };
   const areaIcon = (area) => CARD_ICON[picks.find((id) => cardById[id].area === area)] || 'eco';
 
-  const cards = shown.map((id) => {
+  // 기록 전 카드만 큰 카드로. 기록하면 그 카드가 흐려지며 접히고(아래 카드가 올라옴) '오늘 기록한 실천' 줄로 옮겨 간다
+  const todo = shown.filter((id) => !store.isDone(today, id));
+  const doneIds = shown.filter((id) => store.isDone(today, id));
+  const doneRows = doneIds.map((id) => `
+    <div class="${K.card} flex min-h-[56px] items-center gap-3 px-4 py-2 ${ui.justDone === id ? 'row-in' : ''}">
+      ${ms(CARD_ICON[id] || 'eco', 'text-[20px] text-primary-container', true)}
+      <span class="min-w-0 flex-1 truncate text-body-md font-medium">${esc(cardById[id].title)}</span>
+      ${shareBtn(id)}
+      <button type="button" class="${btn('line', 'min-h-[36px] px-3')}" data-act="toggle" data-id="${id}" aria-pressed="true" aria-label="${esc(cardById[id].title)} 기록 취소">${ms('check', 'text-[16px] text-primary-container')}했어요</button>
+    </div>`).join('');
+  ui.justDone = null;
+
+  const cards = todo.map((id) => {
     const c = cardById[id];
-    const done = store.isDone(today, id);
+    const done = false;
     const month = store.countCard(id, prefix);
     return `
-      <article class="${K.card} flex flex-col gap-3 p-4 ${done ? 'ring-1 ring-primary-container/30' : ''}">
+      <article class="${K.card} flex flex-col gap-3 p-4" data-card="${id}">
         <div class="flex items-start justify-between gap-3">
           <div class="flex min-w-0 items-center gap-2.5">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-container-highest shadow-inner ${done ? 'text-primary-container' : 'text-on-surface-variant'}">${ms(CARD_ICON[id] || 'eco', 'text-[22px]', done)}</div>
@@ -343,13 +356,6 @@ function viewToday() {
         </div>
       </header>
 
-      <section class="flex gap-3 rounded-2xl bg-surface-container-high p-4" aria-label="저탄소 실천 다짐">
-        ${ms('eco', 'mt-0.5 text-[22px] text-primary-container', true)}
-        <div class="flex min-w-0 flex-col gap-1.5">
-          <p class="text-body-md font-semibold leading-snug [word-break:keep-all]">${PLEDGE.lead}</p>
-          <p class="text-body-sm leading-relaxed text-on-surface-variant [word-break:keep-all]">${PLEDGE.pledge}</p>
-        </div>
-      </section>
 
       <section class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-4 shadow-xl" aria-label="오늘 기록 요약">
         <div class="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-primary-container/10 blur-3xl"></div>
@@ -388,7 +394,8 @@ function viewToday() {
           ${areas.map((a) => pill(a, a, areaIcon(a))).join('')}
           <button type="button" class="tap flex shrink-0 items-center gap-1 rounded-full border border-dashed border-outline px-3.5 py-1.5 text-label-sm text-on-surface-variant hover:text-on-surface" data-act="picker">${ms('add', 'text-[15px]')}${COPY.pickMore}</button>
         </div>
-        <div class="flex flex-col gap-3">${cards}</div>
+        ${cards ? `<div class="flex flex-col gap-3">${cards}</div>` : picks.length ? `<p class="flex items-center gap-1.5 rounded-xl bg-primary-container/10 px-4 py-3 text-body-sm text-primary">${ms('local_florist', 'text-[18px]', true)}${ui.todayArea === 'all' ? '오늘 카드를 모두 기록했어요. 위의 식물이 꽃을 피웠어요.' : '이 분야 카드는 모두 기록했어요.'}</p>` : ''}
+        ${doneRows ? `<div class="flex flex-col gap-2"><p class="px-1 font-mono text-label-sm text-on-surface-variant">오늘 기록한 실천 ${doneIds.length}</p>${doneRows}</div>` : ''}
         ${doneCount ? '' : `<p class="${K.small}">${COPY.firstHint}</p>`}
       </section>
 
@@ -565,6 +572,24 @@ function viewLogin() {
 
 // ───────── ③ 기록 ─────────
 
+const stampSeen = {}; // 날짜 → 마지막으로 보여 준 기록 수 (오늘 도장 찍는 효과를 한 번만)
+
+// 달력 뒤 배경 그림: 해, 구름, 언덕, 나무, 풀. 테마 색(currentColor)으로 옅게 깐다
+const CAL_BG = `
+  <svg class="cal-bg pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 360 400" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <circle class="sun" cx="300" cy="70" r="26"/>
+    <g class="cloud"><ellipse cx="70" cy="66" rx="30" ry="11"/><ellipse cx="92" cy="58" rx="20" ry="12"/><ellipse cx="190" cy="40" rx="22" ry="8"/></g>
+    <path class="hill2" d="M0 300 C70 250 130 262 190 286 C250 310 300 262 360 270 L360 400 L0 400 Z"/>
+    <path class="hill1" d="M0 336 C60 314 120 318 180 336 C240 354 300 322 360 330 L360 400 L0 400 Z"/>
+    <g class="tree">
+      <path d="M44 300 l14 -34 l14 34 z M50 286 l8 -22 l8 22 z"/><rect x="55" y="300" width="6" height="12" rx="1"/>
+      <path d="M292 276 l12 -30 l12 30 z M297 262 l7 -18 l7 18 z"/><rect x="301" y="276" width="5" height="10" rx="1"/>
+      <circle cx="232" cy="300" r="13"/><rect x="229" y="306" width="6" height="16" rx="1"/>
+      <circle cx="128" cy="318" r="10"/><rect x="126" y="322" width="5" height="12" rx="1"/>
+    </g>
+    <g class="grass"><path d="M20 372 q3 -10 6 0 q3 -12 6 0 M150 380 q3 -9 6 0 q3 -11 6 0 M262 368 q3 -10 6 0 q3 -12 6 0 M330 384 q3 -8 6 0"/></g>
+  </svg>`;
+
 function viewRecord() {
   const now = new Date();
   const todayKey = store.dateKey(now);
@@ -578,11 +603,18 @@ function viewRecord() {
   const cells = [];
   for (let i = 0; i < new Date(y, mo, 1).getDay(); i++) cells.push('<div aria-hidden="true"></div>');
   const lastDay = new Date(y, mo + 1, 0).getDate();
+  // 기록한 날엔 도장: 1~2개는 잎 도장, 3개 이상은 꽃 도장. 날마다 살짝 다른 각도로 찍힌다
   for (let d = 1; d <= lastDay; d++) {
     const key = store.dateKey(new Date(y, mo, d));
     const n = (records[key] || []).length;
-    const cls = [n >= 3 ? 'many' : n ? 'some' : key > todayKey ? 'future' : 'past', key === todayKey ? 'today' : ''].join(' ');
-    cells.push(`<div class="${cls}" aria-label="${d}일 기록 ${n}개"><span>${d}</span><small>${n ? n + '개' : ''}</small></div>`);
+    const isToday = key === todayKey;
+    const cls = [n ? 'has' : key > todayKey ? 'future' : 'past', isToday ? 'today' : ''].join(' ');
+    const fresh = isToday && n && stampSeen[key] !== n; // 오늘 도장이 새로 찍히거나 바뀌었을 때만 쾅
+    if (isToday) stampSeen[key] = n;
+    const stamp = n
+      ? `<span class="stamp ${n >= 3 ? 'flower' : ''} ${fresh ? 'new' : ''}" style="--r:${((d * 47) % 31) - 15}deg" aria-hidden="true">${ms(n >= 3 ? 'local_florist' : 'eco', '', true)}</span>`
+      : '';
+    cells.push(`<div class="${cls}" aria-label="${mo + 1}월 ${d}일 ${n ? `기록 ${n}개 · ${n >= 3 ? '꽃' : '잎'} 도장` : '기록 없음'}"><span class="cal-n">${d}</span>${stamp}</div>`);
   }
 
   // 이번 달 쌓인 변화: 가장 많이 한 카드 3개
@@ -613,7 +645,9 @@ function viewRecord() {
   return `
     <div class="${K.screen}">
       ${header('', '나의 기록', '', 'calendar_month')}
-      <section class="${K.card} p-4" aria-label="${y}년 ${mo + 1}월 기록 달력">
+      <section class="${K.card} cal-card relative overflow-hidden p-4" aria-label="${y}년 ${mo + 1}월 기록 달력">
+        ${CAL_BG}
+        <div class="relative">
         <div class="mb-2 flex items-center justify-between">
           <button type="button" class="tap flex h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container" data-act="cal-prev" aria-label="이전 달">${ms('chevron_left')}</button>
           <div class="font-serif text-body-md font-semibold">${y}년 ${mo + 1}월</div>
@@ -622,8 +656,9 @@ function viewRecord() {
         <div class="cal mb-1.5 text-center text-label-sm text-outline">${WEEKDAYS.map((w) => `<span>${w}</span>`).join('')}</div>
         <div class="cal">${cells.join('')}</div>
         <div class="mt-3 flex justify-end gap-3 text-label-sm text-on-surface-variant">
-          <span class="flex items-center gap-1"><i class="inline-block h-2.5 w-2.5 rounded bg-secondary-container"></i>1~2개</span>
-          <span class="flex items-center gap-1"><i class="inline-block h-2.5 w-2.5 rounded bg-primary-container"></i>3개 이상</span>
+          <span class="flex items-center gap-1"><span class="stamp mini" aria-hidden="true">${ms('eco', '', true)}</span>잎 도장 1~2개</span>
+          <span class="flex items-center gap-1"><span class="stamp mini flower" aria-hidden="true">${ms('local_florist', '', true)}</span>꽃 도장 3개 이상</span>
+        </div>
         </div>
       </section>
       ${isThisMonth ? gapNote(records, now) : ''}
@@ -1559,9 +1594,24 @@ document.addEventListener('click', (e) => {
   const { act, id } = el.dataset;
   const today = store.dateKey();
   switch (act) {
-    case 'toggle':
-      store.toggleRecord(today, id);
-      break;
+    case 'toggle': {
+      // 기록하기: 카드가 흐려지며 접히고 아래 카드가 올라온 뒤 기록한다 (움직임 줄이기 설정이면 바로)
+      const card = el.closest('[data-card]');
+      if (!card || store.isDone(today, id) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        store.toggleRecord(today, id);
+        break;
+      }
+      if (card.classList.contains('card-out')) return;
+      card.style.height = `${card.offsetHeight}px`;
+      void card.offsetHeight;
+      card.classList.add('card-out');
+      setTimeout(() => {
+        if (!store.isDone(today, id)) store.toggleRecord(today, id);
+        ui.justDone = id;
+        render(true);
+      }, 420);
+      return;
+    }
     case 'today-area':
       ui.todayArea = id;
       break;
