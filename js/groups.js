@@ -263,8 +263,10 @@ export async function react(groupId, shareId, kind) {
     onChange();
   }
   try {
+    // upsert는 모든 칸을 고치려 해서 열 권한(kind만 고칠 수 있음)에 막힌다. 있으면 kind만 고치고, 없으면 넣는다
     if (mine?.kind === kind) await db().from('reactions').delete().eq('share_id', shareId).eq('user_id', uid()).then(must);
-    else await db().from('reactions').upsert({ share_id: shareId, group_id: groupId, user_id: uid(), kind }, { onConflict: 'share_id,user_id' }).then(must);
+    else if (mine) await db().from('reactions').update({ kind }).eq('share_id', shareId).eq('user_id', uid()).then(must);
+    else await db().from('reactions').insert({ share_id: shareId, group_id: groupId, user_id: uid(), kind }).then(must);
   } catch (e) {
     if (g) g.reactions = before;
     onChange();
@@ -273,8 +275,10 @@ export async function react(groupId, shareId, kind) {
 }
 
 export async function cheer(groupId, shareId, phrase) {
-  await db().from('cheers').upsert({ share_id: shareId, group_id: groupId, from_user: uid(), phrase }, { onConflict: 'share_id,from_user' }).then(must);
   const g = cache.group[groupId]?.data;
+  const sent = g?.cheers.some((c) => c.share_id === shareId && c.from_user === uid());
+  if (sent) await db().from('cheers').update({ phrase }).eq('share_id', shareId).eq('from_user', uid()).then(must);
+  else await db().from('cheers').insert({ share_id: shareId, group_id: groupId, from_user: uid(), phrase }).then(must);
   if (g) {
     g.cheers = g.cheers.filter((c) => !(c.share_id === shareId && c.from_user === uid()));
     g.cheers.push({ share_id: shareId, from_user: uid(), phrase });
