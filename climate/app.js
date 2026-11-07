@@ -1,6 +1,6 @@
 // Stitch 샘플 '지구 기후 모니터 · Climate Home'을 입힌 네 번째 디자인. 첫 탭 '지구'에서 기후 지표를 보고 오늘 실천으로 이어진다.
 // 지구 화면과 5칸 메뉴로 이루어진 하나뿐인 버전이다. 데이터·저장은 공용 모듈(../js)을 쓴다.
-import { CARDS, LEVEL_LABEL, STAGES, POSTS, NEWSLETTER, BEE_POST_ID, BEE_SERIES_ID, BEE_SERIES_TITLE, GROUPS, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
+import { CARDS, LEVEL_LABEL, STAGES, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, BEE_SERIES_ID, BEE_SERIES_TITLE, GROUPS, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import * as store from '../js/store.js';
 import * as auth from '../js/auth.js';
 import * as sync from '../js/sync.js';
@@ -355,6 +355,11 @@ function viewToday() {
           ${themeBtn()}
         </div>
       </header>
+
+      <section class="flex items-start gap-3 rounded-2xl bg-surface-container-high p-4" aria-label="실천의 의미">
+        ${ms('spa', 'mt-0.5 text-[22px] text-primary-container', true)}
+        <p class="min-w-0 text-body-md font-semibold leading-snug [word-break:keep-all]">${PLEDGE.lead}</p>
+      </section>
 
 
       <section class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-4 shadow-xl" aria-label="오늘 기록 요약">
