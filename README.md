@@ -28,12 +28,36 @@ GitHub 저장소(hey-bernard/eco-practice)의 `main`에 push하면 Vercel이 자
 | --- | --- |
 | `climate/` | 앱 틀(`index.html`, Tailwind 다크 토큰), 해시 라우터(`#/earth` 등)와 화면들(`app.js`), 스타일(`style.css`) (아래 '화면 디자인') |
 | `js/data.js` | 실천 카드 30개, 숲 단계, 읽기 카드 14편, 예시 모임, 화면 문구(`COPY`) |
-| `js/store.js` | 기기 저장(localStorage). 2단계 로그인·동기화 때 이 모듈만 교체 |
+| `js/store.js` | 기기 저장(localStorage). 바뀔 때마다 `subscribe()`로 알린다 |
+| `js/auth.js`, `js/auth-config.js` | 카카오·구글 로그인 (Supabase Auth, PKCE). 설정이 비어 있으면 "준비 중" 안내만 (아래 '로그인 · 동기화') |
+| `js/sync.js` | 로그인한 사람의 기록을 Supabase `user_state` 테이블과 맞춘다 |
+| `climate/privacy.html` | 개인정보처리방침 (구글 OAuth 앱 게시·카카오 앱에 링크). 받는 정보가 바뀌면 함께 고친다 |
+| `supabase/schema.sql` | `user_state` 테이블과 RLS(자기 줄만 읽고 쓰기) |
 | `js/climate-data.js`, `js/climate-chart.js`, `css/climate-chart.css` | 기후 4대 지표 연도별 추이 그래프 (아래 '기후 4대 지표 그래프') |
 | `sw.js`, `manifest.webmanifest` | PWA (오프라인 캐시, 홈 화면 추가). 파일을 바꾸면 `sw.js`의 `VERSION`을 올린다 |
 | `images/village/earth.webp`, `risa.webp` | 지구지킴이·리사 정면. 시트에서 잘라 배경 제거 |
 | `images/forest/stage1~6.webp` | 학생용 지구지킴이 성장 6단계. `22a5fae709d12dd5.webp` 시트의 Lv.1~6을 잘라 2배 확대 |
 | `images/forest/plant1~6.svg` | 식물 성장 6단계 (씨앗→숲). 숲 화면 동물 그림과 같은 358×220 좌표 |
+
+## 로그인 · 동기화
+
+- 웹(브라우저·PWA): 버튼 → Supabase → 카카오/구글 → `/climate/?code=...` 로 돌아오면 `js/auth.js`가 세션으로 바꾸고 `#/today`로 보낸다.
+- Expo 앱(`mobile/`): 구글이 WebView 로그인을 막으므로, 웹이 로그인 주소만 만들어 앱에 넘기고 앱이 시스템 인증 브라우저(`expo-web-browser`)로 연다. 돌아온 주소를 웹의 `window.__ecoAuthFinish()`로 넘겨 마무리한다.
+- 동기화: 이 기기를 계정에 처음 연결할 때(또는 못 올린 기록이 있을 때)는 기기 기록과 계정 기록을 합치고, 그 뒤엔 계정 기록을 받아 온다. 기록이 바뀌면 1.2초 뒤 올린다. 오프라인이면 다시 연결될 때 올린다. 로그아웃해도 기기 기록은 지우지 않는다.
+
+### 처음 설정 (한 번)
+
+1. [supabase.com](https://supabase.com)에서 프로젝트를 만들고 SQL Editor에서 `supabase/schema.sql`을 실행한다.
+2. Project Settings > API의 Project URL과 anon public 키를 `js/auth-config.js`에 넣는다 (service_role 키는 절대 넣지 않는다).
+3. Authentication > URL Configuration
+   - Site URL: `https://eco-practice-phi.vercel.app/climate/`
+   - Redirect URLs: `https://eco-practice-phi.vercel.app/climate/`, `http://localhost:*/climate/`(로컬 확인용), `ecopractice://auth`(앱 빌드), `exp://**`(Expo Go)
+4. 구글: Google Cloud Console > API 및 서비스 > 사용자 인증 정보 > OAuth 클라이언트 ID(웹 애플리케이션). 승인된 리디렉션 URI에 `https://<프로젝트>.supabase.co/auth/v1/callback`. 클라이언트 ID·보안 비밀을 Supabase Authentication > Providers > Google에 넣는다.
+5. 카카오: [developers.kakao.com](https://developers.kakao.com) > 앱 만들기
+   - 앱 키의 REST API 키 → Supabase Providers > Kakao의 Client ID, 보안 > Client Secret 코드 생성·활성화 → Client Secret
+   - 카카오 로그인 활성화, Redirect URI에 `https://<프로젝트>.supabase.co/auth/v1/callback`
+   - 동의항목: 닉네임·프로필 사진. Supabase는 이메일(account_email)도 요청하므로, 이메일 동의항목을 켜거나(개인 개발자 비즈 앱 전환 필요) Supabase Kakao 설정에서 이메일 없는 사용자 허용을 켠다.
+6. 배포 후 `sw.js`의 `VERSION`이 올라갔는지 확인한다.
 
 ## 대상
 
@@ -105,7 +129,7 @@ Stitch 샘플 '지구 기후 모니터 · Climate Home'(다크 배경, 네온 �
 | 화면 | 상태 |
 | --- | --- |
 | ① 오늘 | 동작. 하루 3장 추천(쉬움 2 + 보통·도전 1, 날짜별 고정), 원탭 기록, 카드 더 고르기, 텀블러 → 아낀 컵 수 |
-| ② 로그인 | 화면만. 버튼을 누르면 "2단계에서 연결" 안내 |
+| ② 로그인 | 카카오·구글 로그인, 계정 화면(저장 상태·로그아웃), 기록 동기화. `js/auth-config.js`가 비어 있으면 "준비 중" 안내 |
 | ③ 기록 | 동작. 월별 달력, 끊긴 날 안내("괜찮아요, 다시 시작"), 이번 달 많이 한 실천 3개, 40일 챌린지 |
 | ④ 나의 숲 | 동작. 기록 1개 = 1점, 6단계, 동물 해금(벌·새·다람쥐) |
 | ⑤ 읽기 | 동작. 기초부터 읽기(4단계 29편), 주제 필터, 이번 주 카드(주차별 순환), 한 줄 성찰 저장(나만 보기), 뉴스레터(10월 호) |

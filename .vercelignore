@@ -4,3 +4,5 @@ mockup
 README.md
 .playwright-mcp
 .env*
+# Expo(Expo Go) 껍데기 앱: 웹 배포와 상관없음
+mobile

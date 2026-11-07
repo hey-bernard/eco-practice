@@ -1,4 +1,4 @@
-// 기기 저장(localStorage). 2단계에서 로그인·동기화가 붙으면 이 모듈만 바꾼다.
+// 기기 저장(localStorage). 로그인하면 sync.js가 subscribe()로 바뀐 내용을 받아 계정에 올린다.
 import { CARDS } from './data.js';
 
 // 예전 성인용 키를 그대로 써서 기존 기록을 유지한다
@@ -14,6 +14,13 @@ const empty = () => ({
 });
 
 let state = load();
+const subscribers = new Set();
+
+// fn(state) — 이 기기에서 기록이 바뀔 때마다 불린다 (계정에서 받아 온 내용으로 바꿀 때는 부르지 않는다)
+export function subscribe(fn) {
+  subscribers.add(fn);
+  return () => subscribers.delete(fn);
+}
 
 function load() {
   try {
@@ -24,12 +31,23 @@ function load() {
   }
 }
 
-function save() {
+function write() {
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
   } catch {
     // 사생활 보호 모드 등에서 저장이 막혀도 화면은 계속 동작
   }
+}
+
+function save() {
+  write();
+  subscribers.forEach((fn) => fn(state));
+}
+
+// 계정에서 받아 온(또는 합친) 내용으로 이 기기 기록을 바꾼다
+export function replaceState(next) {
+  state = { ...empty(), ...next };
+  write();
 }
 
 export function dateKey(d = new Date()) {

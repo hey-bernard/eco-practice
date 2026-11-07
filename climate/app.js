@@ -2,6 +2,8 @@
 // 지구 화면과 5칸 메뉴로 이루어진 하나뿐인 버전이다. 데이터·저장은 공용 모듈(../js)을 쓴다.
 import { CARDS, LEVEL_LABEL, STAGES, TOPICS, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, GROUPS, FEED, REACTIONS, PHRASES, REVIEW_DRAFT, COPY } from '../js/data.js';
 import * as store from '../js/store.js';
+import * as auth from '../js/auth.js';
+import * as sync from '../js/sync.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
 import { achievementsFold, mountAchievements } from '../js/achievements.js';
 import { seriesSection, mountSeries } from '../js/series.js';
@@ -322,7 +324,7 @@ function viewToday() {
           </div>
         </div>
         <div class="flex shrink-0 items-center gap-2">
-          <a href="#/login" class="${btn('line', 'min-h-[40px] px-3')}">${ms('person', 'text-[18px]')}로그인</a>
+          ${accountBtn()}
           ${themeBtn()}
         </div>
       </header>
@@ -484,7 +486,62 @@ function selectPickerTab(area) {
 
 // ───────── ② 로그인 ─────────
 
+const PROVIDER_LABEL = { kakao: '카카오', google: '구글' };
+
+// 프로필 사진이 없거나 못 불러오면 이름 첫 글자
+function avatar(p, size) {
+  const initial = `<span class="flex h-full w-full items-center justify-center bg-primary-container/15 font-semibold text-primary-container" style="font-size:${Math.round(size * 0.42)}px">${esc([...p.name][0] || '나')}</span>`;
+  return `<span class="relative inline-flex shrink-0 overflow-hidden rounded-full" style="width:${size}px;height:${size}px">${initial}${p.avatar
+    ? `<img src="${esc(p.avatar)}" alt="" referrerpolicy="no-referrer" class="absolute inset-0 h-full w-full object-cover" onerror="this.remove()">`
+    : ''}</span>`;
+}
+
+// 오늘 화면 머리의 버튼: 로그인 전엔 '로그인', 로그인 뒤엔 내 이름
+function accountBtn() {
+  const p = auth.profile();
+  if (!p) return `<a href="#/login" class="${btn('line', 'min-h-[40px] px-3')}">${ms('person', 'text-[18px]')}로그인</a>`;
+  return `<a href="#/login" class="${btn('line', 'min-h-[40px] max-w-[132px] pl-1.5 pr-3')}" aria-label="내 계정 · ${esc(p.name)}">${avatar(p, 28)}<span class="truncate">${esc(p.name)}</span></a>`;
+}
+
+function syncText() {
+  const s = sync.getStatus();
+  if (s.state === 'syncing') return [ms('sync', 'text-[18px] animate-spin'), '계정에 저장하는 중이에요'];
+  if (s.state === 'offline') return [ms('cloud_off', 'text-[18px]'), '지금은 이 기기에 저장해요. 인터넷이 연결되면 계정에 올려요.'];
+  if (s.state === 'saved') {
+    const t = new Date(s.at);
+    return [ms('cloud_done', 'text-[18px] text-primary-container', true), `계정에 저장했어요 · ${t.getHours()}:${String(t.getMinutes()).padStart(2, '0')}`];
+  }
+  return [ms('cloud', 'text-[18px]'), '계정과 연결하는 중이에요'];
+}
+
+function viewAccount(p) {
+  const [icon, text] = syncText();
+  const points = store.totalPoints();
+  return `
+    <div class="flex min-h-[100dvh] flex-col px-5 pb-6 pt-6">
+      <a href="#/today" class="${K.back}">${ms('chevron_left', 'text-[20px]')}오늘로</a>
+      <div class="mt-6 flex flex-col items-center gap-3 text-center">
+        ${avatar(p, 72)}
+        <div>
+          <h1 class="font-serif text-headline-lg font-bold">${esc(p.name)}${COPY.nim}</h1>
+          <p class="${K.small}">${PROVIDER_LABEL[p.provider] || p.provider} 계정으로 로그인했어요</p>
+        </div>
+      </div>
+      <section class="mt-8 ${K.card} flex flex-col gap-3 p-4" aria-label="저장 상태">
+        <div class="flex items-center gap-2 text-body-sm" role="status">${icon}<span>${text}</span></div>
+        <p class="${K.small}">지금까지 기록 ${points}개. 다른 기기에서 같은 계정으로 로그인하면 기록과 숲이 그대로 보여요.</p>
+      </section>
+      <div class="mt-auto flex flex-col gap-2.5 pt-8">
+        <a href="#/today" class="${btn('solid', 'h-[52px] rounded-full')}">오늘 실천하러 가기</a>
+        <button type="button" data-act="logout" class="${btn('line', 'h-[52px] rounded-full')}">로그아웃</button>
+        <p class="${K.tiny} text-center">로그아웃해도 이 기기의 기록은 지우지 않아요.</p>
+      </div>
+    </div>`;
+}
+
 function viewLogin() {
+  const p = auth.profile();
+  if (p) return viewAccount(p);
   return `
     <div class="flex min-h-[100dvh] flex-col px-5 pb-6 pt-12">
       <div class="flex flex-col items-start gap-3">
@@ -493,11 +550,11 @@ function viewLogin() {
         <p class="text-body-sm leading-relaxed text-on-surface-variant">로그인하면 기기를 바꿔도 기록과 숲이 그대로 남아요. 알림 설정과 모임 참여도 이때부터 쓸 수 있어요.</p>
       </div>
       <div class="mt-8 flex flex-col gap-2.5">
-        <button type="button" data-act="login" class="tap flex h-[52px] items-center justify-center gap-2 rounded-full bg-[#FEE500] text-body-md font-medium text-[#191919]">
+        <button type="button" data-act="login" data-id="kakao" class="tap flex h-[52px] items-center justify-center gap-2 rounded-full bg-[#FEE500] text-body-md font-medium text-[#191919]">
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4C6.9 4 3 7.1 3 10.9c0 2.4 1.6 4.5 4 5.7l-1 3.6c-.1.3.3.6.6.4l4.2-2.8c.4 0 .9.1 1.2.1 5.1 0 9-3.1 9-6.9S17.1 4 12 4z" fill="#191919"/></svg>
           카카오로 시작하기
         </button>
-        <button type="button" data-act="login" class="tap flex h-[52px] items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface-container-lowest text-body-md font-medium">
+        <button type="button" data-act="login" data-id="google" class="tap flex h-[52px] items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface-container-lowest text-body-md font-medium">
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4c-.2 1.2-.9 2.3-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.3z" fill="#4285F4"/><path d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6C4.8 19.8 8.2 22 12 22z" fill="#34A853"/><path d="M6.4 13.9c-.2-.6-.3-1.3-.3-1.9s.1-1.3.3-1.9V7.5H3.1C2.4 8.9 2 10.4 2 12s.4 3.1 1.1 4.5l3.3-2.6z" fill="#FBBC05"/><path d="M12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.9C17 3 14.7 2 12 2 8.2 2 4.8 4.2 3.1 7.5l3.3 2.6C7.2 7.8 9.4 6 12 6z" fill="#EA4335"/></svg>
           구글로 시작하기
         </button>
@@ -505,7 +562,8 @@ function viewLogin() {
       </div>
       <div class="mt-auto rounded-2xl border border-hairline bg-surface-container-lowest p-4">
         <div class="${K.eyebrow}">받는 정보</div>
-        <p class="mt-1 text-body-sm leading-relaxed text-on-surface-variant">필수: 닉네임 · 선택: 프로필 사진<br>비밀번호는 저장하지 않아요. 탈퇴하면 기록과 연결 정보를 함께 지워요.</p>
+        <p class="mt-1 text-body-sm leading-relaxed text-on-surface-variant">필수: 닉네임 · 선택: 프로필 사진<br>비밀번호는 저장하지 않아요. 탈퇴를 요청하면 기록과 연결 정보를 함께 지워요.</p>
+        <a href="./privacy.html" class="mt-2 inline-flex min-h-[44px] items-center text-body-sm text-primary underline underline-offset-2">개인정보처리방침</a>
       </div>
     </div>`;
 }
@@ -987,7 +1045,30 @@ document.addEventListener('click', (e) => {
       }
       break;
     case 'login':
-      toast('로그인은 2단계에서 연결돼요. 지금은 이 기기에 저장돼요.');
+      if (!auth.isConfigured()) {
+        toast('로그인은 준비 중이에요. 지금은 이 기기에 저장돼요.');
+        return;
+      }
+      if (!navigator.onLine) {
+        toast('인터넷에 연결한 뒤 다시 시도해 주세요');
+        return;
+      }
+      el.disabled = true;
+      auth.signIn(id, '#/today').catch(() => {
+        el.disabled = false;
+        toast(`${PROVIDER_LABEL[id]} 로그인을 열지 못했어요. 잠시 뒤 다시 시도해 주세요.`);
+      });
+      // 앱(WebView)에서는 시스템 브라우저가 열리므로, 돌아올 때를 대비해 버튼을 다시 살려 둔다
+      setTimeout(() => { el.disabled = false; }, 4000);
+      return;
+    case 'logout':
+      el.disabled = true;
+      sync.flush()
+        .catch(() => {})
+        .then(() => auth.signOut())
+        .then(() => toast('로그아웃했어요. 기록은 이 기기에 남아 있어요.'))
+        .catch(() => toast('로그아웃하지 못했어요. 다시 시도해 주세요.'))
+        .finally(() => render(true));
       return;
     case 'soon':
       toast('3단계에서 연결되는 기능이에요');
@@ -1058,6 +1139,36 @@ document.addEventListener('submit', (e) => {
 });
 
 render();
+
+// ───────── 로그인·동기화 ─────────
+
+let syncedUser = null;
+auth.onAuth((user) => {
+  const id = user?.id ?? null;
+  if (id === syncedUser) {
+    if (currentRoute() === 'login' || currentRoute() === 'today') render(true);
+    return; // 토큰 갱신 등은 다시 맞출 필요 없음
+  }
+  syncedUser = id;
+  if (id) sync.start(auth.getClient(), id, () => render(true));
+  else sync.stop();
+  render(true);
+});
+
+// 저장 상태 문구는 계정 화면에서만 보인다
+sync.onStatus(() => { if (currentRoute() === 'login') render(true); });
+
+// Expo 앱이 시스템 브라우저 로그인을 마치고 결과를 넘겨 줄 때
+window.addEventListener('eco-auth-result', (e) => {
+  toast(e.detail.message);
+  if (e.detail.ok && currentRoute() === 'login') location.hash = '#/today';
+});
+
+auth.init().then((res) => {
+  if (!res) return;
+  render(); // init()이 주소를 #/today 등으로 바꿔 두었다
+  toast(res.message);
+});
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});
