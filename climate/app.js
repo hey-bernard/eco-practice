@@ -4,6 +4,7 @@ import { CARDS, LEVEL_LABEL, STAGES, POSTS, NEWSLETTER, PLEDGE, BEE_POST_ID, BEE
 import * as store from '../js/store.js';
 import * as auth from '../js/auth.js';
 import * as sync from '../js/sync.js';
+import * as groups from '../js/groups.js';
 import { mountClimateCharts } from '../js/climate-chart.js';
 import { achievementsFold, mountAchievements } from '../js/achievements.js';
 import { seriesSection, mountSeries } from '../js/series.js';
@@ -27,8 +28,12 @@ const ui = {
   reviewShared: false,
   reviewText: REVIEW_DRAFT,
   feedPicks: {},
-  feedSent: ''
+  feedSent: '',
+  keep: {},          // 입력 중인 값 (data-keep): 화면을 다시 그려도 남게
+  loginReturn: '',   // 로그인 뒤 돌아갈 화면
+  confirmFn: null    // 확인 시트에서 '예'를 누르면 할 일
 };
+const keep = (k, d = '') => (ui.keep[k] ?? d);
 
 const cardById = Object.fromEntries(CARDS.map((c) => [c.id, c]));
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -239,7 +244,17 @@ function practicePlant(done, total) {
     </div>`;
 }
 
+// 오늘 기록한 카드의 '공유' 버튼: 로그인했고 모임이 있을 때만. 모든 모임에 공유했으면 '공유함'
+function shareBtn(cardId) {
+  const mine = auth.getUser() ? groups.cache.mine : null;
+  if (!mine?.length) return '';
+  const all = mine.every((g) => groups.cache.sharedToday.has(`${g.id}|${cardId}`));
+  if (all) return `<span class="font-mono text-[12px] text-primary">${ms('groups', 'mr-0.5 align-[-3px] text-[14px]')}공유함</span>`;
+  return `<button type="button" class="${btn('soft', 'min-h-[36px] px-3')}" data-act="share-open" data-id="${cardId}" aria-label="${esc(cardById[cardId].title)} 모임에 공유">${ms('ios_share', 'text-[16px]')}공유</button>`;
+}
+
 function viewToday() {
+  if (auth.getUser()) groups.loadMine();
   const today = store.dateKey();
   const now = new Date();
   const picks = store.getPicks(today);
@@ -286,16 +301,28 @@ function viewToday() {
         </div>
         <div class="flex items-center justify-between gap-2">
           <span class="flex items-center gap-1 font-mono text-[12px] ${done ? 'text-primary' : 'text-on-surface-variant'}">${ms(done ? 'task_alt' : 'radio_button_unchecked', 'text-[14px]')}${done ? '오늘 기록했어요' : '아직 기록 전'}</span>
+          ${done ? `<div class="flex shrink-0 items-center gap-1.5">${shareBtn(id)}` : ''}
           ${done
-            ? `<button type="button" class="${btn('line', 'min-h-[36px] px-3')}" data-act="toggle" data-id="${id}" aria-pressed="true" aria-label="${esc(c.title)} 기록 취소">${ms('check', 'text-[16px] text-primary-container')}했어요</button>`
+            ? `<button type="button" class="${btn('line', 'min-h-[36px] px-3')}" data-act="toggle" data-id="${id}" aria-pressed="true" aria-label="${esc(c.title)} 기록 취소">${ms('check', 'text-[16px] text-primary-container')}했어요</button></div>`
             : `<button type="button" class="${btn('solid', 'min-h-[36px] px-3')}" data-act="toggle" data-id="${id}" aria-pressed="false">${ms('add', 'text-[16px]')}기록하기</button>`}
         </div>
       </article>`;
   }).join('');
 
   const e = COPY.effect;
-  // 샘플의 '오늘의 커뮤니티 미션' 배너 자리: 내 모임 소식 (예시 데이터)
-  const mission = { tag: '내 모임 소식', meta: '예시', title: '주말 플로깅 크루 · 일요일 오전 10시', body: '멤버 8명 중 6명이 이번 주 실천을 기록했어요. 30분 걸으며 쓰레기를 주워요.', pct: 75, count: '6/8', href: '#/group', btn: '모임 보러 가기', icon: 'directions_run' };
+  // 샘플의 '오늘의 커뮤니티 미션' 배너 자리: 내 모임 소식. 로그인 전에는 예시, 로그인 뒤에는 첫 번째 내 모임
+  const mine = auth.getUser() ? groups.cache.mine : null;
+  let mission = { tag: '내 모임 소식', meta: '예시', title: '주말 플로깅 크루 · 일요일 오전 10시', body: '멤버 8명 중 6명이 이번 주 실천을 기록했어요. 30분 걸으며 쓰레기를 주워요.', pct: 75, count: '6/8', href: '#/group', btn: '모임 보러 가기', icon: 'directions_run' };
+  if (mine?.length) {
+    const g = mine[0];
+    mission = {
+      tag: '내 모임 소식', meta: g.role === 'owner' ? '운영자' : '멤버', title: `${g.name}${g.schedule ? ` · ${g.schedule}` : ''}`,
+      body: `멤버 ${g.member_count}명 중 ${g.active_week}명이 최근 7일 실천을 공유했어요.`,
+      pct: Math.round((g.active_week / Math.max(1, g.member_count)) * 100), count: `${g.active_week}/${g.member_count}`, href: `#/group/${g.id}`, btn: '모임 보러 가기', icon: 'groups'
+    };
+  } else if (mine) {
+    mission = { tag: '모임', meta: '', title: '함께 실천할 모임을 찾아보세요', body: '공개 모임을 검색하거나, 받은 초대 코드로 들어갈 수 있어요.', pct: 0, count: '', href: '#/groups', btn: '모임 찾기', icon: 'search' };
+  }
 
   return `
     <div class="${K.screen}">
@@ -383,8 +410,8 @@ function viewToday() {
           <span class="font-mono text-label-sm text-on-surface-variant">${mission.meta}</span>
         </div>
         <h3 class="mt-2 font-serif text-headline-md font-medium">${esc(mission.title)}</h3>
-        <p class="mt-1 text-body-sm leading-relaxed text-on-surface-variant">${mission.body}</p>
-        <div class="mt-3 flex items-center gap-2">${bar(mission.pct)}<span class="num shrink-0 text-[12px] text-on-surface">${mission.count}</span></div>
+        <p class="mt-1 text-body-sm leading-relaxed text-on-surface-variant">${esc(mission.body)}</p>
+        ${mission.count ? `<div class="mt-3 flex items-center gap-2">${bar(mission.pct)}<span class="num shrink-0 text-[12px] text-on-surface">${mission.count}</span></div>` : ''}
         <a href="${mission.href}" class="tap glow mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary-container px-4 py-3.5 font-serif text-[15px] font-bold text-on-primary">${ms(mission.icon, 'text-[20px]', true)}${mission.btn}</a>
       </section>
     </div>`;
@@ -530,7 +557,7 @@ function viewLogin() {
       </div>
       <div class="mt-auto rounded-2xl border border-hairline bg-surface-container-lowest p-4">
         <div class="${K.eyebrow}">받는 정보</div>
-        <p class="mt-1 text-body-sm leading-relaxed text-on-surface-variant">필수: 닉네임 · 선택: 프로필 사진<br>비밀번호는 저장하지 않아요. 탈퇴를 요청하면 기록과 연결 정보를 함께 지워요.</p>
+        <p class="mt-1 text-body-sm leading-relaxed text-on-surface-variant">필수: 닉네임 · 선택: 프로필 사진, 이메일<br>모임에서는 내가 정한 모임 닉네임만 보여요. 비밀번호는 저장하지 않아요. 탈퇴를 요청하면 기록과 연결 정보를 함께 지워요.</p>
         <a href="./privacy.html" class="mt-2 inline-flex min-h-[44px] items-center text-body-sm text-primary underline underline-offset-2">개인정보처리방침</a>
       </div>
     </div>`;
@@ -764,14 +791,19 @@ function viewRead() {
     </div>`;
 }
 
-// ───────── ⑥ 모임 찾기 (정적 예시) ─────────
+// ───────── ⑥ 모임 찾기 (로그인 전: 예시) ─────────
 
-function viewGroups() {
+function viewGroupsDemo() {
   const modes = [['all', '전체'], ['on', '온라인'], ['off', '오프라인']];
   const list = GROUPS.filter((g) => ui.groupMode === 'all' || g.kind === ui.groupMode);
   return `
     <div class="${K.screen} gap-5">
-      ${header('', '모임 찾기', `<button type="button" class="${btn('soft')}" data-act="soon">${ms('add', 'text-[16px]')}모임 만들기</button>`, 'groups')}
+      ${header('', '모임 찾기', `<button type="button" class="${btn('soft')}" data-act="login-from">${ms('add', 'text-[16px]')}모임 만들기</button>`, 'groups')}
+      <section class="${K.card} flex items-center gap-3 p-4">
+        ${ms('group_add', 'text-[24px] text-primary-container')}
+        <p class="min-w-0 flex-1 text-body-sm text-on-surface-variant">로그인하면 실제 모임을 만들고, 찾고, 초대 코드로 들어갈 수 있어요. 아래는 예시예요.</p>
+        <button type="button" class="${btn('solid')}" data-act="login-from">로그인</button>
+      </section>
       <div class="relative">
         <label for="q" class="sr">모임 검색</label>
         ${ms('search', 'pointer-events-none absolute left-4 top-3 text-[20px] text-outline')}
@@ -802,7 +834,7 @@ function viewGroups() {
 
 // ───────── ⑦ 모임 홈 · 운영자 (정적 예시) ─────────
 
-function viewGroupHome() {
+function viewGroupHomeDemo() {
   const dots = [1, 1, 1, 1, 1, 1, 0, 0].map((on) => `<span class="h-4 w-4 rounded-full border-[1.5px] border-primary-container ${on ? 'bg-primary-container' : ''}"></span>`).join('');
   const body = ui.reviewEditing
     ? `<label for="draft" class="${K.small}">후기 고치기</label><textarea id="draft" rows="5" data-act="draft" class="w-full resize-none rounded-2xl border border-outline-variant bg-surface-container-lowest p-3 text-[16px] leading-relaxed focus:border-primary-container focus:outline-none">${esc(ui.reviewText)}</textarea>`
@@ -843,13 +875,13 @@ function viewGroupHome() {
         <div><p class="${K.small}">다음 활동</p><p class="text-body-md font-medium">일요일 오전 10시 · 플로깅</p></div>
         <button type="button" class="${btn('soft')}" data-act="soon">플로깅 키트 열기</button>
       </div>
-      <p class="px-1 ${K.tiny}">예시 데이터입니다. 모임 기능은 3단계에서 연결합니다.</p>
+      <p class="px-1 ${K.tiny}">예시 데이터입니다. 로그인하면 실제 모임을 만들거나 들어갈 수 있어요.</p>
     </div>`;
 }
 
 // ───────── ⑧ 모임 피드 · 응원 (정적 예시) ─────────
 
-function viewFeed() {
+function viewFeedDemo() {
   const posts = FEED.map((p) => {
     const mine = ui.feedPicks[p.id];
     return `
@@ -886,6 +918,567 @@ function openPhrases(postId) {
     <button type="button" class="${btn('ghost', 'mt-1')}" data-act="close">취소</button>`);
 }
 
+// ───────── ⑨ 실제 모임 (Supabase · js/groups.js) ─────────
+// 로그인 전에는 위의 예시 화면을 보여 주고, 로그인 뒤에는 아래 화면을 쓴다.
+
+const INPUT = 'w-full rounded-xl border border-outline-variant/60 bg-surface-container-lowest px-4 text-[16px] text-on-surface placeholder:text-outline focus:border-primary-container focus:outline-none';
+const KIND_LABEL = { on: '온라인', off: '오프라인' };
+const kindPill = (kind) => `<span class="${K.pill} ${kind === 'on' ? 'bg-sky text-on-sky' : 'bg-oat text-amber'}">${KIND_LABEL[kind] || ''}</span>`;
+const NICK_BG = ['#E3EEE6', '#F3E6D2', '#DCE8EE', '#EBE3F1', '#F1E1E1', '#E6EBD5'];
+const colorOf = (id) => NICK_BG[[...String(id)].reduce((n, c) => (n * 31 + c.charCodeAt(0)) >>> 0, 7) % NICK_BG.length];
+const nickAvatar = (name, id, size = 36) => `<div class="flex shrink-0 items-center justify-center rounded-full font-bold text-[#0F281E]" style="width:${size}px;height:${size}px;background:${colorOf(id)};font-size:${Math.round(size * 0.4)}px" aria-hidden="true">${esc([...String(name)][0] || '?')}</div>`;
+const defaultNick = () => [...(auth.profile()?.name || '')].slice(0, 12).join('');
+const backLink = (href, label) => `<a href="${href}" class="${K.back}">${ms('chevron_left', 'text-[20px]')}${esc(label)}</a>`;
+const note = (text, icon = 'info') => `<p class="flex items-start gap-1.5 px-1 ${K.tiny}">${ms(icon, 'mt-px text-[14px]')}<span>${text}</span></p>`;
+const loadingLine = (text = '불러오는 중이에요') => `<p class="flex items-center gap-2 px-1 ${K.small}" role="status">${ms('progress_activity', 'animate-spin text-[18px]')}${text}</p>`;
+const segBtns = (items, cur, attrs, label) => `
+  <div class="grid auto-cols-fr grid-flow-col gap-1 rounded-full bg-surface-container p-1" role="group" aria-label="${label}">
+    ${items.map(([id, text]) => `<button type="button" class="tap h-10 rounded-full text-label-md ${cur === id ? 'bg-surface-container-lowest font-semibold text-primary shadow-sm' : 'text-on-surface-variant'}" ${attrs(id)} aria-pressed="${cur === id}">${text}</button>`).join('')}
+  </div>`;
+
+function dayLabel(day) {
+  const n = Math.round((new Date(`${store.dateKey()}T00:00:00`) - new Date(`${day}T00:00:00`)) / 864e5);
+  return n <= 0 ? '오늘' : n === 1 ? '어제' : `${n}일 전`;
+}
+
+function loginPrompt(title, text, back = '#/groups') {
+  return `
+    <div class="${K.screen} gap-5 pt-3">
+      ${backLink(back, '모임')}
+      <section class="${K.card} flex flex-col gap-3 p-5">
+        ${ms('group_add', 'text-[28px] text-primary-container')}
+        <h1 class="${K.h2}">${title}</h1>
+        <p class="${K.small}">${text}</p>
+        <button type="button" class="${btn('solid', 'h-12 w-full rounded-full')}" data-act="login-from">로그인하고 계속하기</button>
+      </section>
+    </div>`;
+}
+
+function stateView(back, backLabel, body) {
+  return `<div class="${K.screen} gap-5 pt-3">${backLink(back, backLabel)}${body}</div>`;
+}
+
+// 로그인한 사람의 모임 탭: 내 모임 · 초대 코드 · 공개 모임 검색
+function viewGroups() {
+  if (!auth.getUser()) return viewGroupsDemo();
+  groups.loadMine();
+  const s = groups.cache.search;
+  if (s.list === null) groups.search(keep('gq'), ui.groupMode);
+  const mine = groups.cache.mine;
+
+  const myCard = (g) => {
+    const pct = Math.round((g.active_week / Math.max(1, g.member_count)) * 100);
+    return `
+      <a href="#/group/${g.id}" class="tap ${K.card} flex flex-col gap-2 p-4">
+        <div class="flex items-start justify-between gap-2">
+          <h3 class="min-w-0 font-serif text-[17px] font-semibold leading-snug">${esc(g.name)}</h3>
+          <div class="flex shrink-0 gap-1">
+            ${g.pending ? `<span class="${K.pill} bg-tertiary/15 text-tertiary">신청 ${g.pending}</span>` : ''}
+            ${g.role === 'owner' ? `<span class="${K.pill} bg-primary-container text-on-primary">운영자</span>` : ''}
+          </div>
+        </div>
+        <p class="${K.small}">${KIND_LABEL[g.kind]} · 멤버 ${g.member_count}명${g.schedule ? ` · ${esc(g.schedule)}` : ''}</p>
+        <div class="flex items-center gap-2">${bar(pct)}<span class="num shrink-0 text-[12px]">${g.active_week}/${g.member_count}</span></div>
+        <p class="${K.tiny}">최근 7일 실천을 공유한 멤버</p>
+      </a>`;
+  };
+  const resultCard = (g) => {
+    const full = g.member_count >= g.max_members;
+    const action = g.is_member
+      ? `<a href="#/group/${g.id}" class="${btn('solid')}">들어가기</a>`
+      : g.requested
+        ? `<a href="#/group/${g.id}" class="${btn('line')}">신청함</a>`
+        : `<a href="#/group/${g.id}" class="${btn('line')}">둘러보기</a>`;
+    return `
+      <article class="${K.card} flex flex-col gap-2 p-5">
+        <div class="flex items-start justify-between gap-2">
+          <h3 class="min-w-0 font-serif text-headline-md font-semibold leading-snug">${esc(g.name)}</h3>
+          ${kindPill(g.kind)}
+        </div>
+        <p class="flex flex-wrap items-center gap-x-2 ${K.small}"><span>${esc(g.topic)}</span>${g.place ? `·<span>${esc(g.place)}</span>` : ''}·<span>멤버 ${g.member_count}/${g.max_members}명</span>${g.join_mode === 'approve' ? '·<span>승인 후 참여</span>' : ''}${full ? '·<span class="text-tertiary">정원 마감</span>' : ''}</p>
+        ${g.intro ? `<p class="text-body-sm leading-relaxed">${esc(g.intro)}</p>` : ''}
+        <div class="flex items-center justify-between gap-2 pt-1">
+          <span class="flex min-w-0 items-center gap-1 text-body-sm">${g.schedule ? `${ms('schedule', 'text-[16px] text-secondary')}<span class="truncate">${esc(g.schedule)}</span>` : ''}</span>
+          ${action}
+        </div>
+      </article>`;
+  };
+
+  const mineHtml = mine === null
+    ? loadingLine()
+    : mine.length
+      ? mine.map(myCard).join('')
+      : `<p class="px-1 ${K.small}">아직 참여한 모임이 없어요. 아래에서 공개 모임을 찾거나, 받은 초대 코드로 들어가요.</p>`;
+  const results = s.list === null
+    ? loadingLine('모임을 찾는 중이에요')
+    : s.err && !s.list.length
+      ? `<p class="px-1 ${K.small}">모임을 불러오지 못했어요. <button type="button" class="font-medium text-primary underline" data-act="g-search-retry">다시 시도</button></p>`
+      : s.list.length
+        ? s.list.map(resultCard).join('')
+        : `<p class="px-1 ${K.small}">찾는 모임이 없어요. 다른 말로 찾아보거나 직접 만들어 보세요.</p>`;
+  const q = keep('gq');
+
+  return `
+    <div class="${K.screen} gap-5">
+      ${header('', '모임', `<a href="#/group-new" class="${btn('soft')}">${ms('add', 'text-[16px]')}만들기</a>`, 'groups')}
+      <section class="flex flex-col gap-3">
+        <h2 class="${K.h2} px-1">내 모임</h2>
+        ${mineHtml}
+        ${groups.cache.mineErr ? `<p class="px-1 ${K.small}">내 모임을 불러오지 못했어요. <button type="button" class="font-medium text-primary underline" data-act="g-mine-retry">다시 시도</button></p>` : ''}
+      </section>
+      <form class="flex gap-2" data-act="code-form">
+        <label for="g-code" class="sr">초대 코드</label>
+        <input id="g-code" name="code" data-keep="code" value="${esc(keep('code'))}" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="초대 코드 6자리" class="${INPUT} h-11 min-w-0 flex-1 rounded-full font-mono uppercase tracking-widest">
+        <button type="submit" class="${btn('line', 'h-11 rounded-full')}">코드로 참여</button>
+      </form>
+      <section class="flex flex-col gap-3">
+        <h2 class="${K.h2} px-1">모임 찾기</h2>
+        <form class="relative" data-act="search-form" role="search">
+          <label for="gq" class="sr">모임 검색</label>
+          ${ms('search', 'pointer-events-none absolute left-4 top-3 text-[20px] text-outline')}
+          <input id="gq" name="q" type="search" data-keep="gq" value="${esc(q)}" maxlength="30" placeholder="모임 이름, 주제, 지역" autocomplete="off" class="${INPUT} h-12 rounded-full pl-11">
+        </form>
+        ${segBtns([['all', '전체'], ['on', '온라인'], ['off', '오프라인']], ui.groupMode, (id) => `data-act="group-mode" data-id="${id}"`, '모임 방식')}
+        <div class="flex flex-wrap gap-2">
+          ${groups.TOPICS.filter((t) => t !== '기타').map((t) => `<button type="button" class="tap inline-flex min-h-[36px] items-center rounded-full px-3.5 text-label-md ${q === t ? 'bg-primary-container font-semibold text-on-primary' : 'bg-secondary-container/60'}" data-act="topic-chip" data-id="${esc(t)}" aria-pressed="${q === t}">${esc(t)}</button>`).join('')}
+        </div>
+        <p class="px-1 ${K.small}">공개 모임 ${s.list ? s.list.length : '…'}개${s.q.trim() ? ` · '${esc(s.q.trim())}' 검색` : ' · 최근 만든 순'}</p>
+        ${results}
+      </section>
+    </div>`;
+}
+
+// 모임 소개 + 참여 (공개 모임 둘러보기, 초대 링크)
+function viewPreview({ id = null, code = null }) {
+  const back = ['#/groups', '모임'];
+  groups.loadPreview({ id, code });
+  const p = groups.previewOf({ id, code });
+  if (!p) return stateView(...back, loadingLine());
+  if (p.err) return stateView(...back, `<p class="${K.small}">모임을 불러오지 못했어요. <button type="button" class="font-medium text-primary underline" data-act="g-preview-retry" data-id="${esc(id || '')}" data-code="${esc(code || '')}">다시 시도</button></p>`);
+  if (!p.data) {
+    return stateView(...back, `
+      <section class="${K.card} flex flex-col gap-2 p-5">
+        <h1 class="${K.h2}">${code ? '초대 코드가 맞지 않아요' : '모임을 찾지 못했어요'}</h1>
+        <p class="${K.small}">${code ? '운영자가 코드를 바꿨을 수 있어요. 새 초대 링크를 받아 주세요.' : '비공개로 바뀌었거나 없어진 모임일 수 있어요.'}</p>
+      </section>`);
+  }
+  const g = p.data;
+  const full = g.member_count >= g.max_members;
+  const approve = g.join_mode === 'approve' && !g.by_code;
+  let action;
+  if (g.is_member) {
+    action = `<a href="#/group/${g.id}" class="${btn('solid', 'h-12 w-full rounded-full')}">모임으로 들어가기</a>`;
+  } else if (g.requested && !g.by_code) {
+    action = `
+      <div role="status" class="rounded-2xl bg-done px-4 py-3 text-body-sm font-medium text-primary">참여 신청을 보냈어요. 운영자가 수락하면 '내 모임'에 나타나요.</div>
+      <button type="button" class="${btn('line', 'h-11 w-full rounded-full')}" data-act="g-cancel-req" data-id="${g.id}">신청 취소</button>`;
+  } else if (full) {
+    action = `<p class="rounded-2xl bg-surface-container px-4 py-3 text-body-sm">정원(${g.max_members}명)이 다 찼어요.</p>`;
+  } else {
+    action = `
+      <form class="flex flex-col gap-3" data-act="join-form" data-id="${g.id}" data-code="${esc(g.by_code ? code : '')}">
+        <div class="flex flex-col gap-1.5">
+          <label for="j-nick" class="text-label-md font-medium">모임에서 쓸 닉네임</label>
+          <input id="j-nick" name="nick" data-keep="j_nick" value="${esc(keep('j_nick', defaultNick()))}" required maxlength="12" autocomplete="off" class="${INPUT} h-12">
+          <p class="${K.tiny}">멤버에게는 이 닉네임만 보여요. 카카오·구글 이름이나 사진은 보이지 않아요.</p>
+        </div>
+        ${approve ? `
+        <div class="flex flex-col gap-1.5">
+          <label for="j-msg" class="text-label-md font-medium">운영자에게 한마디 <span class="${K.tiny}">(선택)</span></label>
+          <input id="j-msg" name="msg" data-keep="j_msg" value="${esc(keep('j_msg'))}" maxlength="80" autocomplete="off" placeholder="예: 마포에 살고 주말에 함께하고 싶어요" class="${INPUT} h-12">
+        </div>` : ''}
+        <button type="submit" class="${btn('solid', 'h-12 w-full rounded-full')}">${approve ? '참여 신청 보내기' : '참여하기'}</button>
+      </form>`;
+  }
+  return stateView(...back, `
+    <section class="${K.card} flex flex-col gap-3 p-5">
+      <div class="flex items-start justify-between gap-2">
+        <h1 class="min-w-0 ${K.h1}">${esc(g.name)}</h1>
+        ${kindPill(g.kind)}
+      </div>
+      <p class="flex flex-wrap items-center gap-x-2 ${K.small}"><span>${esc(g.topic)}</span>${g.place ? `·<span>${esc(g.place)}</span>` : ''}·<span>멤버 ${g.member_count}/${g.max_members}명</span></p>
+      ${g.schedule ? `<p class="flex items-center gap-1 text-body-sm">${ms('schedule', 'text-[16px] text-secondary')}${esc(g.schedule)}</p>` : ''}
+      ${g.intro ? `<p class="text-body-md leading-relaxed">${esc(g.intro)}</p>` : ''}
+      <p class="${K.tiny}">${g.by_code ? '초대 코드로 들어가요 · 바로 참여' : g.join_mode === 'approve' ? '운영자가 수락하면 참여돼요' : '누르면 바로 참여돼요'}</p>
+    </section>
+    <section class="flex flex-col gap-3">${action}</section>
+    ${note('참여하면 멤버에게 모임 닉네임과 내가 직접 공유한 실천만 보여요. 나의 기록·숲·성찰은 보이지 않아요.', 'lock')}`);
+}
+
+function viewJoin() {
+  const code = routeParam();
+  if (!auth.getUser()) return loginPrompt('초대받은 모임이 있어요', '로그인하면 모임 소개를 보고 바로 참여할 수 있어요.');
+  return viewPreview({ code });
+}
+
+function groupEntry() {
+  const id = routeParam();
+  groups.loadGroup(id);
+  return { id, e: groups.cache.group[id] };
+}
+
+function viewGroupRoute() {
+  if (!routeParam()) return viewGroupHomeDemo();
+  if (!auth.getUser()) return loginPrompt('모임 소개는 로그인한 뒤 볼 수 있어요', '카카오나 구글로 로그인하면 모임을 둘러보고 참여할 수 있어요.');
+  const { id, e } = groupEntry();
+  if (!e) return stateView('#/groups', '모임', loadingLine());
+  if (!e.data) {
+    if (e.err) return stateView('#/groups', '모임', `<p class="${K.small}">모임을 불러오지 못했어요. <button type="button" class="font-medium text-primary underline" data-act="g-refresh" data-g="${esc(id)}">다시 시도</button></p>`);
+    return viewPreview({ id }); // 아직 멤버가 아니면 소개 화면
+  }
+  return viewGroupHome(id, e.data);
+}
+
+function viewGroupHome(id, d) {
+  const { info, members, shares, requests, reports, me } = d;
+  const owner = me.role === 'owner';
+  const week = groups.todayKey(-6);
+  const active = new Set(shares.filter((s) => s.day >= week).map((s) => s.user_id));
+  const dots = members.slice(0, 16).map((m) => `<span class="h-4 w-4 rounded-full border-[1.5px] border-primary-container ${active.has(m.user_id) ? 'bg-primary-container' : ''}" title="${esc(m.nickname)}"></span>`).join('');
+  const nick = Object.fromEntries(members.map((m) => [m.user_id, m.nickname]));
+  const row = 'flex min-h-[52px] items-center justify-between gap-2 border-t border-hairline py-2 first:border-t-0';
+
+  const manage = owner ? `
+    <section class="${K.card} flex flex-col gap-1 p-5">
+      <h2 class="${K.h2} mb-1">참여 신청 <span class="${K.small}">${requests.length}</span></h2>
+      ${requests.length ? requests.map((r) => `
+        <div class="${row}">
+          <div class="flex min-w-0 items-center gap-2.5">${nickAvatar(r.nickname, r.user_id, 32)}<div class="min-w-0"><div class="text-body-md font-medium">${esc(r.nickname)}</div>${r.message ? `<div class="${K.small} [word-break:keep-all]">${esc(r.message)}</div>` : ''}</div></div>
+          <div class="flex shrink-0 gap-1.5">
+            <button type="button" class="${btn('line', 'min-h-[36px] px-3')}" data-act="g-reject" data-g="${id}" data-u="${r.user_id}">거절</button>
+            <button type="button" class="${btn('solid', 'min-h-[36px] px-3')}" data-act="g-accept" data-g="${id}" data-u="${r.user_id}">수락</button>
+          </div>
+        </div>`).join('') : `<p class="${K.small}">${info.join_mode === 'approve' ? '기다리는 신청이 없어요.' : '지금은 바로 참여 모임이라 신청 없이 들어와요.'}</p>`}
+    </section>
+    ${reports.length ? `
+    <section class="${K.card} flex flex-col gap-1 border border-tertiary/30 p-5">
+      <h2 class="${K.h2} mb-1">신고된 공유 <span class="${K.small}">${new Set(reports.map((r) => r.share_id)).size}</span></h2>
+      ${[...new Set(reports.map((r) => r.share_id))].map((sid) => {
+        const s = shares.find((x) => x.id === sid);
+        const why = reports.filter((r) => r.share_id === sid).map((r) => r.reason).filter(Boolean);
+        return `
+          <div class="flex flex-col gap-2 border-t border-hairline py-3 first:border-t-0">
+            <p class="text-body-sm"><b>${esc(nick[s?.user_id] || '멤버')}</b> · ${esc(cardById[s?.action_id]?.title || '실천')}${s?.memo ? ` · “${esc(s.memo)}”` : ''}</p>
+            <p class="${K.tiny}">신고 ${reports.filter((r) => r.share_id === sid).length}건${why.length ? ` · ${esc([...new Set(why)].join(', '))}` : ''}${s?.hidden ? ' · 숨김' : ''}</p>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" class="${btn('line')}" data-act="g-dismiss" data-g="${id}" data-id="${sid}">그대로 두기</button>
+              <button type="button" class="${btn('solid')}" data-act="g-hide" data-g="${id}" data-id="${sid}" data-v="1">숨기기</button>
+            </div>
+          </div>`;
+      }).join('')}
+    </section>` : ''}
+    <section class="${K.card} flex flex-col gap-3 p-5">
+      <h2 class="${K.h2}">모임 설정</h2>
+      <div class="flex items-center justify-between gap-3">
+        <div><div class="text-body-md font-medium">모임 찾기에 공개</div><div class="${K.small}">${info.is_public ? '검색 결과에 소개 정보가 보여요' : '초대 코드로만 들어올 수 있어요'}</div></div>
+        <button type="button" role="switch" aria-checked="${info.is_public}" aria-label="모임 찾기에 공개" class="tap relative h-8 w-14 shrink-0 rounded-full ${info.is_public ? 'bg-primary-container' : 'bg-surface-container-highest'}" data-act="g-set" data-g="${id}" data-k="is_public" data-v="${info.is_public ? '0' : '1'}"><span class="absolute top-1 h-6 w-6 rounded-full bg-white shadow transition-all ${info.is_public ? 'left-7' : 'left-1'}"></span></button>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <div class="text-body-md font-medium">검색으로 찾아온 사람</div>
+        ${segBtns([['open', '바로 참여'], ['approve', '승인 후 참여']], info.join_mode, (v) => `data-act="g-set" data-g="${id}" data-k="join_mode" data-v="${v}"`, '참여 방식')}
+        <p class="${K.tiny}">초대 코드로 들어오는 사람은 언제나 바로 참여해요.</p>
+      </div>
+    </section>` : '';
+
+  const memberList = `
+    <section class="${K.card} flex flex-col gap-1 p-5">
+      <h2 class="${K.h2} mb-1">멤버 <span class="${K.small}">${members.length}/${info.max_members}</span></h2>
+      ${members.map((m) => `
+        <div class="${row}">
+          <div class="flex min-w-0 items-center gap-2.5">${nickAvatar(m.nickname, m.user_id, 32)}<span class="truncate text-body-md">${esc(m.nickname)}${m.user_id === me.user_id ? ' <span class="text-label-sm text-outline">(나)</span>' : ''}</span>${m.role === 'owner' ? `<span class="${K.pill} bg-primary-container text-on-primary">운영자</span>` : ''}</div>
+          ${m.user_id === me.user_id
+            ? `<button type="button" class="${btn('ghost', 'min-h-[36px] px-2')}" data-act="g-nick-open" data-g="${id}">닉네임 바꾸기</button>`
+            : owner ? `<button type="button" class="${btn('ghost', 'min-h-[36px] px-2 text-outline')}" data-act="g-kick" data-g="${id}" data-u="${m.user_id}" aria-label="${esc(m.nickname)} 내보내기">내보내기</button>` : ''}
+        </div>`).join('')}
+    </section>`;
+
+  return `
+    <div class="${K.screen} gap-5 pt-3">
+      ${backLink('#/groups', '모임')}
+      <div class="-mt-3 flex items-start justify-between gap-2">
+        <div class="min-w-0 space-y-0.5"><h1 class="${K.h1}">${esc(info.name)}</h1><p class="${K.small}">${KIND_LABEL[info.kind]}${info.place ? ` · ${esc(info.place)}` : ''} · ${esc(info.topic)} · 멤버 ${members.length}명</p></div>
+        ${owner ? `<span class="${K.pill} bg-primary-container text-on-primary">운영자</span>` : ''}
+      </div>
+      ${info.intro ? `<p class="-mt-2 px-1 text-body-sm leading-relaxed text-on-surface-variant">${esc(info.intro)}</p>` : ''}
+      <section class="${K.card} flex flex-col gap-3 p-5">
+        <div class="flex items-baseline justify-between"><h2 class="${K.h2}">최근 7일</h2><span class="${K.meta}">공유 ${shares.filter((s) => s.day >= week).length}건</span></div>
+        <div class="flex flex-wrap items-center gap-3"><div class="flex flex-wrap gap-1" aria-hidden="true">${dots}</div><span class="text-body-sm">실천을 공유한 멤버 <b>${active.size}</b>/${members.length}명</span></div>
+        <button type="button" class="${btn('solid', 'w-full')}" data-act="share-open-g" data-g="${id}">${ms('ios_share', 'text-[18px]')}오늘 실천 공유하기</button>
+        <a href="#/feed/${id}" class="${btn('soft', 'w-full justify-between')}">멤버 실천 보기 · 응원 남기기${ms('chevron_right', 'text-[18px]')}</a>
+      </section>
+      ${info.schedule ? `
+      <div class="flex items-center justify-between gap-2 px-1">
+        <div><p class="${K.small}">다음 활동</p><p class="text-body-md font-medium">${esc(info.schedule)}</p></div>
+      </div>` : ''}
+      <section class="flex flex-col gap-3 rounded-2xl border border-amber/20 bg-oat/60 p-5">
+        <div class="text-label-md font-medium text-tertiary">초대 코드</div>
+        <div class="flex items-center justify-between gap-2">
+          <span class="num text-[28px] font-bold tracking-[0.2em] text-on-surface">${esc(info.invite_code)}</span>
+          <button type="button" class="${btn('solid')}" data-act="g-invite" data-g="${id}">${ms('share', 'text-[16px]')}초대 링크 보내기</button>
+        </div>
+        <p class="${K.tiny}">이 코드나 링크를 받은 사람은 비공개 모임이어도 바로 들어올 수 있어요.${owner ? '' : ' 코드는 운영자가 바꿀 수 있어요.'}</p>
+        ${owner ? `<button type="button" class="${btn('ghost', 'self-start px-0')}" data-act="g-reset-code" data-g="${id}">${ms('autorenew', 'text-[16px]')}코드 바꾸기</button>` : ''}
+      </section>
+      ${manage}
+      ${memberList}
+      <button type="button" class="${btn('line', 'h-11 rounded-full text-[#E5484D]')}" data-act="${owner ? 'g-delete' : 'g-leave'}" data-g="${id}">${owner ? '모임 삭제하기' : '모임 나가기'}</button>
+      ${note(owner ? '운영자는 모임을 나갈 수 없어요. 삭제하면 모든 멤버의 공유와 응원이 함께 지워져요.' : '나가면 이 모임에 남긴 공유·반응·한마디가 함께 지워져요.')}
+    </div>`;
+}
+
+function viewFeedRoute() {
+  if (!routeParam()) return viewFeedDemo();
+  if (!auth.getUser()) return loginPrompt('멤버 실천은 로그인한 뒤 볼 수 있어요', '모임 멤버만 서로의 실천과 응원을 볼 수 있어요.');
+  const { id, e } = groupEntry();
+  if (!e) return stateView('#/groups', '모임', loadingLine());
+  if (!e.data) {
+    if (e.err) return stateView('#/groups', '모임', `<p class="${K.small}">불러오지 못했어요. <button type="button" class="font-medium text-primary underline" data-act="g-refresh" data-g="${esc(id)}">다시 시도</button></p>`);
+    return viewPreview({ id });
+  }
+  return viewFeed(id, e.data);
+}
+
+function viewFeed(id, d) {
+  const { info, members, shares, reactions, cheers, me } = d;
+  const owner = me.role === 'owner';
+  const nick = Object.fromEntries(members.map((m) => [m.user_id, m.nickname]));
+  const week = groups.todayKey(-6);
+  const active = new Set(shares.filter((s) => s.day >= week).map((s) => s.user_id)).size;
+
+  const post = (s) => {
+    const rs = reactions.filter((r) => r.share_id === s.id);
+    const mine = rs.find((r) => r.user_id === me.user_id)?.kind;
+    const cs = cheers.filter((c) => c.share_id === s.id);
+    const own = s.user_id === me.user_id;
+    const sent = cs.find((c) => c.from_user === me.user_id);
+    const card = cardById[s.action_id];
+    const name = nick[s.user_id] || '멤버';
+    return `
+      <article class="${K.card} flex flex-col gap-3 p-4 ${s.hidden ? 'opacity-60' : ''}">
+        <div class="flex items-center gap-2.5">
+          ${nickAvatar(name, s.user_id)}
+          <div class="min-w-0 flex-1"><div class="truncate text-body-md font-semibold">${esc(name)}${own ? ' <span class="text-label-sm font-normal text-outline">(나)</span>' : ''}</div><div class="${K.tiny}">${dayLabel(s.day)}${s.hidden ? ' · 숨긴 글 (멤버에게 안 보여요)' : ''}</div></div>
+          <span class="${K.pill} max-w-[40%] truncate bg-secondary-container/70 text-primary">${ms(CARD_ICON[s.action_id] || 'eco', 'mr-0.5 text-[13px]')}${esc(card?.title || '실천')}</span>
+          <button type="button" class="tap -mr-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-outline hover:bg-surface-container" data-act="g-more" data-g="${id}" data-id="${s.id}" aria-label="더 보기 · ${own ? '지우기' : '신고'}">${ms('more_horiz')}</button>
+        </div>
+        ${s.memo ? `<p class="text-body-md leading-relaxed [word-break:keep-all]">${esc(s.memo)}</p>` : `<p class="${K.small}">${esc(card?.title || '실천')}을(를) 했어요</p>`}
+        <div class="flex items-center gap-1.5">
+          ${REACTIONS.map((label, i) => {
+            const n = rs.filter((r) => r.kind === i).length;
+            return `<button type="button" class="tap h-10 flex-1 rounded-full border text-label-md ${mine === i ? 'border-primary-container bg-secondary-container font-semibold text-primary' : 'border-hairline bg-surface-container-low text-on-surface'}" data-act="g-react" data-g="${id}" data-id="${s.id}" data-i="${i}" aria-pressed="${mine === i}">${label} ${n}</button>`;
+          }).join('')}
+          ${own ? '' : `<button type="button" class="tap flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${sent ? 'bg-secondary-container text-primary' : 'bg-primary-container text-on-primary'}" data-act="g-cheer-open" data-g="${id}" data-id="${s.id}" aria-label="${esc(name)}${COPY.nim}에게 한마디 ${sent ? '바꾸기' : '보내기'}">${ms(sent ? 'mark_chat_read' : 'send', 'text-[18px]')}</button>`}
+        </div>
+        ${own && cs.length ? `
+          <div class="flex flex-col gap-1 rounded-xl bg-surface-container px-3 py-2">
+            <span class="${K.tiny}">받은 한마디 ${cs.length}</span>
+            ${cs.map((c) => `<p class="text-body-sm"><b class="font-semibold">${esc(nick[c.from_user] || '멤버')}</b> · ${esc(PHRASES[c.phrase] || '')}</p>`).join('')}
+          </div>` : ''}
+        ${!own && sent ? `<p class="${K.tiny}">보낸 한마디 · ${esc(PHRASES[sent.phrase] || '')}</p>` : ''}
+      </article>`;
+  };
+
+  return `
+    <div class="${K.screen} gap-4 pt-3">
+      <div class="flex items-center justify-between gap-2">
+        ${backLink(`#/group/${id}`, info.name)}
+        <button type="button" class="tap grid h-10 w-10 place-items-center rounded-full text-on-surface-variant hover:bg-surface-container" data-act="g-refresh" data-g="${id}" aria-label="새로 고침">${ms('refresh', 'text-[20px]')}</button>
+      </div>
+      <div class="-mt-2 space-y-1"><h1 class="${K.h1}">멤버 실천</h1><p class="${K.small}">최근 7일 ${members.length}명 중 ${active}명이 공유했어요 · 순위 없이 응원만 남겨요</p></div>
+      <button type="button" class="${btn('solid', 'w-full')}" data-act="share-open-g" data-g="${id}">${ms('ios_share', 'text-[18px]')}오늘 실천 공유하기</button>
+      ${ui.feedSent ? `<div role="status" class="rounded-2xl bg-done px-4 py-3 text-body-sm font-medium text-primary">${esc(ui.feedSent)}</div>` : ''}
+      ${shares.length ? shares.map(post).join('') : `<p class="px-1 ${K.small}">최근 2주 동안 공유한 실천이 없어요. 오늘 기록한 실천을 먼저 공유해 보세요.</p>`}
+      ${note('응원은 이 모임 멤버만 볼 수 있어요. 한 기록에 반응은 하나, 한마디는 정해진 문구로 하나만 보내요. 최근 2주 공유만 보여요.')}
+    </div>`;
+}
+
+// 모임 만들기
+function viewGroupNew() {
+  if (!auth.getUser()) return loginPrompt('모임을 만들려면 로그인해 주세요', '모임을 만든 사람이 운영자가 돼요. 멤버 신청 수락과 공유 관리를 할 수 있어요.');
+  const kind = keep('n_kind', 'off');
+  const topic = keep('n_topic', groups.TOPICS[0]);
+  const pub = keep('n_pub', '1') === '1';
+  const mode = keep('n_mode', 'open');
+  const field = (key, label, attrs, hint = '', opt = false) => `
+    <div class="flex flex-col gap-1.5">
+      <label for="${key}" class="text-label-md font-medium">${label}${opt ? ` <span class="${K.tiny}">(선택)</span>` : ''}</label>
+      <input id="${key}" name="${key}" data-keep="${key}" value="${esc(keep(key, key === 'n_nick' ? defaultNick() : ''))}" autocomplete="off" class="${INPUT} h-12" ${attrs}>
+      ${hint ? `<p class="${K.tiny}">${hint}</p>` : ''}
+    </div>`;
+  return `
+    <div class="${K.screen} gap-5 pt-3">
+      ${backLink('#/groups', '모임')}
+      <h1 class="-mt-3 ${K.h1}">모임 만들기</h1>
+      <form class="flex flex-col gap-5" data-act="create-group" novalidate>
+        ${field('n_name', '모임 이름', 'required minlength="2" maxlength="30" placeholder="예: 주말 플로깅 크루"')}
+        <div class="flex flex-col gap-1.5">
+          <span class="text-label-md font-medium">모임 방식</span>
+          ${segBtns([['off', '오프라인'], ['on', '온라인']], kind, (v) => `data-act="keep-set" data-k="n_kind" data-id="${v}"`, '모임 방식')}
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <span class="text-label-md font-medium">주제</span>
+          <div class="flex flex-wrap gap-2" role="group" aria-label="주제">
+            ${groups.TOPICS.map((t) => `<button type="button" class="tap inline-flex min-h-[36px] items-center rounded-full px-3.5 text-label-md ${topic === t ? 'bg-primary-container font-semibold text-on-primary' : 'bg-secondary-container/60'}" data-act="keep-set" data-k="n_topic" data-id="${esc(t)}" aria-pressed="${topic === t}">${esc(t)}</button>`).join('')}
+          </div>
+        </div>
+        ${kind === 'off' ? field('n_place', '지역', 'maxlength="30" placeholder="예: 서울 마포구"', '검색 결과에 보이니 구·동 단위까지만 적어요. 정확한 장소는 모임 안에서 알려요.', true) : ''}
+        ${field('n_schedule', '모이는 때', 'maxlength="40" placeholder="예: 매주 일요일 오전 10시"', '', true)}
+        <div class="flex flex-col gap-1.5">
+          <label for="n_intro" class="text-label-md font-medium">소개 한 줄 <span class="${K.tiny}">(선택)</span></label>
+          <textarea id="n_intro" name="n_intro" data-keep="n_intro" rows="3" maxlength="100" placeholder="어떤 실천을 함께하는 모임인지 적어요" class="${INPUT} resize-none py-3 leading-relaxed">${esc(keep('n_intro'))}</textarea>
+        </div>
+        <section class="${K.card} flex flex-col gap-3 p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div><div class="text-body-md font-medium">모임 찾기에 공개</div><div class="${K.small}">${pub ? '누구나 검색해서 찾을 수 있어요' : '초대 코드를 받은 사람만 들어와요'}</div></div>
+            <button type="button" role="switch" aria-checked="${pub}" aria-label="모임 찾기에 공개" class="tap relative h-8 w-14 shrink-0 rounded-full ${pub ? 'bg-primary-container' : 'bg-surface-container-highest'}" data-act="keep-set" data-k="n_pub" data-id="${pub ? '0' : '1'}"><span class="absolute top-1 h-6 w-6 rounded-full bg-white shadow transition-all ${pub ? 'left-7' : 'left-1'}"></span></button>
+          </div>
+          ${pub ? `
+          <div class="flex flex-col gap-1.5">
+            <span class="text-body-md font-medium">검색으로 찾아온 사람</span>
+            ${segBtns([['open', '바로 참여'], ['approve', '승인 후 참여']], mode, (v) => `data-act="keep-set" data-k="n_mode" data-id="${v}"`, '참여 방식')}
+            <p class="${K.tiny}">${mode === 'approve' ? '참여 신청을 운영자가 수락해야 들어와요. 오프라인 모임에 추천해요.' : '참여하기를 누르면 바로 멤버가 돼요.'}</p>
+          </div>` : ''}
+        </section>
+        ${field('n_nick', '내 모임 닉네임', 'required maxlength="12"', '멤버에게 보이는 이름이에요.')}
+        <button type="submit" class="${btn('solid', 'h-12 w-full rounded-full')}">모임 만들기</button>
+        ${note('모임 이름·주제·지역·소개는 공개로 두면 로그인한 다른 사용자에게 보여요. 한 사람이 운영하는 모임은 5개까지예요.')}
+      </form>
+    </div>`;
+}
+
+// 공유 시트: 오늘 탭 카드에서(실천 고정 → 모임 고르기) 또는 모임 화면에서(모임 고정 → 오늘 기록 고르기)
+function openShare({ actionId = null, groupId = null }) {
+  const today = store.dateKey();
+  const mine = groups.cache.mine || [];
+  const g = groupId ? groups.cache.group[groupId]?.data : null;
+  const sharedIn = (gid, a) => groups.cache.sharedToday.has(`${gid}|${a}`)
+    || (g && gid === groupId && g.shares.some((s) => s.user_id === g.me.user_id && s.day === today && s.action_id === a));
+  const check = 'h-5 w-5 shrink-0 accent-[#00b36e]';
+  const rowCls = 'flex min-h-[52px] items-center gap-3 rounded-2xl border border-hairline bg-surface-container-lowest px-4 py-2 text-body-md';
+  let picks;
+  if (actionId) {
+    picks = mine.map((x) => {
+      const done = sharedIn(x.id, actionId);
+      return `<label class="${rowCls} ${done ? 'text-outline' : ''}"><input type="checkbox" name="g" value="${x.id}" class="${check}" ${done ? 'disabled' : 'checked'}><span class="min-w-0 flex-1 truncate">${esc(x.name)}</span>${done ? `<span class="${K.small}">공유함</span>` : ''}</label>`;
+    }).join('');
+  } else {
+    const done = [...new Set(store.getState().records[today] || [])].filter((a) => cardById[a]);
+    if (!done.length) {
+      sheet('실천 공유', `
+        <h2 class="${K.h2}">오늘 기록한 실천이 없어요</h2>
+        <p class="${K.small}">오늘 탭에서 실천을 기록하면 모임에 공유할 수 있어요.</p>
+        <a href="#/today" class="${btn('solid', 'h-12 rounded-full')}">오늘 탭으로</a>
+        <button type="button" class="${btn('ghost')}" data-act="close">닫기</button>`);
+      return;
+    }
+    const open = done.filter((a) => !sharedIn(groupId, a));
+    picks = done.map((a) => {
+      const s = sharedIn(groupId, a);
+      return `<label class="${rowCls} ${s ? 'text-outline' : ''}"><input type="radio" name="a" value="${a}" class="${check}" ${s ? 'disabled' : a === open[0] ? 'checked' : ''}>${ms(CARD_ICON[a] || 'eco', 'text-[18px] text-secondary')}<span class="min-w-0 flex-1 truncate">${esc(cardById[a].title)}</span>${s ? `<span class="${K.small}">공유함</span>` : ''}</label>`;
+    }).join('');
+  }
+  sheet('실천 공유', `
+    <form class="flex flex-col gap-2.5" data-act="share-form" data-a="${actionId || ''}" data-g="${groupId || ''}">
+      <h2 class="${K.h2}">${actionId ? `'${esc(cardById[actionId].title)}' 공유` : `${esc(g?.info.name || '모임')}에 공유`}</h2>
+      <p class="${K.small}">${actionId ? '공유할 모임을 골라요' : '오늘 기록한 실천 중 하나를 골라요'}</p>
+      ${picks}
+      <label for="s-memo" class="mt-1 text-label-md font-medium">한 줄 메모 <span class="${K.tiny}">(선택 · ${groups.MAX_MEMO}자)</span></label>
+      <textarea id="s-memo" name="memo" rows="2" maxlength="${groups.MAX_MEMO}" placeholder="예: 카페 세 곳에서 텀블러를 썼어요" class="${INPUT} resize-none py-3 leading-relaxed"></textarea>
+      <p class="${K.tiny}">모임 멤버만 볼 수 있어요. 공유한 뒤에도 지울 수 있어요.</p>
+      <button type="submit" class="${btn('solid', 'h-12 rounded-full')}">공유하기</button>
+      <button type="button" class="${btn('ghost')}" data-act="close">취소</button>
+    </form>`, { outside: false });
+}
+
+function confirmSheet(title, text, label, fn) {
+  ui.confirmFn = fn;
+  sheet(title, `
+    <h2 class="${K.h2}">${title}</h2>
+    <p class="${K.small}">${text}</p>
+    <button type="button" class="${btn('line', 'h-12 rounded-full text-[#E5484D]')}" data-act="confirm-run">${label}</button>
+    <button type="button" class="${btn('ghost')}" data-act="close">취소</button>`);
+}
+
+// 비동기 작업: 끝나면 알림을 띄우고 화면을 다시 그린다
+function run(promise, ok, after) {
+  return Promise.resolve(promise)
+    .then((r) => {
+      if (ok) toast(typeof ok === 'function' ? ok(r) : ok);
+      after?.(r);
+    })
+    .catch((err) => toast(groups.message(err)))
+    .finally(() => render(true));
+}
+
+const REPORT_REASONS = ['불쾌한 내용', '광고·스팸', '개인정보 노출', '실천과 관계없는 글'];
+
+function openMore(gid, sid) {
+  const d = groups.cache.group[gid]?.data;
+  const s = d?.shares.find((x) => x.id === sid);
+  if (!s) return;
+  const own = s.user_id === d.me.user_id;
+  const owner = d.me.role === 'owner';
+  const rows = [];
+  if (own) rows.push(sheetRow(`data-act="g-del-share" data-g="${gid}" data-id="${sid}"`, `${ms('delete', 'mr-2 align-[-4px] text-[18px]')}공유 지우기`));
+  if (owner && !own) rows.push(sheetRow(`data-act="g-hide" data-g="${gid}" data-id="${sid}" data-v="${s.hidden ? '0' : '1'}"`, `${ms(s.hidden ? 'visibility' : 'visibility_off', 'mr-2 align-[-4px] text-[18px]')}${s.hidden ? '다시 보이기' : '멤버에게 숨기기'}`));
+  if (!own) {
+    rows.push(`<p class="mt-2 ${K.small}">신고하기 · 운영자에게만 알려져요</p>`);
+    REPORT_REASONS.forEach((r, i) => rows.push(sheetRow(`data-act="g-report" data-g="${gid}" data-id="${sid}" data-i="${i}"`, r)));
+  }
+  sheet('더 보기', `<h2 class="${K.h2}">${own ? '내 공유' : esc(d.members.find((m) => m.user_id === s.user_id)?.nickname || '멤버') + '의 공유'}</h2>${rows.join('')}<button type="button" class="${btn('ghost', 'mt-1')}" data-act="close">닫기</button>`);
+}
+
+function openCheer(gid, sid) {
+  const d = groups.cache.group[gid]?.data;
+  const s = d?.shares.find((x) => x.id === sid);
+  if (!s) return;
+  const name = d.members.find((m) => m.user_id === s.user_id)?.nickname || '멤버';
+  const sent = d.cheers.find((c) => c.share_id === sid && c.from_user === d.me.user_id);
+  sheet('한마디 보내기', `
+    <h2 class="${K.h2}">${esc(name)}${COPY.nim}에게 한마디</h2>
+    <p class="${K.small}">직접 쓰는 글 대신 따뜻한 문구를 골라 보내요${sent ? ' · 다시 고르면 바뀌어요' : ''}</p>
+    ${PHRASES.map((t, i) => sheetRow(`data-act="g-cheer" data-g="${gid}" data-id="${sid}" data-i="${i}"`, esc(t), sent?.phrase === i ? '보냄' : '')).join('')}
+    <button type="button" class="${btn('ghost', 'mt-1')}" data-act="close">취소</button>`);
+}
+
+function openNick(gid) {
+  const d = groups.cache.group[gid]?.data;
+  if (!d) return;
+  sheet('닉네임 바꾸기', `
+    <form class="flex flex-col gap-2.5" data-act="nick-form" data-g="${gid}">
+      <h2 class="${K.h2}">모임 닉네임</h2>
+      <label for="nick-in" class="sr">닉네임</label>
+      <input id="nick-in" name="nick" value="${esc(d.me.nickname)}" required maxlength="12" autocomplete="off" class="${INPUT} h-12">
+      <button type="submit" class="${btn('solid', 'h-12 rounded-full')}">바꾸기</button>
+      <button type="button" class="${btn('ghost')}" data-act="close">취소</button>
+    </form>`);
+}
+
+async function invite(gid) {
+  const info = groups.cache.group[gid]?.data?.info;
+  if (!info) return;
+  const url = groups.inviteLink(info.invite_code);
+  const text = `'${info.name}' 모임에 초대해요. 초대 코드 ${info.invite_code}`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: '지구편 실천앱 모임 초대', text, url });
+      return;
+    } catch (err) {
+      if (err?.name === 'AbortError') return;
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(`${text}\n${url}`);
+    toast('초대 링크를 복사했어요');
+  } catch {
+    sheet('초대 링크', `
+      <h2 class="${K.h2}">초대 링크</h2>
+      <p class="${K.small}">아래 주소를 길게 눌러 복사해 보내요</p>
+      <p class="break-all rounded-xl bg-surface-container p-3 font-mono text-body-sm">${esc(url)}</p>
+      <button type="button" class="${btn('ghost')}" data-act="close">닫기</button>`);
+  }
+}
+
 // ───────── 라우터 ─────────
 
 const ROUTES = {
@@ -896,14 +1489,21 @@ const ROUTES = {
   forest: { view: viewForest, tab: 'today' },
   read: { view: viewRead, tab: 'read' },
   groups: { view: viewGroups, tab: 'groups' },
-  group: { view: viewGroupHome, tab: 'groups' },
-  feed: { view: viewFeed, tab: 'groups' }
+  'group-new': { view: viewGroupNew, tab: 'groups' },
+  group: { view: viewGroupRoute, tab: 'groups' },   // #/group = 예시, #/group/<id> = 실제 모임
+  feed: { view: viewFeedRoute, tab: 'groups' },     // #/feed = 예시, #/feed/<id> = 실제 피드
+  join: { view: viewJoin, tab: 'groups' }           // #/join/<초대 코드>
 };
 
 // 예전 주소(#/start 대상 고르기, #/village 학생용 지구 마을)는 오늘 화면으로 보낸다
 function currentRoute() {
-  const name = location.hash.replace(/^#\/?/, '') || 'earth';
+  const name = location.hash.replace(/^#\/?/, '').split('/')[0] || 'earth';
   return ROUTES[name] ? name : 'today';
+}
+
+// #/group/<id> 의 <id> 부분
+function routeParam() {
+  return decodeURIComponent(location.hash.replace(/^#\/?/, '').split('/')[1] || '');
 }
 
 // 하단 메뉴: 샘플처럼 지금 탭만 네온 초록 글자로. 맨 앞에 '지구' 탭을 더해 5칸
@@ -928,7 +1528,18 @@ window.addEventListener('themechange', () => render(true));
 function render(keepScroll = false) {
   const route = ROUTES[currentRoute()];
   const y = window.scrollY;
+  // 입력 중이던 칸은 다시 그린 뒤에도 커서를 그대로 둔다 (검색 결과가 도착해 화면이 바뀌어도)
+  const a = document.activeElement;
+  const focusId = a && a.id && $app.contains(a) && /^(INPUT|TEXTAREA)$/.test(a.tagName) ? a.id : '';
+  const caret = focusId ? a.selectionStart : null;
   $app.innerHTML = route.view();
+  if (focusId) {
+    const el = document.getElementById(focusId);
+    if (el) {
+      el.focus({ preventScroll: true });
+      try { el.setSelectionRange(caret, caret); } catch { /* type=search 등 */ }
+    }
+  }
   mountClimateCharts($app);
   mountAchievements($app, isDark() ? 'dark' : 'light');
   mountSeries($app);
@@ -993,7 +1604,7 @@ document.addEventListener('click', (e) => {
         return;
       }
       el.disabled = true;
-      auth.signIn(id, '#/today').catch(() => {
+      auth.signIn(id, ui.loginReturn || '#/today').catch(() => {
         el.disabled = false;
         toast(`${PROVIDER_LABEL[id]} 로그인을 열지 못했어요. 잠시 뒤 다시 시도해 주세요.`);
       });
@@ -1030,7 +1641,124 @@ document.addEventListener('click', (e) => {
       break;
     case 'group-mode':
       ui.groupMode = id;
+      if (auth.getUser()) groups.search(keep('gq'), id);
       break;
+    case 'topic-chip':
+      ui.keep.gq = keep('gq') === id ? '' : id;
+      groups.search(ui.keep.gq, ui.groupMode);
+      break;
+    case 'g-search-retry':
+      groups.cache.search.key = '';
+      groups.search(keep('gq'), ui.groupMode);
+      break;
+    case 'g-mine-retry':
+      groups.loadMine(true);
+      break;
+    case 'g-preview-retry':
+      groups.loadPreview({ id: el.dataset.id || null, code: el.dataset.code || null }, true);
+      break;
+    case 'g-refresh':
+      groups.loadGroup(el.dataset.g, true);
+      break;
+    case 'login-from':
+      ui.loginReturn = location.hash || '#/groups';
+      location.hash = '#/login';
+      return;
+    case 'keep-set':
+      ui.keep[el.dataset.k] = id;
+      break;
+    case 'confirm-run': {
+      const fn = ui.confirmFn;
+      ui.confirmFn = null;
+      closeSheet();
+      fn?.();
+      return;
+    }
+    case 'share-open':
+      openShare({ actionId: id });
+      return;
+    case 'share-open-g':
+      openShare({ groupId: el.dataset.g });
+      return;
+    case 'g-react':
+      groups.react(el.dataset.g, id, Number(el.dataset.i)).catch((err) => toast(groups.message(err)));
+      return;
+    case 'g-cheer-open':
+      openCheer(el.dataset.g, id);
+      return;
+    case 'g-cheer': {
+      const d = groups.cache.group[el.dataset.g]?.data;
+      const s = d?.shares.find((x) => x.id === id);
+      const name = d?.members.find((m) => m.user_id === s?.user_id)?.nickname || '멤버';
+      closeSheet();
+      run(groups.cheer(el.dataset.g, id, Number(el.dataset.i)), `${name}${COPY.nim}에게 한마디를 보냈어요`);
+      return;
+    }
+    case 'g-more':
+      openMore(el.dataset.g, id);
+      return;
+    case 'g-report':
+      closeSheet();
+      run(groups.report(el.dataset.g, id, REPORT_REASONS[Number(el.dataset.i)] || ''), '운영자에게 알렸어요. 고마워요.');
+      return;
+    case 'g-del-share': {
+      const g = el.dataset.g;
+      confirmSheet('공유를 지울까요?', '이 공유에 남은 반응과 한마디도 함께 지워져요. 나의 기록은 그대로예요.', '지우기', () =>
+        run(groups.deleteShare(g, id), '공유를 지웠어요', () => groups.loadMine(true)));
+      return;
+    }
+    case 'g-hide':
+      closeSheet();
+      run(groups.hideShare(el.dataset.g, id, el.dataset.v === '1'), el.dataset.v === '1' ? '멤버에게 숨겼어요' : '다시 보이게 했어요');
+      return;
+    case 'g-dismiss':
+      run(groups.dismissReports(el.dataset.g, id), '신고를 정리했어요');
+      return;
+    case 'g-accept':
+      run(groups.acceptRequest(el.dataset.g, el.dataset.u), '참여를 수락했어요');
+      return;
+    case 'g-reject':
+      run(groups.rejectRequest(el.dataset.g, el.dataset.u), '신청을 거절했어요');
+      return;
+    case 'g-kick': {
+      const { g, u } = el.dataset;
+      const name = groups.cache.group[g]?.data?.members.find((m) => m.user_id === u)?.nickname || '멤버';
+      confirmSheet(`${esc(name)}${COPY.nim}을 내보낼까요?`, '이 멤버가 모임에 남긴 공유·반응·한마디가 함께 지워져요. 초대 코드를 알면 다시 들어올 수 있으니, 필요하면 코드도 바꿔 주세요.', '내보내기', () =>
+        run(groups.kick(g, u), '멤버를 내보냈어요'));
+      return;
+    }
+    case 'g-set': {
+      const { g, k, v } = el.dataset;
+      run(groups.updateGroup(g, { [k]: k === 'is_public' ? v === '1' : v }), '설정을 바꿨어요');
+      return;
+    }
+    case 'g-reset-code': {
+      const g = el.dataset.g;
+      confirmSheet('초대 코드를 바꿀까요?', '지금 코드와 예전 초대 링크로는 더 이상 들어올 수 없어요. 이미 들어온 멤버는 그대로예요.', '코드 바꾸기', () =>
+        run(groups.resetCode(g), (c) => `새 코드는 ${c}예요`));
+      return;
+    }
+    case 'g-invite':
+      invite(el.dataset.g);
+      return;
+    case 'g-nick-open':
+      openNick(el.dataset.g);
+      return;
+    case 'g-cancel-req':
+      run(groups.cancelRequest(id), '참여 신청을 취소했어요');
+      return;
+    case 'g-leave': {
+      const g = el.dataset.g;
+      confirmSheet('모임을 나갈까요?', '이 모임에 남긴 공유·반응·한마디가 함께 지워져요. 나의 기록과 숲은 그대로예요.', '나가기', () =>
+        run(groups.leave(g), '모임을 나왔어요', () => { location.hash = '#/groups'; }));
+      return;
+    }
+    case 'g-delete': {
+      const g = el.dataset.g;
+      confirmSheet('모임을 삭제할까요?', '모든 멤버의 공유·반응·한마디와 참여 신청이 지워지고 되돌릴 수 없어요.', '삭제하기', () =>
+        run(groups.deleteGroup(g), '모임을 삭제했어요', () => { location.hash = '#/groups'; }));
+      return;
+    }
     case 'review-edit':
       ui.reviewEditing = !ui.reviewEditing;
       break;
@@ -1057,11 +1785,112 @@ document.addEventListener('click', (e) => {
   render(true);
 });
 
+let searchTimer = 0;
 document.addEventListener('input', (e) => {
-  if (e.target.dataset.act === 'draft') ui.reviewText = e.target.value;
+  const t = e.target;
+  if (t.dataset.act === 'draft') ui.reviewText = t.value;
+  if (t.dataset.keep) ui.keep[t.dataset.keep] = t.value;
+  if (t.dataset.keep === 'gq') {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => groups.search(t.value, ui.groupMode), 350);
+  }
 });
 
+const trim = (v) => String(v || '').trim();
+
+// 모임 화면의 입력 폼들
+function onGroupSubmit(form) {
+  const act = form.dataset.act;
+  const f = form.elements;
+  if (act === 'search-form') {
+    clearTimeout(searchTimer);
+    groups.search(f.q.value, ui.groupMode);
+    f.q.blur();
+    return true;
+  }
+  if (act === 'code-form') {
+    const code = trim(f.code.value).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (code.length !== 6) {
+      toast('초대 코드 6자리를 넣어 주세요');
+      return true;
+    }
+    ui.keep.code = '';
+    location.hash = `#/join/${code}`;
+    return true;
+  }
+  if (act === 'join-form') {
+    const nick = trim(f.nick.value);
+    if (!nick) {
+      toast('모임에서 쓸 닉네임을 넣어 주세요');
+      return true;
+    }
+    const { id } = form.dataset;
+    const code = form.dataset.code || null;
+    form.querySelector('[type=submit]').disabled = true;
+    run(groups.join(id, nick, code, trim(f.msg?.value)),
+      (r) => (r === 'requested' ? '참여 신청을 보냈어요. 운영자가 수락하면 들어갈 수 있어요' : '모임에 들어왔어요'),
+      (r) => {
+        ui.keep.j_msg = '';
+        if (r !== 'requested') location.hash = `#/group/${id}`;
+      });
+    return true;
+  }
+  if (act === 'create-group') {
+    const name = trim(keep('n_name'));
+    const nickname = trim(keep('n_nick', defaultNick()));
+    if (name.length < 2) {
+      toast('모임 이름을 두 글자 이상 넣어 주세요');
+      document.getElementById('n_name')?.focus();
+      return true;
+    }
+    if (!nickname) {
+      toast('내 모임 닉네임을 넣어 주세요');
+      document.getElementById('n_nick')?.focus();
+      return true;
+    }
+    const kind = keep('n_kind', 'off');
+    const isPublic = keep('n_pub', '1') === '1';
+    form.querySelector('[type=submit]').disabled = true;
+    run(groups.createGroup({
+      name, kind, topic: keep('n_topic', groups.TOPICS[0]), place: kind === 'off' ? trim(keep('n_place')) : '온라인',
+      schedule: trim(keep('n_schedule')), intro: trim(keep('n_intro')), isPublic, joinMode: isPublic ? keep('n_mode', 'open') : 'open', nickname
+    }), '모임을 만들었어요. 초대 코드로 멤버를 불러 보세요', (gid) => {
+      Object.keys(ui.keep).filter((k) => k.startsWith('n_')).forEach((k) => delete ui.keep[k]);
+      location.hash = `#/group/${gid}`;
+    });
+    return true;
+  }
+  if (act === 'share-form') {
+    const actionId = form.dataset.a || form.querySelector('input[name=a]:checked')?.value;
+    const gids = form.dataset.g ? [form.dataset.g] : [...form.querySelectorAll('input[name=g]:checked')].map((x) => x.value);
+    if (!actionId) {
+      toast('공유할 실천을 골라 주세요');
+      return true;
+    }
+    if (!gids.length) {
+      toast('공유할 모임을 골라 주세요');
+      return true;
+    }
+    form.querySelector('[type=submit]').disabled = true;
+    closeSheet();
+    run(groups.share(gids, actionId, trim(f.memo.value)), gids.length > 1 ? `모임 ${gids.length}곳에 공유했어요` : '모임에 공유했어요');
+    return true;
+  }
+  if (act === 'nick-form') {
+    const nick = trim(f.nick.value);
+    if (!nick) return true;
+    closeSheet();
+    run(groups.setNickname(form.dataset.g, nick), '닉네임을 바꿨어요');
+    return true;
+  }
+  return false;
+}
+
 document.addEventListener('submit', (e) => {
+  if (onGroupSubmit(e.target)) {
+    e.preventDefault();
+    return;
+  }
   if (e.target.dataset.act !== 'reflect') return;
   e.preventDefault();
   const text = e.target.elements.text.value.trim();
@@ -1083,9 +1912,21 @@ auth.onAuth((user) => {
     return; // 토큰 갱신 등은 다시 맞출 필요 없음
   }
   syncedUser = id;
+  groups.reset(); // 다른 계정의 모임 내용이 남지 않게
   if (id) sync.start(auth.getClient(), id, () => render(true));
   else sync.stop();
   render(true);
+});
+
+// 모임 내용을 받아 오면 다시 그린다
+groups.setOnChange(() => render(true));
+
+// 앱으로 돌아오면 모임 내용을 새로 받는다 (다른 멤버의 공유·응원)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || !auth.getUser()) return;
+  const r = currentRoute();
+  if ((r === 'group' || r === 'feed') && routeParam()) groups.loadGroup(routeParam(), true);
+  if (r === 'groups' || r === 'today') groups.loadMine(true);
 });
 
 // 저장 상태 문구는 계정 화면에서만 보인다
