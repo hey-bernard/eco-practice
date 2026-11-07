@@ -160,7 +160,7 @@ const header = (meta, title, right = '', icon = '') => `
 // ───────── ① 오늘 ─────────
 
 // ───────── ⓪ 지구 (기후 홈) ─────────
-// 머리(지구 기후 모니터) 아래는 '지구 지금' 위젯(js/earth-now-widget.js): 위성 지구 + 기온·CO₂·해수면·수온·산성화 실시간 자료.
+// 머리(지구 기후 모니터) 아래는 '기후변화' 위젯(제목만 바꾼 지구 지금 위젯)(js/earth-now-widget.js): 위성 지구 + 기온·CO₂·해수면·수온·산성화 실시간 자료.
 // 자료는 서버 함수 api/earth-now.js가 Copernicus·NOAA·하와이대 공개 자료를 모아 준다.
 
 
@@ -1545,7 +1545,7 @@ function render(keepScroll = false) {
   mountSeries($app);
   mountPlant($app);
   const earth = $app.querySelector('[data-earth-now]');
-  if (earth && window.EarthNow) window.EarthNow.mount(earth, { api: '/api/earth-now', assets: '../images/earth/', title: '지구 지금' });
+  if (earth && window.EarthNow) window.EarthNow.mount(earth, { api: '/api/earth-now', assets: '../images/earth/', title: '기후변화' });
   renderNav(route.tab);
   window.scrollTo(0, keepScroll ? y : 0);
 }
