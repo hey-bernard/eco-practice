@@ -1587,6 +1587,8 @@ function render(keepScroll = false) {
   const earth = $app.querySelector('[data-earth-now]');
   if (earth && window.EarthNow) window.EarthNow.mount(earth, { api: '/api/earth-now', assets: '../images/earth/', title: '기후변화' });
   renderNav(route.tab);
+  // Clarity: 어떤 화면에서 녹화됐는지 걸러 볼 수 있게 화면 이름을 남긴다
+  if (window.clarity) window.clarity('set', 'screen', currentRoute());
   window.scrollTo(0, keepScroll ? y : 0);
 }
 
